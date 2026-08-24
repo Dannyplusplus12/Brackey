@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
+  m_Name: Warrior_Stats
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
+  maxHP: 100
+  damage: 10
+  attackInterval: 1
+  attackRange: 1.2
+  attackVisualDuration: 0.15
+  moveSpeed: 1.5
+  leashRadius: 2.5
+  separationRadius: 0.6
+  separationStrength: 0.5
+  swayTiltAngle: 15
+  swayBounceHeight: 0.09
+  swayFrequency: 20
+  initialAngry: 0
+  angryPerHunger: 0
+  angryOnAllyDeath: 0
+  angryOnRoundStart: 0
+  maxAngry: 100
+  foodRequiredPerRound: 1
+  idleSprite: {fileID: 8793639957104055765, guid: 7fa14b35e05fbcd4bb9efe34f530bf78, type: 3}
+  attackSprite: {fileID: 8808545954069617921, guid: 144b9b69f31bc7f45ba5111770074bda, type: 3}
+  skillSprite: {fileID: 1623481048343612374, guid: 16cf6c7f909b61a438bc83d22cf6eac8, type: 3}
