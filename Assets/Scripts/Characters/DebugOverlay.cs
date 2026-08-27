@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class DebugOverlay : MonoBehaviour
 {
-    [Header("Debug Spawn (nhấn E để spawn Enemy tại vị trí chuột)")]
+    [Header("Debug Spawn")]
+    [Tooltip("Nhấn E: spawn tại vị trí chuột (force Enemy)")]
     [SerializeField] CharacterBase enemyPrefab;
+    [Tooltip("Nhấn R: spawn tại vị trí chuột (force Ally)")]
+    [SerializeField] CharacterBase allyPrefab;
 
     static readonly float[] timeScalePresets = { 0.25f, 0.5f, 1f, 2f, 4f };
     int timeScaleIndex = 2;
@@ -19,7 +22,10 @@ public class DebugOverlay : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
-            SpawnDebugEnemy();
+            SpawnDebugChar(enemyPrefab, Faction.Enemy);
+
+        if (Input.GetKeyDown(KeyCode.R))
+            SpawnDebugChar(allyPrefab, Faction.Ally);
 
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
             SetTimeScaleIndex(timeScaleIndex - 1);
@@ -48,14 +54,15 @@ public class DebugOverlay : MonoBehaviour
         Time.timeScale = timeScalePresets[timeScaleIndex];
     }
 
-    void SpawnDebugEnemy()
+    void SpawnDebugChar(CharacterBase prefab, Faction forceFaction)
     {
-        if (enemyPrefab == null) { Debug.LogWarning("DebugOverlay: chưa gán Enemy Prefab."); return; }
+        if (prefab == null) { Debug.LogWarning($"DebugOverlay: chưa gán prefab cho {forceFaction}."); return; }
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
         Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
-        CharacterBase spawned = Instantiate(enemyPrefab, mouseWorld, Quaternion.identity);
+        CharacterBase spawned = Instantiate(prefab, mouseWorld, Quaternion.identity);
+        spawned.ForceSetFaction(forceFaction);
         spawned.SetSpawnPosition(mouseWorld);
     }
 
@@ -65,7 +72,20 @@ public class DebugOverlay : MonoBehaviour
         GUILayout.BeginArea(new Rect(10, 10, 340, 500), GUI.skin.box);
 
         GUILayout.Label(WaveManager.IsWaveActive ? "Wave: ACTIVE" : "Wave: INACTIVE");
-        GUILayout.Label($"TimeScale: {Time.timeScale:0.##}x  (1: slow, 2: fast)");
+
+        // Hiển thị tốc độ game từ GameSpeedController nếu có
+        if (GameSpeedController.Instance != null)
+        {
+            var gsc = GameSpeedController.Instance;
+            string speedLabel = WaveManager.IsWaveActive
+                ? $"Speed: {gsc.CurrentSpeed:0.##}x  (Space cycle)"
+                : $"Speed: {gsc.CurrentSpeed:0.##}x  (chỉ active trong wave)";
+            GUILayout.Label(speedLabel);
+        }
+        else
+        {
+            GUILayout.Label($"TimeScale: {Time.timeScale:0.##}x  (1: slow, 2: fast)");
+        }
 
         int corn = PlayerWallet.Instance != null ? PlayerWallet.Instance.Corn : -1;
         GUILayout.Label($"Corn: {corn}");
@@ -97,7 +117,8 @@ public class DebugOverlay : MonoBehaviour
         }
 
         GUILayout.Space(6);
-        GUILayout.Label("E: spawn enemy tại chuột");
+        GUILayout.Label("E: spawn enemy  |  R: spawn ally  |  Space: toggle speed (wave)");
+        GUILayout.Label("1: slow timescale  |  2: fast timescale  (debug override)");
 
         CharacterBase dragged = CharacterDragHandler.CurrentlyDragged;
         if (dragged != null)

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 // 1 trong 4 ô item rao bán trong Shop (cột dọc bên trái). slotIndex khớp vị trí trong
 // ShopOfferManager - gán tay trong Inspector cho từng ô (0-3).
-public class ShopOfferSlotUI : MonoBehaviour
+public class ShopOfferSlotUI : MonoBehaviour, IItemSlot
 {
     [SerializeField] int slotIndex;
     [SerializeField] Image icon;
@@ -31,4 +31,11 @@ public class ShopOfferSlotUI : MonoBehaviour
     {
         ShopOfferManager.Instance?.BuyOffer(slotIndex);
     }
+
+    // ── IItemSlot ─────────────────────────────────────────────────────────────
+    public ItemData GetCurrentItem() =>
+        ShopOfferManager.Instance != null ? ShopOfferManager.Instance.GetOffer(slotIndex) : null;
+
+    // Offer slot chưa mua → không có sell value
+    public bool IsSellable => false;
 }

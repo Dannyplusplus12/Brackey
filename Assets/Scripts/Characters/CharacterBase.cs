@@ -155,6 +155,13 @@ public abstract class CharacterBase : MonoBehaviour
             EnterCombat();
     }
 
+    // Force phe trước khi Start() chạy. Gọi ngay sau Instantiate (cùng lúc SetSpawnPosition).
+    // CharacterGrid.Register dùng faction tại thời điểm Start → phải set trước đó.
+    public void ForceSetFaction(Faction f)
+    {
+        faction = f;
+    }
+
     protected virtual void OnDestroy()
     {
         CharacterGrid.Unregister(this);
