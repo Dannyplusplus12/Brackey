@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Zombie
   stats: {fileID: 11400000, guid: ae749e7e61b0a174b94c0bc0064a077c, type: 2}
-  faction: 0
+  faction: 1
   spriteRenderer: {fileID: 667362400591610444}
   visualRoot: {fileID: 850388843497369789}
   vfxSpawnPoint: {fileID: 0}

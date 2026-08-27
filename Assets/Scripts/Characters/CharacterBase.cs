@@ -78,6 +78,11 @@ public abstract class CharacterBase : MonoBehaviour
     float hitShakeTimeRemaining;
     Coroutine hitFlashRoutine;
 
+    // Màu nền của sprite: Color.white khi còn là Ally, đỏ nhạt khi đã SwitchToEnemy.
+    // HitFlashRoutine reset về baseColor thay vì Color.white để tránh mất tint đỏ.
+    Color baseColor = Color.white;
+    static readonly Color EnemyTintColor = new Color(1f, 0.35f, 0.35f, 1f);
+
     protected virtual void Awake()
     {
         if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -519,7 +524,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         spriteRenderer.color = stats.hitFlashColor;
         yield return new WaitForSeconds(stats.hitFlashDuration);
-        spriteRenderer.color = Color.white; // luôn trả về màu gốc, tránh kẹt đỏ nếu bị đánh trúng dồn dập
+        spriteRenderer.color = baseColor; // reset về baseColor (trắng hoặc đỏ tint nếu đã SwitchToEnemy)
         hitFlashRoutine = null;
     }
 
@@ -537,10 +542,12 @@ public abstract class CharacterBase : MonoBehaviour
             SwitchToEnemy();
     }
 
-    // Debug only: thay đổi angry tự do (kể cả giảm), không trigger SwitchToEnemy.
+    // Debug only: thay đổi angry tự do (kể cả giảm). Trigger SwitchToEnemy khi chạm max.
     public void DebugAddAngry(float delta)
     {
         CurrentAngry = Mathf.Clamp(CurrentAngry + delta, 0f, stats.maxAngry);
+        if (CurrentAngry >= stats.maxAngry && faction == Faction.Ally)
+            SwitchToEnemy();
     }
 
     // Đổi phe: unregister khỏi Ally grid → đổi faction → re-register là Enemy.
@@ -551,6 +558,13 @@ public abstract class CharacterBase : MonoBehaviour
         faction = Faction.Enemy;
         CharacterGrid.Register(this);
         currentTarget = null;
+
+        // Phủ màu đỏ lên sprite để báo hiệu đã chuyển phe.
+        // Nếu đang flash hit, dừng ngay để tránh flash trả về Color.white.
+        if (hitFlashRoutine != null) { StopCoroutine(hitFlashRoutine); hitFlashRoutine = null; }
+        baseColor = EnemyTintColor;
+        if (spriteRenderer != null) spriteRenderer.color = baseColor;
+
         if (WaveManager.IsWaveActive)
             EnterCombat();
     }
