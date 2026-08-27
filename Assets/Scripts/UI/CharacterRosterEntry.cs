@@ -10,13 +10,24 @@ public class CharacterRosterEntry : MonoBehaviour,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [SerializeField] Image portraitImage;
-    [SerializeField] Sprite cornIcon;   // drag corn sprite vào đây trong prefab
+
+    [Header("Feed Popup (gán sẵn trong prefab, mặc định inactive)")]
+    [SerializeField] GameObject feedPopup;
+    [SerializeField] TextMeshProUGUI feedCostText;
+    [SerializeField] Image feedCornIcon;
+
+    [Header("Feed Popup - Chỉnh tại đây (không chỉnh trong FeedPopup prefab)")]
+    [Tooltip("Offset X: sang phải card. Offset Y: lên/xuống so với giữa card")]
+    [SerializeField] Vector2 popupOffset = new Vector2(8f, 0f);
+    [Tooltip("Scale của popup (1 = mặc định)")]
+    [SerializeField] float popupScale = 1f;
 
     // Fill dùng anchorMax (không cần sprite, fill kín edge-to-edge)
     RectTransform angryFillRT;
     RectTransform hpFillRT;
 
     CharacterBase target;
+    public CharacterBase BoundCharacter => target;
 
     // ── Drag ──────────────────────────────────────────────────────────
     Canvas rootCanvas;
@@ -40,7 +51,43 @@ public class CharacterRosterEntry : MonoBehaviour,
     void HandleFeedResult(CharacterBase fed, int cost, bool wasFed)
     {
         if (fed != target) return;
-        StartCoroutine(FeedPopupCoroutine(cost, wasFed));
+        if (feedPopup == null || feedCostText == null) return;
+
+        Canvas rootCanvas = GetComponentInParent<Canvas>()?.rootCanvas;
+        if (rootCanvas == null) return;
+
+        // Set nội dung
+        Color col = wasFed
+            ? new Color(1f, 0.85f, 0.15f)
+            : new Color(1f, 0.35f, 0.2f);
+        feedCostText.text  = $"-{cost}";
+        feedCostText.color = col;
+
+        // Reparent lên canvas root ngay (thoát RectMask2D của ScrollView)
+        feedPopup.transform.SetParent(rootCanvas.transform, false);
+        feedPopup.SetActive(true);
+
+        // Đặt vị trí bên phải card — không cần yield vì không dùng size của popup
+        Camera uiCam = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                       ? null : rootCanvas.worldCamera;
+        Vector3[] corners = new Vector3[4];
+        rectTransform.GetWorldCorners(corners);
+        // Dùng trung điểm cạnh phải (giữa corners[2] top-right và corners[3] bottom-right)
+        Vector3 rightMid = (corners[2] + corners[3]) * 0.5f;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rootCanvas.transform as RectTransform,
+            RectTransformUtility.WorldToScreenPoint(uiCam, rightMid),
+            uiCam, out Vector2 localPos);
+
+        RectTransform popupRT    = feedPopup.GetComponent<RectTransform>();
+        popupRT.localScale       = Vector3.one * popupScale;
+        popupRT.anchorMin        = new Vector2(0.5f, 0.5f);
+        popupRT.anchorMax        = new Vector2(0.5f, 0.5f);
+        popupRT.pivot            = new Vector2(0f, 0.5f);
+        popupRT.anchoredPosition = localPos + popupOffset;
+
+        // FeedPopupAnimator chạy độc lập trên popup GO — không bị ShopRoot kill
+        FeedPopupAnimator.Attach(feedPopup, transform);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -199,114 +246,41 @@ public class CharacterRosterEntry : MonoBehaviour,
         return (corners[0].y + corners[2].y) * 0.5f;
     }
 
-    // ── Feed popup ────────────────────────────────────────────────────
-    // Coroutine chạy trên CharacterRosterEntry chỉ dùng để BUILD popup.
-    // Animation chạy trên FeedPopupAnimator gắn lên popup GO (sống trên canvas root
-    // nên không bị kill khi ShopRoot bị deactivate).
-
-    IEnumerator FeedPopupCoroutine(int cost, bool wasFed)
-    {
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas == null) yield break;
-        canvas = canvas.rootCanvas;
-
-        // Tạo popup trên canvas root (không nằm trong ShopRoot → không bị mask / hide)
-        GameObject popup = new GameObject("_FeedPopup",
-            typeof(RectTransform), typeof(CanvasGroup),
-            typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
-        popup.transform.SetParent(canvas.transform, false);
-
-        CanvasGroup cg    = popup.GetComponent<CanvasGroup>();
-        cg.blocksRaycasts = false;
-        cg.interactable   = false;
-        cg.alpha          = 0f;
-
-        HorizontalLayoutGroup hlg  = popup.GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing                = 4f;
-        hlg.childAlignment         = TextAnchor.MiddleLeft;
-        hlg.childForceExpandWidth  = false;
-        hlg.childForceExpandHeight = false;
-        hlg.childControlWidth      = true;
-        hlg.childControlHeight     = true;
-
-        ContentSizeFitter csf = popup.GetComponent<ContentSizeFitter>();
-        csf.horizontalFit     = ContentSizeFitter.FitMode.PreferredSize;
-        csf.verticalFit       = ContentSizeFitter.FitMode.PreferredSize;
-
-        // Text
-        Color textColor = wasFed
-            ? new Color(1f, 0.85f, 0.15f)
-            : new Color(1f, 0.35f, 0.2f);
-
-        GameObject textGO = new GameObject("Label", typeof(RectTransform));
-        textGO.transform.SetParent(popup.transform, false);
-        var tmp       = textGO.AddComponent<TextMeshProUGUI>();
-        tmp.text      = $"-{cost}";
-        tmp.color     = textColor;
-        tmp.fontSize  = 20f;
-        tmp.fontStyle = FontStyles.Bold;
-
-        // Corn icon (tuỳ chọn)
-        if (cornIcon != null)
-        {
-            GameObject iconGO = new GameObject("Icon",
-                typeof(RectTransform), typeof(Image), typeof(LayoutElement));
-            iconGO.transform.SetParent(popup.transform, false);
-            iconGO.GetComponent<Image>().sprite         = cornIcon;
-            iconGO.GetComponent<Image>().preserveAspect = true;
-            var le             = iconGO.GetComponent<LayoutElement>();
-            le.preferredWidth  = 22f;
-            le.preferredHeight = 22f;
-        }
-
-        // 1 frame để ContentSizeFitter layout
-        yield return null;
-
-        // Vị trí: góc trên-phải của card
-        Vector3[] corners = new Vector3[4];
-        rectTransform.GetWorldCorners(corners);
-        RectTransform canvasRT = canvas.transform as RectTransform;
-        Camera uiCam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRT,
-            RectTransformUtility.WorldToScreenPoint(uiCam, corners[2]),
-            uiCam, out Vector2 localPos);
-
-        RectTransform popupRT    = popup.GetComponent<RectTransform>();
-        popupRT.pivot            = new Vector2(0f, 1f);
-        popupRT.anchorMin        = popupRT.anchorMax = Vector2.zero;
-        popupRT.anchoredPosition = localPos + new Vector2(8f, 0f);
-
-        // Giao animation cho component trên popup GO — tránh bị kill cùng ShopRoot
-        FeedPopupAnimator.Attach(popup, cg);
-    }
 }
 
-// ── Tự animate và tự destroy — chạy trên popup GO (canvas root), không bị ShopRoot.SetActive(false) kill ──
+// Tự fade và trả popup về parent ban đầu sau khi xong.
+// Gắn động lên feedPopup GO — sống trên canvas root nên không bị ShopRoot kill.
 public class FeedPopupAnimator : MonoBehaviour
 {
-    public static void Attach(GameObject popupGO, CanvasGroup cg)
+    Transform _originalParent;
+
+    public static void Attach(GameObject popupGO, Transform originalParent)
     {
-        var a = popupGO.AddComponent<FeedPopupAnimator>();
-        a._cg = cg;
+        var a = popupGO.GetComponent<FeedPopupAnimator>();
+        if (a == null) a = popupGO.AddComponent<FeedPopupAnimator>();
+        a._originalParent = originalParent;
+        a.StopAllCoroutines();
         a.StartCoroutine(a.Run());
     }
 
-    CanvasGroup _cg;
-
     System.Collections.IEnumerator Run()
     {
-        // Fade in
-        float t = 0f;
-        while (t < 0.15f) { _cg.alpha = Mathf.Lerp(0f, 1f, t / 0.15f); t += Time.unscaledDeltaTime; yield return null; }
-        _cg.alpha = 1f;
+        CanvasGroup cg = GetComponent<CanvasGroup>();
+        if (cg == null) cg = gameObject.AddComponent<CanvasGroup>();
+        cg.alpha = 1f;
 
         yield return new WaitForSecondsRealtime(0.8f);
 
-        // Fade out
-        t = 0f;
-        while (t < 0.25f) { _cg.alpha = Mathf.Lerp(1f, 0f, t / 0.25f); t += Time.unscaledDeltaTime; yield return null; }
+        float t = 0f;
+        while (t < 0.25f)
+        {
+            cg.alpha = Mathf.Lerp(1f, 0f, t / 0.25f);
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
 
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+        if (_originalParent != null)
+            transform.SetParent(_originalParent, false);
     }
 }

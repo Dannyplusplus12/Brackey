@@ -27,9 +27,19 @@ public class FeedingManager : MonoBehaviour
         if (PlayerWallet.Instance != null)
         {
             feedBuffer.Clear();
-            var allies = CharacterGrid.GetAll(Faction.Ally);
-            for (int i = 0; i < allies.Count; i++)
-                feedBuffer.Add(allies[i]);
+
+            // Ưu tiên thứ tự roster UI (player kéo thả để sắp xếp).
+            // Fallback về CharacterGrid nếu UI chưa sẵn sàng.
+            if (CharacterRosterUI.Instance != null)
+            {
+                feedBuffer.AddRange(CharacterRosterUI.Instance.GetFeedOrder());
+            }
+            else
+            {
+                var allies = CharacterGrid.GetAll(Faction.Ally);
+                for (int i = 0; i < allies.Count; i++)
+                    feedBuffer.Add(allies[i]);
+            }
 
             foreach (CharacterBase ally in feedBuffer)
             {
