@@ -8,6 +8,8 @@ using UnityEngine;
 //
 // Dùng Physics2D.OverlapPoint chủ động mỗi frame thay vì OnMouseDown/Drag/Up của Unity
 // để tránh phụ thuộc Camera.main bị null lúc Awake hoặc các ca lệch collider khó debug.
+// Lock toàn cục (currentlyDragged) đảm bảo chỉ 1 nhân vật được kéo mỗi lúc, tránh
+// tình trạng nhiều chars chồng nhau cùng nhận MouseButtonDown.
 [RequireComponent(typeof(CharacterBase))]
 [RequireComponent(typeof(Collider2D))]
 public class CharacterDragHandler : MonoBehaviour
@@ -16,6 +18,10 @@ public class CharacterDragHandler : MonoBehaviour
     // "Queries Hit Triggers" toàn Project (Edit > Project Settings > Physics 2D) là gì.
     static readonly ContactFilter2D overlapFilter = new ContactFilter2D { useTriggers = true };
     static readonly List<Collider2D> overlapResults = new();
+
+    // Chỉ 1 nhân vật được kéo cùng lúc
+    static CharacterBase currentlyDragged;
+    public static CharacterBase CurrentlyDragged => currentlyDragged;
 
     CharacterBase character;
     Collider2D col;
@@ -40,11 +46,15 @@ public class CharacterDragHandler : MonoBehaviour
 
         if (!dragging && Input.GetMouseButtonDown(0))
         {
+            // Nếu đang có char khác đang được kéo thì bỏ qua
+            if (currentlyDragged != null) return;
+
             overlapResults.Clear();
             Physics2D.OverlapPoint(mouseWorld, overlapFilter, overlapResults);
             if (overlapResults.Contains(col))
             {
                 dragging = true;
+                currentlyDragged = character;
                 character.BeginDrag();
             }
             return;
@@ -59,7 +69,15 @@ public class CharacterDragHandler : MonoBehaviour
         if (dragging && Input.GetMouseButtonUp(0))
         {
             dragging = false;
+            currentlyDragged = null;
             character.EndDrag();
         }
+    }
+
+    void OnDestroy()
+    {
+        // Giải phóng lock nếu char bị destroy trong lúc đang kéo
+        if (currentlyDragged == character)
+            currentlyDragged = null;
     }
 }

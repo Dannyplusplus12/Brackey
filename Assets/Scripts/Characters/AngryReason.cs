@@ -1,8 +1,8 @@
-// Stub: chỉ dùng để đánh dấu nguồn gốc cộng Angry, chưa xử lý logic đổi phe.
 public enum AngryReason
 {
     Initial,
-    Hunger,
-    AllyDeath,
-    RoundStart
+    Hungry,      // thiếu đồ ăn (SkipFeed)
+    AllyDied,    // đồng đội chết
+    RoundStart,  // mỗi đầu round
+    Debug        // điều chỉnh thủ công qua DebugOverlay
 }

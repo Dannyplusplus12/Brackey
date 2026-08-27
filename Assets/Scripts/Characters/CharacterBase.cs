@@ -7,6 +7,9 @@ using UnityEngine;
 // Vị trí "logic" (transform.position của root) dùng cho leash/grid/separation;
 // việc lắc lư khi di chuyển chỉ tác động lên visualRoot (thường là 1 child SpriteRenderer)
 // để không ảnh hưởng tới tính toán gameplay.
+//
+// Effective stats = CharacterStats (base, bất biến) + GlobalStatBonus (runtime, từ item).
+// Dùng EffectiveDamage / EffectiveMoveSpeed / v.v. thay vì đọc stats.xxx trực tiếp.
 public abstract class CharacterBase : MonoBehaviour
 {
     [Header("Data")]
@@ -17,23 +20,53 @@ public abstract class CharacterBase : MonoBehaviour
     [SerializeField] protected SpriteRenderer spriteRenderer;
     [SerializeField] protected Transform visualRoot;
 
+    [Header("VFX (để trống = dùng vị trí của chính nhân vật)")]
+    [SerializeField] Transform vfxSpawnPoint;
+
+    [Header("Shadow (để trống sẽ tự tìm CharacterShadow trong con)")]
+    [SerializeField] CharacterShadow shadow;
+
     public Faction Faction => faction;
+    public CharacterStats Stats => stats;
     public CharacterState State { get; private set; } = CharacterState.Idle;
     public float CurrentHP { get; protected set; }
     public float CurrentAngry { get; protected set; }
     public bool IsDead { get; protected set; }
     public bool IsDragging { get; private set; }
+    public CharacterBase CurrentTarget => currentTarget;
+    public float DebugEffectiveMoveSpeed => EffectiveMoveSpeed;
+    public float MaxHP => EffectiveMaxHP;
+
+    // Số đòn đánh đã thực hiện từ đầu wave. Reset mỗi ExitCombat.
+    // Dùng trong subclass để trigger skill mỗi X đòn.
+    protected int attackCount { get; private set; }
+
+    // ── Effective stats = base + GlobalStatBonus ────────────────────────────
+    protected float EffectiveDamage        => stats.damage        + GlobalStatBonus.damage        + GlobalStatBonus.GetTypeBonus(stats).damage;
+    protected float EffectiveMoveSpeed     => stats.moveSpeed     + GlobalStatBonus.moveSpeed     + GlobalStatBonus.GetTypeBonus(stats).moveSpeed;
+    protected float EffectiveMaxHP         => stats.maxHP         + GlobalStatBonus.maxHP         + GlobalStatBonus.GetTypeBonus(stats).maxHP;
+    protected float EffectiveAttackInterval=> stats.attackInterval+ GlobalStatBonus.attackInterval+ GlobalStatBonus.GetTypeBonus(stats).attackInterval;
+    protected float EffectiveAttackRange   => stats.attackRange   + GlobalStatBonus.attackRange   + GlobalStatBonus.GetTypeBonus(stats).attackRange;
+
+    // Tâm thân nhân vật (giữa chân và đầu) — dùng cho mọi tính toán distance/separation
+    // thay vì transform.position (chân) để khớp với vòng tròn Gizmos và cảm giác gameplay.
+    // centerOffset là local space → nhân lossyScale.y để ra world space.
+    public Vector2 BodyCenter => (Vector2)transform.position + Vector2.up * (stats != null ? stats.centerOffset * transform.lossyScale.y : 0f);
 
     protected Vector2 leashCenter;
-    protected float leashRadius;
     protected CharacterBase currentTarget;
     protected float attackTimer;
+    float waitTimer;
+    CharacterState waitNextState;
     Coroutine attackVisualRoutine;
     bool skipLeashClaim;
 
     readonly List<CharacterBase> nearbyBuffer = new();
 
     float swayTimer;
+    float swayStopTimer;
+    const float SwayStopDelay = 0.12f; // giây đứng yên trước khi sway tắt hẳn
+    float lastFlipTime = -999f;
     Vector3 visualBaseLocalPos;
     Quaternion visualBaseLocalRot;
     Vector3 lastPositionForSway;
@@ -50,28 +83,53 @@ public abstract class CharacterBase : MonoBehaviour
         if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (visualRoot == null && spriteRenderer != null) visualRoot = spriteRenderer.transform;
         if (visualRoot == null) visualRoot = transform;
+        if (shadow == null) shadow = GetComponentInChildren<CharacterShadow>();
         visualBaseLocalPos = visualRoot.localPosition;
         visualBaseLocalRot = visualRoot.localRotation;
         lastPositionForSway = transform.position;
     }
 
+#if UNITY_EDITOR
+    protected virtual void OnValidate()
+    {
+        if (stats == null) return;
+        if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (spriteRenderer != null) spriteRenderer.sprite = stats.idleSprite;
+    }
+#endif
+
+    // Fire khi 1 ally chết — các ally khác subscribe để tăng angry.
+    public static event System.Action<CharacterBase> OnAllyDied;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticEvents() => OnAllyDied = null;
+
     protected virtual void OnEnable()
     {
         WaveManager.OnWaveStart += EnterCombat;
         WaveManager.OnWaveEnd += ExitCombat;
+        OnAllyDied += HandleAllyDied;
+        GameManager.OnGameStateChanged += OnGameStateChanged;
     }
 
     protected virtual void OnDisable()
     {
         WaveManager.OnWaveStart -= EnterCombat;
         WaveManager.OnWaveEnd -= ExitCombat;
+        OnAllyDied -= HandleAllyDied;
+        GameManager.OnGameStateChanged -= OnGameStateChanged;
+    }
+
+    void HandleAllyDied(CharacterBase deadAlly)
+    {
+        if (IsDead || deadAlly == this || faction != Faction.Ally) return;
+        AddAngry(stats.angryOnAllyDeath, AngryReason.AllyDied);
     }
 
     protected virtual void Start()
     {
-        CurrentHP = stats.maxHP;
+        CurrentHP = EffectiveMaxHP;
         CurrentAngry = stats.initialAngry;
-        leashRadius = stats.leashRadius;
 
         if (!skipLeashClaim)
             ClaimLeashSlot();
@@ -106,7 +164,13 @@ public abstract class CharacterBase : MonoBehaviour
         switch (State)
         {
             case CharacterState.Idle:
-                desiredMove = MoveToward(leashCenter);
+                // Shop phase: đứng yên, separation tự đẩy. Không chạy về leash.
+                break;
+
+            case CharacterState.Waiting:
+                waitTimer -= Time.deltaTime;
+                if (waitTimer <= 0f)
+                    EnterState(waitNextState);
                 break;
 
             case CharacterState.Seeking:
@@ -118,9 +182,14 @@ public abstract class CharacterBase : MonoBehaviour
                 break;
 
             case CharacterState.Leashing:
-                desiredMove = MoveToward(leashCenter);
-                if (Vector2.Distance(transform.position, leashCenter) < 0.05f)
+                Vector2 toLeash = leashCenter - (Vector2)transform.position;
+                if (toLeash.magnitude < 0.05f)
                     EnterState(CharacterState.Idle);
+                else
+                {
+                    desiredMove = toLeash.normalized;
+                    SetFacing(toLeash);
+                }
                 break;
         }
 
@@ -138,10 +207,15 @@ public abstract class CharacterBase : MonoBehaviour
         if (IsDragging)
         {
             UpdateDragVisual();
+            // Shadow ở lại chân (root đang ở đầu/cursor khi drag)
+            if (shadow != null)
+                shadow.transform.localPosition = new Vector3(0f, -stats.dragHeadOffset, 0f);
             lastPositionForSway = transform.position; // tránh 1 cú "giật" lắc đi bộ ngay khi thả ra
         }
         else
         {
+            if (shadow != null)
+                shadow.transform.localPosition = Vector3.zero;
             UpdateVisualSway();
         }
 
@@ -161,21 +235,32 @@ public abstract class CharacterBase : MonoBehaviour
 
     protected virtual Vector2 TickSeeking()
     {
-        if (currentTarget == null || currentTarget.IsDead)
+        // Target vừa chết → delay trước khi tìm địch tiếp theo
+        if (currentTarget != null && currentTarget.IsDead)
+        {
+            currentTarget = null;
+            EnterWaiting(CharacterState.Seeking);
+            return Vector2.zero;
+        }
+
+        if (currentTarget == null)
             currentTarget = FindNearestEnemy();
 
         if (currentTarget == null)
             return Vector2.zero; // không còn địch nào: đứng yên tại chỗ, chờ hết wave mới về vị trí
 
-        float distToTarget = Vector2.Distance(transform.position, currentTarget.transform.position);
-        if (distToTarget <= stats.attackRange)
+        float distToTarget = Vector2.Distance(BodyCenter, currentTarget.BodyCenter);
+        SetFacing(currentTarget.BodyCenter - BodyCenter);
+
+        if (distToTarget <= EffectiveAttackRange)
         {
             EnterState(CharacterState.Attacking);
-            attackTimer = stats.attackInterval; // đánh ngay đòn đầu khi vừa vào tầm
+            // Random pha đầu tiên để các char cùng loại không sync đòn với nhau
+            attackTimer = Random.Range(0f, EffectiveAttackInterval);
             return Vector2.zero;
         }
 
-        return MoveToward(currentTarget.transform.position);
+        return MoveToward(currentTarget.BodyCenter);
     }
 
     protected virtual void TickAttacking()
@@ -186,15 +271,17 @@ public abstract class CharacterBase : MonoBehaviour
             return;
         }
 
-        float distToTarget = Vector2.Distance(transform.position, currentTarget.transform.position);
-        if (distToTarget > stats.attackRange)
+        float distToTarget = Vector2.Distance(BodyCenter, currentTarget.BodyCenter);
+        if (distToTarget > EffectiveAttackRange)
         {
             EnterState(CharacterState.Seeking);
             return;
         }
 
+        SetFacing(currentTarget.BodyCenter - BodyCenter);
+
         attackTimer += Time.deltaTime;
-        if (attackTimer >= stats.attackInterval)
+        if (attackTimer >= EffectiveAttackInterval)
         {
             attackTimer = 0f;
             ExecuteAttack(currentTarget);
@@ -206,6 +293,26 @@ public abstract class CharacterBase : MonoBehaviour
         State = newState;
         if (newState != CharacterState.Attacking)
             SetSprite(stats.idleSprite);
+    }
+
+    // Sprite mặc định nhìn trái → flipX khi target ở bên phải.
+    // Cooldown 0.4s giữa các lần flip để tránh giật khi đứng gần điểm đến.
+    protected void SetFacing(Vector2 direction)
+    {
+        if (Mathf.Abs(direction.x) < 0.01f) return;
+        bool wantFlip = direction.x > 0f;
+        if (wantFlip == spriteRenderer.flipX) return; // không đổi, bỏ qua
+        if (Time.time - lastFlipTime < stats.flipCooldown) return; // còn cooldown
+        spriteRenderer.flipX = wantFlip;
+        lastFlipTime = Time.time;
+    }
+
+    // Dừng ngẫu nhiên [actionDelayMin, actionDelayMax] giây rồi chuyển sang nextState.
+    void EnterWaiting(CharacterState nextState)
+    {
+        waitNextState = nextState;
+        waitTimer = Random.Range(stats.actionDelayMin, stats.actionDelayMax);
+        EnterState(CharacterState.Waiting);
     }
 
     // ---------- Movement / Separation ----------
@@ -220,13 +327,13 @@ public abstract class CharacterBase : MonoBehaviour
 
     protected Vector2 ComputeSeparation()
     {
-        Vector2 pos = transform.position;
-        CharacterGrid.GetNearby(pos, stats.separationRadius, nearbyBuffer, faction, this);
+        Vector2 pos = BodyCenter;
+        CharacterGrid.GetNearby(transform.position, stats.separationRadius, nearbyBuffer, faction, this);
 
         Vector2 push = Vector2.zero;
         foreach (CharacterBase other in nearbyBuffer)
         {
-            Vector2 offset = pos - (Vector2)other.transform.position;
+            Vector2 offset = pos - other.BodyCenter;
             float dist = offset.magnitude;
             if (dist < 0.0001f)
             {
@@ -243,7 +350,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (direction.sqrMagnitude < 0.0001f) return;
 
-        Vector2 delta = direction.normalized * stats.moveSpeed * Time.deltaTime;
+        Vector2 delta = direction.normalized * EffectiveMoveSpeed * Time.deltaTime;
         transform.position += (Vector3)delta;
         CharacterGrid.UpdatePosition(this);
     }
@@ -254,8 +361,13 @@ public abstract class CharacterBase : MonoBehaviour
     protected void UpdateVisualSway()
     {
         float movedDist = ((Vector2)transform.position - (Vector2)lastPositionForSway).magnitude;
-        bool moving = movedDist > 0.0005f;
         lastPositionForSway = transform.position;
+
+        if (movedDist > 0.001f)
+            swayStopTimer = SwayStopDelay;
+        else
+            swayStopTimer -= Time.deltaTime;
+        bool moving = swayStopTimer > 0f;
 
         swayTimer += Time.deltaTime * stats.swayFrequency;
 
@@ -263,8 +375,18 @@ public abstract class CharacterBase : MonoBehaviour
         // Abs(Sin) để nảy luôn hướng lên, 2 lần nảy mỗi chu kỳ nghiêng trái-phải (giống bước chân trái/phải).
         float bounce = moving ? Mathf.Abs(Mathf.Sin(swayTimer)) * stats.swayBounceHeight : 0f;
 
-        visualRoot.localRotation = visualBaseLocalRot * Quaternion.Euler(0f, 0f, tilt);
-        visualRoot.localPosition = visualBaseLocalPos + new Vector3(0f, bounce, 0f);
+        // Xoay quanh GIỮA nhân vật (feet + halfH) thay vì quanh chân (sprite pivot).
+        // headToFeet phải âm (từ center xuống chân), sau đó xoay rồi cộng bounce ở center.
+        float halfH = stats.dragHeadOffset * 0.5f;
+        Quaternion swayRot = visualBaseLocalRot * Quaternion.Euler(0f, 0f, tilt);
+        Vector3 center = visualBaseLocalPos + new Vector3(0f, halfH, 0f);
+        Vector3 centerToFeet = new Vector3(0f, -halfH, 0f);
+        visualRoot.localRotation = swayRot;
+        visualRoot.localPosition = center + swayRot * centerToFeet + new Vector3(0f, bounce, 0f);
+
+        // Truyền normalized factor (0→1) thay vì raw units để không phụ thuộc swayBounceHeight
+        float bounceFactor = moving ? Mathf.Abs(Mathf.Sin(swayTimer)) : 0f;
+        shadow?.UpdateShadow(bounceFactor);
     }
 
     // Giả lập cảm giác "cầm đầu kéo đi": root (= vị trí chuột) đại diện điểm đầu, thân/chân
@@ -279,30 +401,22 @@ public abstract class CharacterBase : MonoBehaviour
         dragTiltAngularVelocity += accel * Time.deltaTime;
         dragTiltAngle += dragTiltAngularVelocity * Time.deltaTime;
 
-        visualRoot.localRotation = visualBaseLocalRot * Quaternion.Euler(0f, 0f, dragTiltAngle);
-        visualRoot.localPosition = visualBaseLocalPos - new Vector3(0f, stats.dragHeadOffset, 0f);
+        // Xoay quanh ĐẦU (= root/cursor = gốc local), không phải quanh chân (sprite pivot).
+        // Kỹ thuật: tính vector "đầu → chân" rồi xoay nó, đặt visualRoot tại vị trí chân sau xoay.
+        // Kết quả: đầu luôn ghim tại cursor, thân/chân đung đưa sang hai bên theo hướng kéo.
+        Quaternion rot = visualBaseLocalRot * Quaternion.Euler(0f, 0f, dragTiltAngle);
+        Vector3 headToFeet = visualBaseLocalPos - new Vector3(0f, stats.dragHeadOffset, 0f);
+        visualRoot.localRotation = rot;
+        visualRoot.localPosition = rot * headToFeet;
     }
 
     // ---------- Leash slot (vị trí đứng trong shop) ----------
 
     protected virtual void ClaimLeashSlot()
     {
-        Vector2 baseCenter = ShopArea.Instance != null ? ShopArea.Instance.Center : (Vector2)transform.position;
-        float clusterRadius = ShopArea.Instance != null ? ShopArea.Instance.clusterRadius : stats.leashRadius;
-
-        const int maxAttempts = 12;
-        Vector2 chosen = baseCenter;
-
-        for (int i = 0; i < maxAttempts; i++)
-        {
-            Vector2 candidate = baseCenter + Random.insideUnitCircle * clusterRadius;
-            CharacterGrid.GetNearby(candidate, stats.separationRadius, nearbyBuffer, faction, this);
-            chosen = candidate;
-            if (nearbyBuffer.Count == 0) break; // chỗ trống, chọn luôn
-        }
-
-        leashCenter = chosen;
-        transform.position = chosen;
+        // Char đặt sẵn trong scene: giữ nguyên vị trí, ghi nhận làm home.
+        // Char spawn mới (qua CharacterSpawner): đã được đặt tại SpawnArea trước khi Start() chạy.
+        leashCenter = transform.position;
     }
 
     public void SetLeashCenter(Vector2 newCenter)
@@ -330,18 +444,25 @@ public abstract class CharacterBase : MonoBehaviour
 
     public void EndDrag()
     {
+        // Lấy vị trí feet trong world TRƯỚC KHI reset bất cứ thứ gì.
+        // visualRoot.position = world pos của sprite pivot (= chân khi pivot ở chân).
+        // Cách này chính xác bất kể tilt angle đang là bao nhiêu khi thả chuột.
+        Vector2 feetWorld = visualRoot.position;
+
         IsDragging = false;
         dragVelocity = Vector2.zero;
+        dragTiltAngle = 0f;
+        dragTiltAngularVelocity = 0f;
 
-        // Lúc kéo, root = vị trí chuột (đại diện "đầu"), còn thân/chân hiển thị lệch xuống
-        // dragHeadOffset. Thả ra thì dịch root xuống đúng khoảng đó để vị trí logic khớp với
-        // chỗ thân đang đứng trên màn hình, tránh sprite bị "giật" lên khi trở về dáng bình thường.
-        Vector2 dropPosition = (Vector2)transform.position - new Vector2(0f, stats.dragHeadOffset);
-        transform.position = dropPosition;
+        // Đặt root đúng chỗ feet đang đứng → visual sẽ reset về localBase mà không giật
+        transform.position = new Vector3(feetWorld.x, feetWorld.y, transform.position.z);
+        visualRoot.localPosition = visualBaseLocalPos;
+        visualRoot.localRotation = visualBaseLocalRot;
+
         CharacterGrid.UpdatePosition(this);
 
         if (!WaveManager.IsWaveActive)
-            SetLeashCenter(dropPosition);
+            SetLeashCenter(feetWorld);
     }
 
     // ---------- Public API ----------
@@ -349,15 +470,28 @@ public abstract class CharacterBase : MonoBehaviour
     public virtual void EnterCombat()
     {
         if (IsDead) return;
+        leashCenter = transform.position;
+        AddAngry(stats.angryOnRoundStart, AngryReason.RoundStart);
         currentTarget = null;
-        EnterState(CharacterState.Seeking);
+        EnterWaiting(CharacterState.Seeking); // delay ngẫu nhiên trước khi bắt đầu di chuyển
     }
 
     public virtual void ExitCombat()
     {
         if (IsDead) return;
         currentTarget = null;
-        EnterState(CharacterState.Leashing);
+        attackCount = 0;
+        EnterWaiting(CharacterState.Leashing); // delay ngẫu nhiên trước khi quay về
+    }
+
+    void OnGameStateChanged(GameState state)
+    {
+        if (state == GameState.Shop)
+        {
+            // Vào shop: dừng leashing (char đứng ở chỗ hiện tại, separation lo phần còn lại)
+            if (State == CharacterState.Leashing)
+                EnterState(CharacterState.Idle);
+        }
     }
 
     public virtual void TakeDamage(float amount)
@@ -392,19 +526,55 @@ public abstract class CharacterBase : MonoBehaviour
     public virtual void Heal(float amount)
     {
         if (IsDead) return;
-        CurrentHP = Mathf.Min(stats.maxHP, CurrentHP + amount);
+        CurrentHP = Mathf.Min(EffectiveMaxHP, CurrentHP + amount);
     }
 
-    // Stub: chỉ cộng dồn số liệu, CHƯA xử lý logic đổi phe khi Angry đầy.
     public virtual void AddAngry(float amount, AngryReason reason)
     {
-        CurrentAngry = Mathf.Clamp(CurrentAngry + amount, 0f, stats.maxAngry);
+        if (IsDead || amount <= 0f) return;
+        CurrentAngry = Mathf.Min(CurrentAngry + amount, stats.maxAngry);
+        if (CurrentAngry >= stats.maxAngry && faction == Faction.Ally)
+            SwitchToEnemy();
+    }
+
+    // Debug only: thay đổi angry tự do (kể cả giảm), không trigger SwitchToEnemy.
+    public void DebugAddAngry(float delta)
+    {
+        CurrentAngry = Mathf.Clamp(CurrentAngry + delta, 0f, stats.maxAngry);
+    }
+
+    // Đổi phe: unregister khỏi Ally grid → đổi faction → re-register là Enemy.
+    // Nếu đang trong wave thì lập tức EnterCombat đánh lại đồng đội cũ.
+    void SwitchToEnemy()
+    {
+        CharacterGrid.Unregister(this);
+        faction = Faction.Enemy;
+        CharacterGrid.Register(this);
+        currentTarget = null;
+        if (WaveManager.IsWaveActive)
+            EnterCombat();
+    }
+
+    // Gọi bởi FeedingManager khi có đủ corn. Hồi full HP, angry không tăng từ đói.
+    public void Feed()
+    {
+        CurrentHP = EffectiveMaxHP;
+    }
+
+    // Gọi bởi FeedingManager khi thiếu corn.
+    public void SkipFeed()
+    {
+        AddAngry(stats.angryPerHunger, AngryReason.Hungry);
     }
 
     protected virtual void Die()
     {
         IsDead = true;
         CharacterGrid.Unregister(this);
+        if (faction == Faction.Ally)
+            OnAllyDied?.Invoke(this);
+        else
+            PlayerWallet.Instance?.Earn(stats.killReward);
         OnDeath();
     }
 
@@ -418,15 +588,25 @@ public abstract class CharacterBase : MonoBehaviour
 
     protected virtual void ExecuteAttack(CharacterBase target)
     {
-        target.TakeDamage(stats.damage);
+        attackCount++;
+        target.TakeDamage(EffectiveDamage);
         FlashSprite(stats.attackSprite);
+    }
+
+    // Spawn VFX prefab tại vfxSpawnPoint (fallback về gốc nhân vật nếu chưa gán).
+    // Prefab tự hủy sau khi xong (particle Stop Action = Destroy, hoặc dùng Destroy(go, t)).
+    protected void SpawnVFX(GameObject prefab)
+    {
+        if (prefab == null) return;
+        Vector3 pos = vfxSpawnPoint != null ? vfxSpawnPoint.position : transform.position;
+        Object.Instantiate(prefab, pos, Quaternion.identity);
     }
 
     // Không giới hạn phạm vi: quét toàn bộ phe đối lập, luôn ưu tiên gần nhất.
     protected CharacterBase FindNearestEnemy()
     {
         Faction opposing = faction == Faction.Ally ? Faction.Enemy : Faction.Ally;
-        return CharacterGrid.FindNearest(transform.position, opposing, this);
+        return CharacterGrid.FindNearest(BodyCenter, opposing, this);
     }
 
     protected CharacterBase FindLowestHpAlly()
@@ -458,15 +638,42 @@ public abstract class CharacterBase : MonoBehaviour
 
     // ---------- Debug ----------
 
+    // Luôn hiển thị (không cần chọn): separation radius + attack range + line to target.
+    // Màu theo phe: xanh lá = Ally, đỏ = Enemy. Độ trong suốt = đang Idle.
+    protected virtual void OnDrawGizmos()
+    {
+        if (stats == null) return;
+
+        bool isAlly = faction == Faction.Ally;
+        bool active = Application.isPlaying && State != CharacterState.Idle;
+
+        Vector3 bodyCenter = transform.position + Vector3.up * (stats.centerOffset * transform.lossyScale.y);
+
+        // Separation radius — cyan
+        Gizmos.color = new Color(0f, 1f, 1f, active ? 0.4f : 0.15f);
+        Gizmos.DrawWireSphere(bodyCenter, stats.separationRadius);
+
+        // Attack range — đỏ cam
+        Gizmos.color = new Color(1f, 0.3f, 0f, active ? 0.7f : 0.2f);
+        Gizmos.DrawWireSphere(bodyCenter, stats.attackRange);
+
+        // Line đến target khi đang Seeking/Attacking
+        if (Application.isPlaying && currentTarget != null && !currentTarget.IsDead)
+        {
+            Gizmos.color = isAlly ? new Color(0.2f, 1f, 0.2f, 0.8f) : new Color(1f, 0.2f, 0.2f, 0.8f);
+            Gizmos.DrawLine(bodyCenter, currentTarget.transform.position + Vector3.up * (currentTarget.stats.centerOffset * currentTarget.transform.lossyScale.y));
+        }
+    }
+
     protected virtual void OnDrawGizmosSelected()
     {
         if (stats == null) return;
 
-        Vector3 center = Application.isPlaying ? (Vector3)leashCenter : transform.position;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(center, stats.leashRadius);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, stats.attackRange);
+#if UNITY_EDITOR
+        // Label số liệu ngay trong Scene view khi chọn char
+        UnityEditor.Handles.color = Color.white;
+        UnityEditor.Handles.Label(transform.position + Vector3.up * (stats.centerOffset * transform.lossyScale.y * 2f + 0.5f),
+            $"spd:{stats.moveSpeed}  sep:{stats.separationRadius}  atk:{stats.attackRange}");
+#endif
     }
 }

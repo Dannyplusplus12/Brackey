@@ -1,14 +1,10 @@
 using UnityEngine;
 
-// Overlay debug đơn giản bằng IMGUI (không cần Canvas/Text). Gắn vào 1 GameObject
-// bất kỳ trong scene (VD: WaveManager). Muốn thêm thông tin debug mới, chỉ cần
-// thêm 1 dòng GUILayout.Label(...) trong OnGUI().
 public class DebugOverlay : MonoBehaviour
 {
     [Header("Debug Spawn (nhấn E để spawn Enemy tại vị trí chuột)")]
     [SerializeField] CharacterBase enemyPrefab;
 
-    // Phím 1/2 (cả hàng số lẫn numpad) để giảm/tăng Time.timeScale theo các mốc cố định.
     static readonly float[] timeScalePresets = { 0.25f, 0.5f, 1f, 2f, 4f };
     int timeScaleIndex = 2;
 
@@ -30,6 +26,20 @@ public class DebugOverlay : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
             SetTimeScaleIndex(timeScaleIndex + 1);
+
+        // Debug trên char đang được kéo
+        CharacterBase dragged = CharacterDragHandler.CurrentlyDragged;
+        if (dragged != null)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4))
+                dragged.Heal(10f);
+            if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5))
+                dragged.TakeDamage(10f);
+            if (Input.GetKeyDown(KeyCode.Alpha7) || Input.GetKeyDown(KeyCode.Keypad7))
+                dragged.DebugAddAngry(1f);
+            if (Input.GetKeyDown(KeyCode.Alpha8) || Input.GetKeyDown(KeyCode.Keypad8))
+                dragged.DebugAddAngry(-1f);
+        }
     }
 
     void SetTimeScaleIndex(int index)
@@ -40,33 +50,66 @@ public class DebugOverlay : MonoBehaviour
 
     void SpawnDebugEnemy()
     {
-        if (enemyPrefab == null)
-        {
-            Debug.LogWarning("DebugOverlay: chưa gán Enemy Prefab để spawn.");
-            return;
-        }
-
+        if (enemyPrefab == null) { Debug.LogWarning("DebugOverlay: chưa gán Enemy Prefab."); return; }
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
-
         Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
-
         CharacterBase spawned = Instantiate(enemyPrefab, mouseWorld, Quaternion.identity);
         spawned.SetSpawnPosition(mouseWorld);
     }
 
     void OnGUI()
     {
-        GUI.skin.label.fontSize = 16;
-        GUILayout.BeginArea(new Rect(10, 10, 320, 300), GUI.skin.box);
+        GUI.skin.label.fontSize = 14;
+        GUILayout.BeginArea(new Rect(10, 10, 340, 500), GUI.skin.box);
 
-        GUILayout.Label(WaveManager.IsWaveActive ? "Wave: ACTIVE (combat)" : "Wave: SHOP (idle)");
-        GUILayout.Label($"Time Scale: {Time.timeScale:0.##}x  (phím 1: chậm lại, 2: tăng tốc)");
-        GUILayout.Label("Nhấn E: spawn Enemy tại vị trí chuột");
+        GUILayout.Label(WaveManager.IsWaveActive ? "Wave: ACTIVE" : "Wave: INACTIVE");
+        GUILayout.Label($"TimeScale: {Time.timeScale:0.##}x  (1: slow, 2: fast)");
 
-        // Thêm dòng debug mới ở đây, ví dụ:
-        // GUILayout.Label($"FPS: {(1f / Time.unscaledDeltaTime):F0}");
+        int corn = PlayerWallet.Instance != null ? PlayerWallet.Instance.Corn : -1;
+        GUILayout.Label($"Corn: {corn}");
+
+        // --- Char diagnostics ---
+        GUILayout.Space(6);
+        int ally  = CharacterGrid.CountAlive(Faction.Ally);
+        int enemy = CharacterGrid.CountAlive(Faction.Enemy);
+        GUILayout.Label($"Ally alive: {ally}  |  Enemy alive: {enemy}");
+
+        // Liệt kê từng char: tên, faction, state, stats null?
+        GUILayout.Space(4);
+        GUILayout.Label("── Characters ──");
+        foreach (Faction f in new[] { Faction.Ally, Faction.Enemy })
+        {
+            var list = CharacterGrid.GetAll(f);
+            foreach (var c in list)
+            {
+                if (c == null) continue;
+                string statsOk = c.Stats != null ? "" : " [STATS NULL!]";
+                string targetInfo = "no target";
+                if (c.CurrentTarget != null)
+                {
+                    float dist = Vector2.Distance(c.transform.position, c.CurrentTarget.transform.position);
+                    targetInfo = $"→{c.CurrentTarget.name} d={dist:F2}";
+                }
+                GUILayout.Label($"  [{f}] {c.name}  {c.State}  spd={c.DebugEffectiveMoveSpeed:F1}  {targetInfo}{statsOk}");
+            }
+        }
+
+        GUILayout.Space(6);
+        GUILayout.Label("E: spawn enemy tại chuột");
+
+        CharacterBase dragged = CharacterDragHandler.CurrentlyDragged;
+        if (dragged != null)
+        {
+            GUILayout.Space(4);
+            GUILayout.Label($"── Dragging: {dragged.name} ──");
+            float hpPct  = dragged.MaxHP  > 0 ? dragged.CurrentHP    / dragged.MaxHP              * 100f : 0f;
+            float angPct = dragged.Stats != null && dragged.Stats.maxAngry > 0
+                           ? dragged.CurrentAngry / dragged.Stats.maxAngry * 100f : 0f;
+            GUILayout.Label($"  HP:    {dragged.CurrentHP:F0}/{dragged.MaxHP:F0}  ({hpPct:F0}%)   [4] +10  [5] -10");
+            GUILayout.Label($"  Angry: {dragged.CurrentAngry:F1}/{dragged.Stats?.maxAngry:F0}  ({angPct:F0}%)  [7] +1  [8] -1");
+        }
 
         GUILayout.EndArea();
     }

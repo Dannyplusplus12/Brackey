@@ -60,7 +60,7 @@ public static class CharacterGrid
         foreach (CharacterBase c in byFaction[faction])
         {
             if (c == null || c == exclude || c.IsDead) continue;
-            float sqr = ((Vector2)c.transform.position - position).sqrMagnitude;
+            float sqr = (c.BodyCenter - position).sqrMagnitude;
             if (sqr < nearestSqr)
             {
                 nearestSqr = sqr;
@@ -85,6 +85,22 @@ public static class CharacterGrid
             }
         }
         return lowest;
+    }
+
+    // Trả về toàn bộ list của 1 phe (read-only). Dùng cho FeedingManager, UI roster...
+    // KHÔNG modify list này khi đang iterating — snapshot trước nếu cần.
+    public static System.Collections.Generic.IReadOnlyList<CharacterBase> GetAll(Faction faction)
+        => byFaction[faction];
+
+    // Đếm số nhân vật còn sống theo phe - dùng để GameManager phát hiện đã hết địch (wave clear).
+    public static int CountAlive(Faction faction)
+    {
+        int count = 0;
+        foreach (CharacterBase c in byFaction[faction])
+        {
+            if (c != null && !c.IsDead) count++;
+        }
+        return count;
     }
 
     public static void UpdatePosition(CharacterBase character)

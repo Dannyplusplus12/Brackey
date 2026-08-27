@@ -4,6 +4,7 @@ using UnityEngine;
 // từ bất kỳ đâu (nút UI của shop, script khác...), hoặc bấm nút test trong Inspector lúc Play.
 public class WaveManager : MonoBehaviour
 {
+    public static WaveManager Instance { get; private set; }
     public static event System.Action OnWaveStart;
     public static event System.Action OnWaveEnd;
     public static bool IsWaveActive { get; private set; }
@@ -12,6 +13,11 @@ public class WaveManager : MonoBehaviour
     static void ResetOnLoad()
     {
         IsWaveActive = false;
+    }
+
+    void Awake()
+    {
+        Instance = this;
     }
 
     [ContextMenu("Start Wave (Test)")]
