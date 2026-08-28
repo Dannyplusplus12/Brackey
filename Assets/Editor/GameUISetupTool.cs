@@ -865,6 +865,147 @@ public static class GameUISetupTool
                   $"(root Image được transparent). Kiểm tra lại sprite assignment nếu cần.");
     }
 
+    // =========================================================
+    // STATIC ITEM ENTRY PREFAB
+    // =========================================================
+
+    const string StaticEntryPrefabPath = "Assets/Prefabs/UI/StaticItemEntry.prefab";
+
+    [MenuItem("Tools/Shop-Arena Setup/Create Static Item Entry Prefab")]
+    public static void CreateStaticItemEntryPrefab()
+    {
+        EnsureFolder("Assets/Prefabs/UI");
+
+        // Xoá cũ nếu muốn rebuild
+        if (AssetDatabase.LoadAssetAtPath<Object>(StaticEntryPrefabPath) != null)
+        {
+            if (!EditorUtility.DisplayDialog("Tạo Static Item Entry Prefab",
+                "Prefab đã tồn tại. Ghi đè?", "Ghi đè", "Huỷ"))
+                return;
+            AssetDatabase.DeleteAsset(StaticEntryPrefabPath);
+        }
+
+        const float size = 80f;
+
+        // ── Root ──────────────────────────────────────────────────────────────
+        GameObject root = new GameObject("StaticItemEntry", typeof(RectTransform));
+        RectTransform rootRt = root.GetComponent<RectTransform>();
+        rootRt.sizeDelta = new Vector2(size, size);
+
+        root.AddComponent<StaticItemEntry>();
+
+        var trigger = root.AddComponent<ItemTooltipTrigger>();
+        // Direction=Top, AlignEnd=false (hiện phía trên, canh trái)
+        // — sẽ được gán qua SerializedObject bên dưới
+
+        // ── CardBg ────────────────────────────────────────────────────────────
+        GameObject cardBgGO = new GameObject("CardBg", typeof(RectTransform), typeof(Image));
+        cardBgGO.transform.SetParent(root.transform, false);
+        SetStretch(cardBgGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        Image cardBgImg       = cardBgGO.GetComponent<Image>();
+        cardBgImg.raycastTarget = false;
+        cardBgImg.color         = Color.white;
+
+        // ── Icon ──────────────────────────────────────────────────────────────
+        GameObject iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+        iconGO.transform.SetParent(root.transform, false);
+        SetStretch(iconGO.GetComponent<RectTransform>(),
+            Vector2.zero, Vector2.one,
+            new Vector2(8f, 8f), new Vector2(-8f, -8f));
+        Image iconImg          = iconGO.GetComponent<Image>();
+        iconImg.preserveAspect = true;
+        iconImg.raycastTarget  = true; // bubble event lên root's ItemTooltipTrigger
+
+        // ── CountText ─────────────────────────────────────────────────────────
+        // Dùng reflection để thêm TMP_Text component
+        var tmpType = System.Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+        if (tmpType != null)
+        {
+            GameObject countGO = new GameObject("CountText", typeof(RectTransform));
+            countGO.transform.SetParent(root.transform, false);
+
+            // Anchor góc dưới phải
+            RectTransform countRt = countGO.GetComponent<RectTransform>();
+            countRt.anchorMin       = new Vector2(1f, 0f);
+            countRt.anchorMax       = new Vector2(1f, 0f);
+            countRt.pivot           = new Vector2(1f, 0f);
+            countRt.anchoredPosition = new Vector2(-2f, 2f);
+            countRt.sizeDelta       = new Vector2(48f, 24f);
+
+            var tmp = countGO.AddComponent(tmpType);
+            tmpType.GetProperty("text")?.SetValue(tmp, "x2");
+            tmpType.GetProperty("fontSize")?.SetValue(tmp, 18f);
+            tmpType.GetProperty("fontStyle")?.SetValue(tmp,
+                System.Enum.Parse(System.Type.GetType("TMPro.FontStyles, Unity.TextMeshPro"), "Bold"));
+            tmpType.GetProperty("color")?.SetValue(tmp, Color.white);
+            // Alignment = BottomRight
+            var alignType = System.Type.GetType("TMPro.TextAlignmentOptions, Unity.TextMeshPro");
+            if (alignType != null)
+                tmpType.GetProperty("alignment")?.SetValue(tmp,
+                    System.Enum.Parse(alignType, "BottomRight"));
+        }
+        else
+        {
+            Debug.LogWarning("[StaticItemEntry] TMP không tìm thấy — CountText không được tạo. " +
+                             "Thêm tay sau khi import TMP.");
+        }
+
+        // ── Wire ItemTooltipTrigger ───────────────────────────────────────────
+        SerializedObject triggerSO = new SerializedObject(trigger);
+        var dirProp = triggerSO.FindProperty("direction");
+        if (dirProp != null) dirProp.enumValueIndex = (int)TooltipDirection.Top;
+        var endProp = triggerSO.FindProperty("alignEnd");
+        if (endProp != null) endProp.boolValue = false;
+        var gapProp = triggerSO.FindProperty("gap");
+        if (gapProp != null) gapProp.floatValue = 6f;
+        triggerSO.ApplyModifiedProperties();
+
+        // ── Lưu prefab ───────────────────────────────────────────────────────
+        GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, StaticEntryPrefabPath, out bool ok);
+        Object.DestroyImmediate(root);
+
+        if (!ok)
+        {
+            Debug.LogError("[StaticItemEntry] Lưu prefab thất bại.");
+            return;
+        }
+
+        // Wire vào StaticItemListUI trong scene
+        var listUI = Object.FindFirstObjectByType<StaticItemListUI>();
+        if (listUI != null)
+        {
+            SerializedObject listSO = new SerializedObject(listUI);
+            listSO.FindProperty("entryPrefab").objectReferenceValue = prefab;
+            listSO.ApplyModifiedProperties();
+            EditorUtility.SetDirty(listUI);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(listUI.gameObject.scene);
+            Debug.Log("[StaticItemEntry] Đã wire prefab vào StaticItemListUI trong scene.");
+        }
+
+        AssetDatabase.SaveAssets();
+        Selection.activeObject = prefab;
+
+        Debug.Log("[StaticItemEntry] Xong!\n\n" +
+                  "Cấu trúc prefab:\n" +
+                  "  StaticItemEntry (StaticItemEntry + ItemTooltipTrigger)\n" +
+                  "  ├── CardBg  (Image — kéo sprite card vào đây)\n" +
+                  "  ├── Icon    (Image — icon item, tự fill)\n" +
+                  "  └── CountText (TMP_Text — hiện x2, x3...)\n\n" +
+                  "Việc cần làm:\n" +
+                  "  1. Chọn CardBg trong prefab → kéo sprite StatBoost card vào Source Image\n" +
+                  "  2. Chỉnh size (hiện 80×80) nếu muốn to/nhỏ hơn");
+    }
+
+    static void SetStretch(RectTransform rt,
+        Vector2 anchorMin, Vector2 anchorMax,
+        Vector2 offsetMin, Vector2 offsetMax)
+    {
+        rt.anchorMin = anchorMin;
+        rt.anchorMax = anchorMax;
+        rt.offsetMin = offsetMin;
+        rt.offsetMax = offsetMax;
+    }
+
     // ---------- Helpers ----------
 
     static void EnsureFolder(string folderPath)

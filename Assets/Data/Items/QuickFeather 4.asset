@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: Viking_ItemData
+  m_Name: QuickFeather 4
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: VIKING
-  icon: {fileID: 21300000, guid: 7a4783cbae19a224a83a250df5ec68c8, type: 3}
-  itemType: 2
-  rarity: 1
-  description: 
+  displayName: Key
+  icon: {fileID: 21300000, guid: 0af7129050701de45bcd4f357b3d1f30, type: 3}
+  itemType: 1
+  rarity: 0
+  description: all ally gain 50% moverment speed this round
   buyCost: 3
-  sellValue: 1
-  characterPrefab: {fileID: 4535559801046744120, guid: 67da874244924ea43b701364e2b06ad3, type: 3}
+  sellValue: 2
+  characterPrefab: {fileID: 0}
   targetType: 0
   targetCharacterType: {fileID: 0}
   statDelta:
-    damage: 10
-    moveSpeed: 20
+    damage: 0
+    moveSpeed: 0
     maxHP: 0
     attackInterval: 0
     attackRange: 0

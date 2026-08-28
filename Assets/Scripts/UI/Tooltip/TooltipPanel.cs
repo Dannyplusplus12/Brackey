@@ -45,6 +45,9 @@ public class TooltipPanel : MonoBehaviour
         _currentData = data;
         if (descText != null) descText.text = data.richDescription ?? "";
 
+        // Đẩy lên cuối hierarchy để render đè lên tất cả các panel khác
+        transform.SetAsLastSibling();
+
         gameObject.SetActive(true);
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(_rect);

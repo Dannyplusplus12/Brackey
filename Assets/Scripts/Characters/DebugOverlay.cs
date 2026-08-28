@@ -88,7 +88,11 @@ public class DebugOverlay : MonoBehaviour
         }
 
         int corn = PlayerWallet.Instance != null ? PlayerWallet.Instance.Corn : -1;
+        GUILayout.BeginHorizontal();
         GUILayout.Label($"Corn: {corn}");
+        if (GUILayout.Button("+10", GUILayout.Width(40)))
+            PlayerWallet.Instance?.Earn(10);
+        GUILayout.EndHorizontal();
 
         // --- Char diagnostics ---
         GUILayout.Space(6);

@@ -13,7 +13,18 @@ MonoBehaviour:
   m_Name: QuickFeather
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName: 'Quick Feather '
-  icon: {fileID: 1784186740104572286, guid: 5ddb94732211c4340b04f56a546625ec, type: 3}
-  itemType: 0
+  icon: {fileID: 21300000, guid: 5e99e0a0452fdd04fb073e86f82f90a6, type: 3}
+  itemType: 1
+  rarity: 0
   description: all ally gain 50% moverment speed this round
+  buyCost: 3
   sellValue: 2
+  characterPrefab: {fileID: 0}
+  targetType: 0
+  targetCharacterType: {fileID: 0}
+  statDelta:
+    damage: 0
+    moveSpeed: 0
+    maxHP: 0
+    attackInterval: 0
+    attackRange: 0

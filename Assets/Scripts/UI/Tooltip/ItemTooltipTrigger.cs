@@ -34,6 +34,23 @@ public class ItemTooltipTrigger : MonoBehaviour,
         _rect = GetComponent<RectTransform>();
     }
 
+    /// <summary>
+    /// Cấu hình runtime — dùng khi Add component bằng code (ví dụ: StaticItemListUI).
+    /// Phải gọi trước hoặc ngay sau AddComponent, trước frame đầu tiên.
+    /// </summary>
+    public void Setup(TooltipDirection dir, bool end = false, float g = 8f)
+    {
+        direction = dir;
+        alignEnd  = end;
+        gap       = g;
+        // Nếu Awake chưa chạy (AddComponent gọi ngay) thì init ngay
+        if (_rect == null)
+        {
+            _slot = GetComponent<IItemSlot>();
+            _rect = GetComponent<RectTransform>();
+        }
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         var item = GetItem();
