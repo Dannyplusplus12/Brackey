@@ -10,21 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: StoneSword
+  m_Name: SwiftBoots
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: 'Quick Feather '
-  icon: {fileID: 21300000, guid: b07955cff88bdae478ae188170d6db11, type: 3}
-  itemType: 0
-  description: "H\u1ED3i <color=#4CAF50>15</color> <sprite name=\"stat_hp\"> ngay
-    l\u1EADp t\u1EE9c"
-  buyCost: 3
-  sellValue: 2
+  displayName: Swift Boots
+  icon: {fileID: 21300000, guid: 9d16d945cd99d154eafb559d49c0ad63, type: 3}
+  itemType: 1
+  rarity: 0
+  description: <color=#4CAF50>+0.3</color> <sprite name="stat_speed">
+  buyCost: 2
+  sellValue: 1
   characterPrefab: {fileID: 0}
   targetType: 0
   targetCharacterType: {fileID: 0}
   statDelta:
     damage: 0
-    moveSpeed: 500
+    moveSpeed: 0.3
     maxHP: 0
-    attackInterval: 0
+    attackSpeed: 0
     attackRange: 0
+    foodCost: 0
+    damagePercent: 0
+    moveSpeedPercent: 0
+    maxHPPercent: 0
+    attackSpeedPercent: 0

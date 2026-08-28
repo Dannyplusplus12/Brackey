@@ -45,7 +45,7 @@ public class FeedingManager : MonoBehaviour
             {
                 if (ally == null || ally.IsDead) continue;
 
-                int  cost = ally.Stats.foodRequiredPerRound;
+                int  cost = ally.EffectiveFoodCost;
                 bool fed  = PlayerWallet.Instance.TrySpend(cost);
 
                 if (fed) ally.Feed();

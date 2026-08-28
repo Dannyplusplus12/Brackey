@@ -2,11 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// Thanh stats cuối RosterPanel — hiện khi hover vào 1 entry, ẩn khi rời.
-// Setup:
-//   1. Tạo GO "StatBar" ở cuối RosterPanel, add HorizontalLayoutGroup.
-//   2. Tạo 4 child GO, mỗi cái có Image (icon) + TextMeshProUGUI (giá trị).
-//   3. Wire 4 slot vào Inspector, gán icons HP/Damage/Speed/Angry.
+// Thanh stats trong tooltip — hiện khi hover vào roster entry hoặc shop item, ẩn khi rời.
+// Slots: 0=HP, 1=DMG, 2=SPD, 3=ANGRY, 4=FOOD
+// Setup: chạy Tools > Shop-Arena Setup > Build StatBar In TooltipPanel.
 [System.Serializable]
 public struct StatSlotUI
 {
@@ -23,9 +21,10 @@ public class CharacterStatBar : MonoBehaviour
     [SerializeField] Sprite iconDamage;
     [SerializeField] Sprite iconSpeed;
     [SerializeField] Sprite iconAngry;
+    [SerializeField] Sprite iconFood;
 
-    [Header("Slots (thứ tự: HP, Damage, Speed, Angry)")]
-    [SerializeField] StatSlotUI[] slots = new StatSlotUI[4];
+    [Header("Slots (thứ tự: HP, Damage, Speed, Angry, Food)")]
+    [SerializeField] StatSlotUI[] slots = new StatSlotUI[5];
 
     void Awake()
     {
@@ -33,7 +32,7 @@ public class CharacterStatBar : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // Dùng trong Shop: hiện base stats, angry base / maxAngry
+    // Dùng trong Shop: hiện base stats (từ CharacterStats SO — bất biến)
     public void ShowBase(CharacterStats s)
     {
         gameObject.SetActive(true);
@@ -42,29 +41,28 @@ public class CharacterStatBar : MonoBehaviour
         SetSlot(2, iconSpeed,  FormatStat(s.moveSpeed),          "SPD",   s.moveSpeed.ToString("0.#"));
         SetSlot(3, iconAngry,  $"{FormatStat(s.angryOnRoundStart)}/{FormatStat(s.maxAngry)}", "ANGRY",
                                $"{s.angryOnRoundStart:0}/{s.maxAngry:0}");
+        SetSlot(4, iconFood,   s.foodRequiredPerRound.ToString(), "FOOD");
     }
 
-    // Dùng trong Roster: hiện HP hiện tại + effective stats (base + item bonus)
+    // Dùng trong Roster: hiện trạng thái thực tế (HP live + effective stats có item bonus)
     public void ShowLive(CharacterBase character)
     {
         gameObject.SetActive(true);
-        var   s      = character.Stats;
-        float maxHP  = character.MaxHP;
-        float dmg    = character.LiveDamage;
-        float spd    = character.LiveSpeed;
+        var   s     = character.Stats;
+        float maxHP = character.MaxHP;
+        float dmg   = character.LiveDamage;
+        float spd   = character.LiveSpeed;
         SetSlot(0, iconHP,     $"{FormatStat(character.CurrentHP)}/{FormatStat(maxHP)}", "HP",
                                $"{character.CurrentHP:0}/{maxHP:0}");
         SetSlot(1, iconDamage, FormatStat(dmg),  "DMG", dmg.ToString("0"));
         SetSlot(2, iconSpeed,  FormatStat(spd),  "SPD", spd.ToString("0.#"));
         SetSlot(3, iconAngry,  $"{FormatStat(character.CurrentAngry)}/{FormatStat(s.maxAngry)}", "ANGRY",
                                $"{character.CurrentAngry:0}/{s.maxAngry:0}");
+        SetSlot(4, iconFood,   character.EffectiveFoodCost.ToString(), "FOOD");
     }
 
     public void Hide() => gameObject.SetActive(false);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // label: tên hiện khi không có icon, hoặc luôn hiện phía trên nếu muốn 2 dòng
-    // value: số / giá trị hiển thị
     void SetSlot(int i, Sprite sprite, string value, string abbrev, string displayValue = null)
     {
         if (i >= slots.Length) return;

@@ -6,7 +6,8 @@ public class CharacterStats : ScriptableObject
     [Header("Combat")]
     public float maxHP = 100f;
     public float damage = 10f;
-    public float attackInterval = 1f;
+    [Tooltip("Số đòn đánh mỗi giây (attacks per second). Giá trị cao hơn = đánh nhanh hơn.")]
+    public float attackSpeed = 1f;
     public float attackRange = 1.2f;
     [Tooltip("Thời gian hiển thị sprite tấn công mỗi đòn, phải nhỏ hơn Attack Interval")]
     public float attackVisualDuration = 0.15f;

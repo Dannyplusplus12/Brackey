@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // Tạo 1 entry cho mỗi nhân vật phe Ally.
 // - Lúc Start: quét toàn scene (char có sẵn từ đầu).
@@ -22,12 +23,33 @@ public class CharacterRosterUI : MonoBehaviour
 
     void Start()
     {
+        SetupScrollFixes();
+
         // Char có sẵn trong scene khi game start (đặt tay trong editor)
         foreach (CharacterBase character in FindObjectsByType<CharacterBase>(FindObjectsSortMode.None))
         {
             if (character.Faction != Faction.Ally) continue;
             AddEntry(character, atTop: false);
         }
+    }
+
+    // Tự động gắn scroll fixes lên ScrollRect + Viewport — không cần làm tay trong Inspector.
+    void SetupScrollFixes()
+    {
+        var scrollRect = GetComponentInChildren<ScrollRect>(true);
+        if (scrollRect == null) return;
+
+        // 1. ViewportScrollInterceptor — intercept scroll events với chiều đúng
+        //    + thêm Image trong suốt cho Viewport để catch raycasts vùng trống
+        if (scrollRect.viewport != null &&
+            scrollRect.viewport.GetComponent<ViewportScrollInterceptor>() == null)
+        {
+            scrollRect.viewport.gameObject.AddComponent<ViewportScrollInterceptor>();
+        }
+
+        // 2. RosterScrollbarSetup — tạo visual scrollbar (nếu chưa có)
+        if (scrollRect.GetComponent<RosterScrollbarSetup>() == null)
+            scrollRect.gameObject.AddComponent<RosterScrollbarSetup>();
     }
 
     // Gọi từ OnCharacterSpawned — char mới lên đầu roster

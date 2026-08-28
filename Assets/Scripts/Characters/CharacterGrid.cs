@@ -92,6 +92,15 @@ public static class CharacterGrid
     public static System.Collections.Generic.IReadOnlyList<CharacterBase> GetAll(Faction faction)
         => byFaction[faction];
 
+    // Trả về snapshot list các nhân vật còn sống theo phe — an toàn để iterate khi có side-effect.
+    public static List<CharacterBase> FindAllAlive(Faction faction)
+    {
+        var result = new List<CharacterBase>();
+        foreach (CharacterBase c in byFaction[faction])
+            if (c != null && !c.IsDead) result.Add(c);
+        return result;
+    }
+
     // Đếm số nhân vật còn sống theo phe - dùng để GameManager phát hiện đã hết địch (wave clear).
     public static int CountAlive(Faction faction)
     {

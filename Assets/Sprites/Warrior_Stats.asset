@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
   maxHP: 100
   damage: 10
-  attackInterval: 1
+  attackSpeed: 1
   attackRange: 0.8
   attackVisualDuration: 0.15
   moveSpeed: 1.5

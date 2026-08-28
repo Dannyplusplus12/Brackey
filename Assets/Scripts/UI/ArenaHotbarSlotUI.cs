@@ -5,7 +5,8 @@ using UnityEngine.UI;
 // 1 trong 4 ô Inventory lúc Arena (kiểu hotbar Minecraft): kích hoạt bằng phím 1-4 hoặc click chuột.
 public class ArenaHotbarSlotUI : MonoBehaviour, IPointerClickHandler
 {
-    static readonly KeyCode[] hotkeys = { KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4 };
+    // Input phím 1-4 được xử lý bởi ItemActivationInput (script riêng trên ShopManagers).
+    // Slot UI này chỉ lo hiển thị icon và xử lý click chuột.
 
     [SerializeField] int slotIndex;
     [SerializeField] Image icon;
@@ -21,18 +22,7 @@ public class ArenaHotbarSlotUI : MonoBehaviour, IPointerClickHandler
         PlayerInventory.OnInventoryChanged -= Refresh;
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(hotkeys[slotIndex]))
-            Activate();
-    }
-
     public void OnPointerClick(PointerEventData eventData)
-    {
-        Activate();
-    }
-
-    void Activate()
     {
         PlayerInventory.Instance?.ActivateSlot(slotIndex);
     }
@@ -40,7 +30,7 @@ public class ArenaHotbarSlotUI : MonoBehaviour, IPointerClickHandler
     void Refresh()
     {
         ItemData item = PlayerInventory.Instance != null ? PlayerInventory.Instance.GetSlot(slotIndex) : null;
-        icon.sprite = item != null ? item.icon : null;
-        icon.enabled = item != null;
+        icon.sprite  = item?.icon;
+        icon.enabled = item != null && item.icon != null;
     }
 }

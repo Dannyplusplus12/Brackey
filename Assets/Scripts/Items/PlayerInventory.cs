@@ -25,6 +25,7 @@ public class PlayerInventory : MonoBehaviour
     public void AddStaticItem(ItemData item)
     {
         staticItems.Add(item);
+        ApplyStatDelta(item, add: true);
         OnStaticItemsChanged?.Invoke();
     }
 
@@ -67,12 +68,45 @@ public class PlayerInventory : MonoBehaviour
     public void SellStaticItem(ItemData item)
     {
         if (!staticItems.Remove(item)) return;
+        ApplyStatDelta(item, add: false);
         PlayerWallet.Instance?.Earn(item.sellValue);
         OnStaticItemsChanged?.Invoke();
     }
 
-    // Stub: chỉ báo hiệu "slot này vừa được kích hoạt", chưa xử lý hiệu ứng item
-    // (để combat system sau này tự subscribe và áp dụng effect).
+    // Áp hoặc hoàn StatDelta của item vào GlobalStatBonus.
+    // Active item KHÔNG áp qua đây (handler tự xử lý).
+    static void ApplyStatDelta(ItemData item, bool add)
+    {
+        if (item == null || item.itemType == ItemType.Active) return;
+
+        var d = item.statDelta;
+        int sign = add ? 1 : -1;
+
+        if (item.targetType == ItemTargetType.SpecificType && item.targetCharacterType != null)
+        {
+            // Per-type: dùng AddTypeBonus / RemoveTypeBonus
+            if (add) GlobalStatBonus.AddTypeBonus(item.targetCharacterType, d);
+            else      GlobalStatBonus.RemoveTypeBonus(item.targetCharacterType, d);
+        }
+        else
+        {
+            // Global flat
+            GlobalStatBonus.damage      += d.damage      * sign;
+            GlobalStatBonus.moveSpeed   += d.moveSpeed   * sign;
+            GlobalStatBonus.maxHP       += d.maxHP       * sign;
+            GlobalStatBonus.attackSpeed += d.attackSpeed * sign;
+            GlobalStatBonus.attackRange += d.attackRange * sign;
+            GlobalStatBonus.foodCost    += d.foodCost    * sign;
+            // Global percent
+            GlobalStatBonus.damagePercent      += d.damagePercent      * sign;
+            GlobalStatBonus.moveSpeedPercent   += d.moveSpeedPercent   * sign;
+            GlobalStatBonus.maxHPPercent       += d.maxHPPercent       * sign;
+            GlobalStatBonus.attackSpeedPercent += d.attackSpeedPercent * sign;
+        }
+    }
+
+    // Fire khi slot được kích hoạt — handler (ItemEffectHandler) subscribe để áp effect.
+    // Item bị consume (xóa khỏi slot) ngay sau khi event fire.
     public static event System.Action<int, ItemData> OnSlotActivated;
 
     public void ActivateSlot(int index)
@@ -81,5 +115,13 @@ public class PlayerInventory : MonoBehaviour
         if (item == null || item.itemType != ItemType.Active) return;
 
         OnSlotActivated?.Invoke(index, item);
+        ConsumeSlot(index);
+    }
+
+    // Xóa item khỏi slot sau khi dùng (không hoàn corn — đã dùng rồi).
+    void ConsumeSlot(int index)
+    {
+        slots[index] = null;
+        OnInventoryChanged?.Invoke();
     }
 }

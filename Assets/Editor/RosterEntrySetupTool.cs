@@ -82,7 +82,7 @@ public static class RosterEntrySetupTool
         tmp.fontStyle        = FontStyles.Bold;
         tmp.color            = new Color(1f, 0.85f, 0.15f);
         tmp.alignment        = TextAlignmentOptions.Left;
-        tmp.enableWordWrapping = false;
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
         tmp.overflowMode     = TextOverflowModes.Overflow;
 
         // ── CornIcon ─────────────────────────────────────────────────────────
@@ -118,5 +118,122 @@ public static class RosterEntrySetupTool
     {
         return Selection.activeGameObject != null
             && Selection.activeGameObject.GetComponent<CharacterRosterEntry>() != null;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Setup FoodCost Slot
+    // ─────────────────────────────────────────────────────────────────────────
+    // Cách dùng:
+    //   • Chọn root RosterEntry → tự tìm HorizontalLayoutGroup icon row, thêm vào đó.
+    //   • Chọn GO bất kỳ bên trong prefab → thêm FoodCostSlot làm con của GO đó.
+    // Sau khi chạy: kéo sprite corn vào FoodCostSlot > CornIcon > Image > Source Image.
+    [MenuItem("Tools/Shop-Arena Setup/Setup FoodCost Slot in RosterEntry")]
+    static void SetupFoodCostSlot()
+    {
+        GameObject selected = Selection.activeGameObject;
+        if (selected == null)
+        {
+            EditorUtility.DisplayDialog("Setup FoodCost Slot",
+                "Chọn GO trong prefab RosterEntry rồi chạy lại.\n\n" +
+                "• Chọn root (CharacterRosterEntry) → tự detect icon row.\n" +
+                "• Chọn GO bất kỳ bên trong → thêm slot làm con của GO đó.", "OK");
+            return;
+        }
+
+        // Tìm CharacterRosterEntry từ selected hoặc cha
+        CharacterRosterEntry entry = selected.GetComponent<CharacterRosterEntry>()
+            ?? selected.GetComponentInParent<CharacterRosterEntry>();
+        if (entry == null)
+        {
+            EditorUtility.DisplayDialog("Setup FoodCost Slot",
+                "Không tìm thấy CharacterRosterEntry.\nChọn GO bên trong prefab RosterEntry.", "OK");
+            return;
+        }
+
+        // Xác định parent của slot
+        GameObject slotParent = selected;
+
+        // Nếu chọn root, tự tìm HorizontalLayoutGroup icon row (ưu tiên cái có nhiều child nhất)
+        if (selected == entry.gameObject)
+        {
+            HorizontalLayoutGroup bestHLG = null;
+            int bestChildCount = -1;
+            foreach (var hlg in selected.GetComponentsInChildren<HorizontalLayoutGroup>(true))
+            {
+                int cnt = hlg.transform.childCount;
+                if (cnt > bestChildCount) { bestChildCount = cnt; bestHLG = hlg; }
+            }
+            if (bestHLG != null)
+            {
+                slotParent = bestHLG.gameObject;
+                Debug.Log($"[FoodCost] Auto-detected icon row: '{slotParent.name}' ({bestChildCount} children).");
+            }
+            else
+            {
+                Debug.Log("[FoodCost] Không tìm thấy HorizontalLayoutGroup — thêm slot vào root.");
+            }
+        }
+
+        // Xoá slot cũ nếu tồn tại (idempotent)
+        Transform old = slotParent.transform.Find("FoodCostSlot");
+        if (old != null)
+        {
+            Undo.DestroyObjectImmediate(old.gameObject);
+            Debug.Log("[FoodCost] Đã xoá FoodCostSlot cũ.");
+        }
+
+        // ── FoodCostSlot GO ──────────────────────────────────────────────────
+        var slotGO = new GameObject("FoodCostSlot");
+        Undo.RegisterCreatedObjectUndo(slotGO, "Create FoodCostSlot");
+        slotGO.transform.SetParent(slotParent.transform, false);
+
+        var slotRT           = slotGO.AddComponent<RectTransform>();
+        slotRT.sizeDelta     = new Vector2(48f, 32f);
+
+        var slotHLG              = slotGO.AddComponent<HorizontalLayoutGroup>();
+        slotHLG.childAlignment        = TextAnchor.MiddleLeft;
+        slotHLG.spacing               = 3f;
+        slotHLG.childForceExpandWidth = false;
+        slotHLG.childForceExpandHeight= false;
+        slotHLG.childControlWidth     = false;
+        slotHLG.childControlHeight    = false;
+
+        // ── CornIcon (placeholder — kéo sprite vào sau) ──────────────────────
+        var iconGO      = new GameObject("CornIcon");
+        iconGO.transform.SetParent(slotGO.transform, false);
+        var iconRT      = iconGO.AddComponent<RectTransform>();
+        iconRT.sizeDelta = new Vector2(18f, 18f);
+        var iconImg     = iconGO.AddComponent<Image>();
+        iconImg.preserveAspect = true;
+        iconImg.color   = Color.white;
+        iconImg.enabled = false;    // tắt cho đến khi có sprite
+
+        // ── Label ─────────────────────────────────────────────────────────────
+        var labelGO     = new GameObject("Label");
+        labelGO.transform.SetParent(slotGO.transform, false);
+        var labelRT     = labelGO.AddComponent<RectTransform>();
+        labelRT.sizeDelta = new Vector2(26f, 28f);
+        var tmp         = labelGO.AddComponent<TextMeshProUGUI>();
+        tmp.text        = "1";
+        tmp.fontSize    = 12f;
+        tmp.fontStyle   = FontStyles.Bold;
+        tmp.alignment   = TextAlignmentOptions.MidlineLeft;
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
+        tmp.color       = Color.white;
+
+        EditorUtility.SetDirty(entry.gameObject);
+
+        Debug.Log("[FoodCost] Xong! " +
+                  "Kéo sprite corn vào FoodCostSlot > CornIcon > Image > Source Image, " +
+                  "bật lại Image.enabled, rồi Apply prefab.");
+        Selection.activeGameObject = slotGO;
+    }
+
+    [MenuItem("Tools/Shop-Arena Setup/Setup FoodCost Slot in RosterEntry", validate = true)]
+    static bool ValidateSetupFoodCostSlot()
+    {
+        if (Selection.activeGameObject == null) return false;
+        return Selection.activeGameObject.GetComponent<CharacterRosterEntry>() != null
+            || Selection.activeGameObject.GetComponentInParent<CharacterRosterEntry>() != null;
     }
 }

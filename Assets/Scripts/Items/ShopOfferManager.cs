@@ -7,7 +7,7 @@ using UnityEngine;
 // Nếu tier trống → fallback về tier thấp hơn gần nhất.
 //
 // Mua: kiểm tra đủ corn (item.buyCost) → trừ corn → nhét vào PlayerInventory.
-// Reroll: trả rerollCost corn, chạy miễn phí lần đầu (Start).
+// Reroll: lần đầu mỗi wave miễn phí. Lần kế tiếp tốn rerollBaseCost, +1 mỗi lần bấm thêm.
 public class ShopOfferManager : MonoBehaviour
 {
     public static ShopOfferManager Instance { get; private set; }
@@ -17,8 +17,10 @@ public class ShopOfferManager : MonoBehaviour
 
     [SerializeField] List<ItemData> itemPool;
 
-    [Tooltip("Corn cần để reroll (lần reroll đầu tiên lúc Start miễn phí)")]
-    [SerializeField] int rerollCost = 1;
+    [Tooltip("Corn cho lần reroll đầu tiên (bấm nút). Mỗi lần bấm thêm +1.")]
+    [SerializeField] int rerollBaseCost = 4;
+
+    int _rerollCost; // cost hiện tại, reset mỗi wave
 
     [Header("Rarity Weights")]
     [Tooltip("Xác suất tương đối (không cần tổng = 100). Thứ tự: Common, Uncommon, Rare, Epic, Legendary")]
@@ -37,8 +39,28 @@ public class ShopOfferManager : MonoBehaviour
         RebuildRarityCache();
     }
 
+    void OnEnable()
+    {
+        GameManager.OnGameStateChanged += OnStateChanged;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= OnStateChanged;
+    }
+
+    void OnStateChanged(GameState state)
+    {
+        if (state == GameState.Shop)
+        {
+            _rerollCost = rerollBaseCost; // reset mỗi wave
+            RerollFree();
+        }
+    }
+
     void Start()
     {
+        _rerollCost = rerollBaseCost;
         RerollFree(); // lần đầu không tốn corn
     }
 
@@ -60,11 +82,15 @@ public class ShopOfferManager : MonoBehaviour
     // Reroll có tốn corn — gọi từ code
     public bool Reroll()
     {
-        if (PlayerWallet.Instance != null && !PlayerWallet.Instance.TrySpend(rerollCost))
+        if (PlayerWallet.Instance != null && !PlayerWallet.Instance.TrySpend(_rerollCost))
             return false;
+        _rerollCost++; // mỗi lần bấm tăng 1
         RerollFree();
         return true;
     }
+
+    // Cost reroll hiện tại (để UI hiện số)
+    public int CurrentRerollCost => _rerollCost;
 
     void RerollFree()
     {

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: QuickFeather 1
+  m_Name: GrowthVial
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Key
-  icon: {fileID: 21300000, guid: 0af7129050701de45bcd4f357b3d1f30, type: 3}
+  displayName: Growth Vial
+  icon: {fileID: 21300000, guid: 1837391e725d659489d6b122a006204c, type: 3}
   itemType: 1
   rarity: 0
-  description: all ally gain 50% moverment speed this round
-  buyCost: 3
-  sellValue: 2
+  description: <color=#4CAF50>+8%</color> <sprite name="stat_hp">
+  buyCost: 2
+  sellValue: 1
   characterPrefab: {fileID: 0}
   targetType: 0
   targetCharacterType: {fileID: 0}
@@ -26,5 +26,10 @@ MonoBehaviour:
     damage: 0
     moveSpeed: 0
     maxHP: 0
-    attackInterval: 0
+    attackSpeed: 0
     attackRange: 0
+    foodCost: 0
+    damagePercent: 0
+    moveSpeedPercent: 0
+    maxHPPercent: 0.08
+    attackSpeedPercent: 0

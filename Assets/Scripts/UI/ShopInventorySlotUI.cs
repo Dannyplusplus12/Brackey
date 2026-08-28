@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-// 1 trong 4 ô Inventory lúc Shop: click 1 ô rồi click ô khác để đổi vị trí (swap),
-// click phải để bán. Lúc Arena dùng ArenaHotbarSlotUI riêng (kích hoạt bằng phím/click) vì
-// cách tương tác khác hẳn - 2 script cùng đọc/ghi chung PlayerInventory.
+// 1 trong 4 ô Inventory — dùng chung cho Shop lẫn Arena.
+// Shop: left click chọn→swap, right click bán.
+// Arena: left click kích hoạt item Active.
 public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlot
 {
     [SerializeField] int   slotIndex;
@@ -35,8 +35,9 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
     {
         ItemData item = PlayerInventory.Instance != null ? PlayerInventory.Instance.GetSlot(slotIndex) : null;
 
-        icon.sprite  = item != null ? item.icon : null;
-        icon.enabled = item != null;
+        // Icon — disabled nếu không có sprite để tránh hiện hình trắng
+        icon.sprite  = item?.icon;
+        icon.enabled = item != null && item.icon != null;
 
         if (cardBg != null)
         {
@@ -65,6 +66,16 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
     {
         if (PlayerInventory.Instance == null) return;
 
+        // Arena: left click = kích hoạt, right click bỏ qua
+        bool inArena = GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Arena;
+        if (inArena)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+                PlayerInventory.Instance.ActivateSlot(slotIndex);
+            return;
+        }
+
+        // Shop: right click = bán, left click = swap
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             PlayerInventory.Instance.SellSlot(slotIndex);

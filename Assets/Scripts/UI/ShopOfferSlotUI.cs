@@ -30,9 +30,9 @@ public class ShopOfferSlotUI : MonoBehaviour, IItemSlot
     {
         ItemData item = ShopOfferManager.Instance != null ? ShopOfferManager.Instance.GetOffer(slotIndex) : null;
 
-        // Icon
-        icon.sprite  = item != null ? item.icon : null;
-        icon.enabled = item != null;
+        // Icon — disabled nếu không có sprite để tránh hiện hình trắng
+        icon.sprite  = item?.icon;
+        icon.enabled = item != null && item.icon != null;
 
         // Card background
         if (cardBg != null)

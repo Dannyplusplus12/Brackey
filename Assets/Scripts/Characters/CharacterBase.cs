@@ -43,12 +43,53 @@ public abstract class CharacterBase : MonoBehaviour
     // Dùng trong subclass để trigger skill mỗi X đòn.
     protected int attackCount { get; private set; }
 
-    // ── Effective stats = base + GlobalStatBonus ────────────────────────────
-    protected float EffectiveDamage        => stats.damage        + GlobalStatBonus.damage        + GlobalStatBonus.GetTypeBonus(stats).damage;
-    protected float EffectiveMoveSpeed     => stats.moveSpeed     + GlobalStatBonus.moveSpeed     + GlobalStatBonus.GetTypeBonus(stats).moveSpeed;
-    protected float EffectiveMaxHP         => stats.maxHP         + GlobalStatBonus.maxHP         + GlobalStatBonus.GetTypeBonus(stats).maxHP;
-    protected float EffectiveAttackInterval=> stats.attackInterval+ GlobalStatBonus.attackInterval+ GlobalStatBonus.GetTypeBonus(stats).attackInterval;
-    protected float EffectiveAttackRange   => stats.attackRange   + GlobalStatBonus.attackRange   + GlobalStatBonus.GetTypeBonus(stats).attackRange;
+    // ── Effective stats = (base + flat) * (1 + percent) ────────────────────
+    // flat   = GlobalStatBonus + perType flat
+    // percent= GlobalStatBonus + perType percent (stack cộng: 2×+10% = +20%)
+    protected float EffectiveDamage
+    {
+        get {
+            var t = GlobalStatBonus.GetTypeBonus(stats);
+            float flat = stats.damage + GlobalStatBonus.damage + t.damage;
+            float pct  = GlobalStatBonus.damagePercent + t.damagePercent;
+            return flat * (1f + pct);
+        }
+    }
+    protected float EffectiveMoveSpeed
+    {
+        get {
+            var t = GlobalStatBonus.GetTypeBonus(stats);
+            float flat = stats.moveSpeed + GlobalStatBonus.moveSpeed + t.moveSpeed;
+            float pct  = GlobalStatBonus.moveSpeedPercent + t.moveSpeedPercent;
+            return flat * (1f + pct);
+        }
+    }
+    protected float EffectiveMaxHP
+    {
+        get {
+            var t = GlobalStatBonus.GetTypeBonus(stats);
+            float flat = stats.maxHP + GlobalStatBonus.maxHP + t.maxHP;
+            float pct  = GlobalStatBonus.maxHPPercent + t.maxHPPercent;
+            return flat * (1f + pct);
+        }
+    }
+    // Tổng APS = (base + flat) * (1 + percent)
+    protected float EffectiveAPS
+    {
+        get {
+            var t = GlobalStatBonus.GetTypeBonus(stats);
+            float flat = stats.attackSpeed + GlobalStatBonus.attackSpeed + t.attackSpeed;
+            float pct  = GlobalStatBonus.attackSpeedPercent + t.attackSpeedPercent;
+            return flat * (1f + pct);
+        }
+    }
+    // Interval (giây) dùng nội bộ — clamp min 0.05s (tối đa 20 APS)
+    protected float EffectiveAttackInterval => 1f / Mathf.Max(0.05f, EffectiveAPS);
+    protected float EffectiveAttackRange    => stats.attackRange + GlobalStatBonus.attackRange + GlobalStatBonus.GetTypeBonus(stats).attackRange;
+    // Public: UI và FeedingManager đọc chi phí ăn thực tế (có thể bị item thay đổi)
+    public  int    EffectiveFoodCost       => Mathf.Max(0, stats.foodRequiredPerRound
+                                                + (int)GlobalStatBonus.foodCost
+                                                + (int)GlobalStatBonus.GetTypeBonus(stats).foodCost);
 
     // Tâm thân nhân vật (giữa chân và đầu) — dùng cho mọi tính toán distance/separation
     // thay vì transform.position (chân) để khớp với vòng tròn Gizmos và cảm giác gameplay.

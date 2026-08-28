@@ -52,13 +52,13 @@ public static class StatBarSetupTool
         // CharacterStatBar script trên StatsRow
         var statBarScript = rowGO.AddComponent<CharacterStatBar>();
 
-        // ── Tạo 4 slot và auto-wire ───────────────────────────────────────────
-        string[] names = { "SlotHP", "SlotDMG", "SlotSPD", "SlotAngry" };
+        // ── Tạo 5 slot và auto-wire (0=HP, 1=DMG, 2=SPD, 3=ANGRY, 4=FOOD) ────
+        string[] names = { "SlotHP", "SlotDMG", "SlotSPD", "SlotAngry", "SlotFood" };
         var so = new SerializedObject(statBarScript);
         var slotsArr = so.FindProperty("slots");
-        slotsArr.arraySize = 4;
+        slotsArr.arraySize = 5;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
         {
             var slotGO  = CreateSlot(rowGO.transform, names[i]);
             var iconImg = slotGO.transform.Find("Icon").GetComponent<Image>();
@@ -78,7 +78,8 @@ public static class StatBarSetupTool
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(tooltipPanel.scene);
 
         string loc = panelBgT != null ? "PanelBg" : "TooltipPanel";
-        Debug.Log($"[StatBar] Xong! StatsRow đã nằm trong {loc}. Gán icon sprites vào CharacterStatBar trong Inspector.");
+        Debug.Log($"[StatBar] Xong! StatsRow (5 slots: HP/DMG/SPD/ANGRY/FOOD) đã nằm trong {loc}.\n" +
+                  "Gán icon sprites (iconHP/iconDamage/iconSpeed/iconAngry/iconFood) vào CharacterStatBar trong Inspector.");
         Selection.activeGameObject = rowGO;
     }
 

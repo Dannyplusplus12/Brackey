@@ -38,12 +38,28 @@ public class CharacterRosterEntry : MonoBehaviour,
     GameObject placeholder;
     Vector2 dragOffset;
 
+    [Header("Auto-scroll khi drag")]
+    [SerializeField] float autoScrollZone  = 70f;   // screen px từ mép viewport
+    [SerializeField] float autoScrollSpeed = 0.8f;  // normalised units / giây
+
+    ScrollRect    _scrollRect;   // cached: dùng cho IScrollHandler + auto-scroll
+    RectTransform _viewportRT;   // bounds để detect vùng edge
+    bool          _isDragging;
+    Coroutine     _autoScrollCR;
+
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+        // Cache scroll rect ngay lúc Awake (trước khi bị reparent khi drag)
+        _scrollRect = GetComponentInParent<ScrollRect>();
+        if (_scrollRect != null)
+            _viewportRT = _scrollRect.viewport != null
+                ? _scrollRect.viewport
+                : _scrollRect.GetComponent<RectTransform>();
     }
 
     void OnEnable()  => FeedingManager.OnFeedResult += HandleFeedResult;
@@ -196,6 +212,14 @@ public class CharacterRosterEntry : MonoBehaviour,
         rootCanvas    = GetComponentInParent<Canvas>().rootCanvas;
         contentParent = transform.parent;
 
+        // Bắt đầu auto-scroll (phải capture trước khi reparent)
+        _isDragging = true;
+        if (_scrollRect != null)
+        {
+            if (_autoScrollCR != null) StopCoroutine(_autoScrollCR);
+            _autoScrollCR = StartCoroutine(AutoScrollWhileDragging());
+        }
+
         placeholder = new GameObject("_DragPlaceholder", typeof(RectTransform));
         placeholder.transform.SetParent(contentParent, false);
         placeholder.transform.SetSiblingIndex(transform.GetSiblingIndex());
@@ -234,6 +258,12 @@ public class CharacterRosterEntry : MonoBehaviour,
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        _isDragging = false;
+        if (_autoScrollCR != null) { StopCoroutine(_autoScrollCR); _autoScrollCR = null; }
+        // Reset velocity do auto-scroll tích lũy khi set normalizedPosition trực tiếp,
+        // tránh inertia lạ sau khi drag xong làm scroll wheel bị lệch.
+        _scrollRect?.StopMovement();
+
         transform.SetParent(contentParent, false);
         transform.SetSiblingIndex(placeholder.transform.GetSiblingIndex());
 
@@ -242,6 +272,49 @@ public class CharacterRosterEntry : MonoBehaviour,
 
         canvasGroup.blocksRaycasts = true;
         canvasGroup.alpha          = 1f;
+    }
+
+    // ── Auto-scroll khi drag gần mép viewport ─────────────────────────
+    IEnumerator AutoScrollWhileDragging()
+    {
+        while (_isDragging && _scrollRect != null && _viewportRT != null)
+        {
+            Vector3[] corners = new Vector3[4];
+            _viewportRT.GetWorldCorners(corners);
+            // corners[0]=BL, [1]=TL, [2]=TR, [3]=BR (screen space for Overlay canvas)
+            float top    = corners[1].y;
+            float bottom = corners[0].y;
+
+            float mouseY = Input.mousePosition.y;
+            float delta  = 0f;
+
+            if (mouseY < top && mouseY > bottom)   // pointer ở trong viewport
+            {
+                float fromTop    = top    - mouseY;
+                float fromBottom = mouseY - bottom;
+
+                if (fromTop < autoScrollZone)
+                {
+                    // Gần mép trên → scroll lên (normalised tăng)
+                    delta = +(1f - fromTop / autoScrollZone);
+                }
+                else if (fromBottom < autoScrollZone)
+                {
+                    // Gần mép dưới → scroll xuống (normalised giảm)
+                    delta = -(1f - fromBottom / autoScrollZone);
+                }
+            }
+
+            if (Mathf.Abs(delta) > 0.001f)
+            {
+                _scrollRect.verticalNormalizedPosition = Mathf.Clamp01(
+                    _scrollRect.verticalNormalizedPosition + delta * autoScrollSpeed * Time.unscaledDeltaTime
+                );
+            }
+
+            yield return null;
+        }
+        _autoScrollCR = null;
     }
 
     int GetNearestSlotIndex(Vector2 screenPos)
