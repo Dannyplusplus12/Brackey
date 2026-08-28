@@ -699,6 +699,172 @@ public static class GameUISetupTool
                   "  3. Đảm bảo ShopArenaCanvasController đang quản lý ShopRoot visibility");
     }
 
+    // =========================================================
+    // ITEM CARD SLOT SETUP
+    // =========================================================
+
+    [MenuItem("Tools/Shop-Arena Setup/Setup Item Card Slots")]
+    public static void SetupItemCardSlots()
+    {
+        int fixed_ = 0;
+
+        // ── ShopOfferSlotUI ───────────────────────────────────────────────────
+        foreach (var slot in Object.FindObjectsByType<ShopOfferSlotUI>(FindObjectsSortMode.None))
+            if (EnsureCardBg(slot.gameObject, slot, "cardBg")) fixed_++;
+
+        // ── ShopInventorySlotUI ───────────────────────────────────────────────
+        foreach (var slot in Object.FindObjectsByType<ShopInventorySlotUI>(FindObjectsSortMode.None))
+            if (EnsureCardBg(slot.gameObject, slot, "cardBg")) fixed_++;
+
+        // Lưu scene
+        if (fixed_ > 0)
+        {
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        }
+
+        Debug.Log($"[CardSlotSetup] Xong — đã xử lý {fixed_} slot.\n\n" +
+                  "Việc còn lại (gán tay trong Inspector):\n" +
+                  "  Chọn từng slot → kéo sprite card vào:\n" +
+                  "    Card Active    → sprite item 1-lần\n" +
+                  "    Card Stat Boost→ sprite item chỉ số\n" +
+                  "    Card Character → sprite nhân vật\n" +
+                  "    Card Empty     → để trống hoặc sprite ô rỗng\n\n" +
+                  "CardBg đã được đặt trước Icon trong hierarchy (render phía dưới).");
+    }
+
+    // Tạo CardBg Image con, đặt ở sibling 0 (dưới cùng), wire vào field 'fieldName'.
+    // Sau đó tìm field 'icon' và đảm bảo nó ở sibling cao hơn CardBg.
+    // Trả về true nếu có thay đổi.
+    static bool EnsureCardBg(GameObject slotGO, Component target, string fieldName)
+    {
+        const string cardBgName = "CardBg";
+        bool dirty = false;
+
+        // ── 1. Tạo hoặc tìm CardBg ───────────────────────────────────────────
+        Transform existing = slotGO.transform.Find(cardBgName);
+        GameObject cardBgGO;
+        if (existing != null)
+        {
+            cardBgGO = existing.gameObject;
+        }
+        else
+        {
+            cardBgGO = new GameObject(cardBgName, typeof(RectTransform), typeof(Image));
+            Undo.RegisterCreatedObjectUndo(cardBgGO, "Create CardBg");
+            cardBgGO.transform.SetParent(slotGO.transform, false);
+            dirty = true;
+        }
+
+        // Đặt CardBg ở index 0 — render SAU CÙNG (dưới cùng)
+        cardBgGO.transform.SetSiblingIndex(0);
+
+        // Stretch full parent
+        RectTransform rt = cardBgGO.GetComponent<RectTransform>();
+        Undo.RecordObject(rt, "Setup CardBg RectTransform");
+        rt.anchorMin  = Vector2.zero;
+        rt.anchorMax  = Vector2.one;
+        rt.offsetMin  = Vector2.zero;
+        rt.offsetMax  = Vector2.zero;
+        rt.localScale = Vector3.one;
+
+        // Image: raycastTarget tắt để không block click trên slot
+        Image img = cardBgGO.GetComponent<Image>();
+        Undo.RecordObject(img, "Setup CardBg Image");
+        img.raycastTarget  = false;
+        img.preserveAspect = false;
+        img.color          = Color.white;
+
+        // ── 2. Wire field cardBg ─────────────────────────────────────────────
+        SerializedObject   so   = new SerializedObject(target);
+        SerializedProperty prop = so.FindProperty(fieldName);
+        if (prop != null && prop.objectReferenceValue == null)
+        {
+            prop.objectReferenceValue = img;
+            so.ApplyModifiedProperties();
+            dirty = true;
+        }
+
+        // ── 3. Đảm bảo Icon child nằm SAU CardBg (sibling index cao hơn) ────
+        //       Nếu Icon là Image trên chính slotGO (không phải child) thì bỏ qua.
+        SerializedProperty iconProp = so.FindProperty("icon");
+        if (iconProp != null && iconProp.objectReferenceValue is Image iconImg)
+        {
+            if (iconImg.gameObject != slotGO               // icon không phải root GO
+                && iconImg.transform.parent == slotGO.transform) // icon là direct child
+            {
+                int cardIdx = cardBgGO.transform.GetSiblingIndex();
+                int iconIdx = iconImg.transform.GetSiblingIndex();
+                if (iconIdx <= cardIdx)
+                {
+                    Undo.RecordObject(iconImg.transform, "Reorder Icon above CardBg");
+                    iconImg.transform.SetSiblingIndex(cardIdx + 1);
+                    dirty = true;
+                }
+            }
+            else if (iconImg.gameObject == slotGO)
+            {
+                // Icon là Image trên root GO → children luôn đè lên parent
+                // Cần tạo Icon child riêng và update field
+                EnsureIconChild(slotGO, target, so, iconImg);
+                dirty = true;
+            }
+        }
+
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(slotGO);
+        return dirty;
+    }
+
+    // Tạo child "Icon" Image, copy settings từ rootImage, update field 'icon' trên component.
+    static void EnsureIconChild(GameObject slotGO, Component target, SerializedObject so, Image rootImage)
+    {
+        Transform existingIcon = slotGO.transform.Find("Icon");
+        GameObject iconGO;
+
+        if (existingIcon != null)
+        {
+            iconGO = existingIcon.gameObject;
+        }
+        else
+        {
+            iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            Undo.RegisterCreatedObjectUndo(iconGO, "Create Icon child");
+            iconGO.transform.SetParent(slotGO.transform, false);
+        }
+
+        // Đặt Icon SAU CardBg
+        iconGO.transform.SetAsLastSibling();
+
+        // Copy sprite từ root image sang
+        Image iconImg          = iconGO.GetComponent<Image>();
+        iconImg.sprite         = rootImage.sprite;
+        iconImg.color          = rootImage.color;
+        iconImg.preserveAspect = true;
+        iconImg.raycastTarget  = false;
+
+        // Stretch full parent
+        RectTransform iconRt = iconGO.GetComponent<RectTransform>();
+        iconRt.anchorMin  = Vector2.zero;
+        iconRt.anchorMax  = Vector2.one;
+        iconRt.offsetMin  = new Vector2(8f, 8f);   // padding nhỏ để icon nhỏ hơn card
+        iconRt.offsetMax  = new Vector2(-8f, -8f);
+        iconRt.localScale = Vector3.one;
+
+        // Xoá Image trên root (tránh chồng lên)
+        Undo.RecordObject(rootImage, "Clear root Image sprite");
+        rootImage.sprite  = null;
+        rootImage.color   = new Color(0, 0, 0, 0); // transparent
+
+        // Update field 'icon' trỏ vào child mới
+        SerializedProperty iconProp = so.FindProperty("icon");
+        if (iconProp != null)
+            iconProp.objectReferenceValue = iconImg;
+
+        Debug.Log($"[CardSlotSetup] {slotGO.name}: Icon Image đã được chuyển sang child 'Icon' " +
+                  $"(root Image được transparent). Kiểm tra lại sprite assignment nếu cần.");
+    }
+
     // ---------- Helpers ----------
 
     static void EnsureFolder(string folderPath)

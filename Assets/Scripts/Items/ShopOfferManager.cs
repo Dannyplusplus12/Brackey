@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Random 4 item từ pool để bán trong Shop.
+// Roll theo rarity: trước tiên chọn rarity tier (dựa trên rarityWeights),
+// rồi pick ngẫu nhiên 1 item trong tier đó.
+// Nếu tier trống → fallback về tier thấp hơn gần nhất.
+//
 // Mua: kiểm tra đủ corn (item.buyCost) → trừ corn → nhét vào PlayerInventory.
 // Reroll: trả rerollCost corn, chạy miễn phí lần đầu (Start).
 public class ShopOfferManager : MonoBehaviour
@@ -16,13 +20,21 @@ public class ShopOfferManager : MonoBehaviour
     [Tooltip("Corn cần để reroll (lần reroll đầu tiên lúc Start miễn phí)")]
     [SerializeField] int rerollCost = 1;
 
+    [Header("Rarity Weights")]
+    [Tooltip("Xác suất tương đối (không cần tổng = 100). Thứ tự: Common, Uncommon, Rare, Epic, Legendary")]
+    [SerializeField] float[] rarityWeights = { 60f, 25f, 10f, 4f, 1f };
+
     readonly ItemData[] currentOffers = new ItemData[OfferCount];
+
+    // Cache theo rarity để roll nhanh
+    readonly List<ItemData>[] poolByRarity = new List<ItemData>[5];
 
     public ItemData GetOffer(int index) => currentOffers[index];
 
     void Awake()
     {
         Instance = this;
+        RebuildRarityCache();
     }
 
     void Start()
@@ -30,7 +42,22 @@ public class ShopOfferManager : MonoBehaviour
         RerollFree(); // lần đầu không tốn corn
     }
 
-    // Reroll có tốn corn — gọi từ nút UI
+    void RebuildRarityCache()
+    {
+        for (int i = 0; i < poolByRarity.Length; i++)
+            poolByRarity[i] = new List<ItemData>();
+
+        foreach (var item in itemPool)
+            if (item != null)
+                poolByRarity[(int)item.rarity].Add(item);
+    }
+
+    // ── Roll ─────────────────────────────────────────────────────────────────
+
+    // Gọi từ Button OnClick trong Inspector
+    public void RerollButton() => Reroll();
+
+    // Reroll có tốn corn — gọi từ code
     public bool Reroll()
     {
         if (PlayerWallet.Instance != null && !PlayerWallet.Instance.TrySpend(rerollCost))
@@ -42,18 +69,56 @@ public class ShopOfferManager : MonoBehaviour
     void RerollFree()
     {
         for (int i = 0; i < OfferCount; i++)
-            currentOffers[i] = itemPool.Count > 0 ? itemPool[Random.Range(0, itemPool.Count)] : null;
+            currentOffers[i] = PickRandomItem();
         OnOffersChanged?.Invoke();
     }
 
+    ItemData PickRandomItem()
+    {
+        if (itemPool.Count == 0) return null;
+
+        // Bước 1: chọn rarity tier theo weight
+        int tier = RollRarityTier();
+
+        // Bước 2: tìm item trong tier đó, fallback xuống thấp hơn nếu trống
+        for (int t = tier; t >= 0; t--)
+        {
+            var bucket = poolByRarity[t];
+            if (bucket.Count > 0)
+                return bucket[Random.Range(0, bucket.Count)];
+        }
+
+        // Fallback toàn bộ pool (đề phòng tier cao hơn cũng trống)
+        return itemPool[Random.Range(0, itemPool.Count)];
+    }
+
+    int RollRarityTier()
+    {
+        // Đảm bảo mảng đủ 5 phần tử
+        int len = Mathf.Min(rarityWeights.Length, 5);
+        float total = 0f;
+        for (int i = 0; i < len; i++) total += Mathf.Max(0f, rarityWeights[i]);
+
+        if (total <= 0f) return 0; // tất cả weight = 0 → Common
+
+        float roll = Random.Range(0f, total);
+        float acc = 0f;
+        for (int i = 0; i < len; i++)
+        {
+            acc += Mathf.Max(0f, rarityWeights[i]);
+            if (roll < acc) return i;
+        }
+        return len - 1;
+    }
+
+    // ── Buy ──────────────────────────────────────────────────────────────────
+
     // Trả về true nếu mua thành công.
-    // Kiểm tra: đủ corn + còn slot (nếu Active).
     public bool BuyOffer(int index)
     {
         ItemData item = currentOffers[index];
         if (item == null || PlayerInventory.Instance == null) return false;
 
-        // Kiểm tra corn trước khi làm gì
         if (PlayerWallet.Instance != null && !PlayerWallet.Instance.TrySpend(item.buyCost))
             return false;
 
@@ -63,16 +128,13 @@ public class ShopOfferManager : MonoBehaviour
             var spawned = CharacterSpawner.Spawn(item.characterPrefab);
             bought = spawned != null;
             if (!bought)
-                PlayerWallet.Instance?.Earn(item.buyCost); // hoàn corn nếu spawn lỗi
+                PlayerWallet.Instance?.Earn(item.buyCost);
         }
         else if (item.itemType == ItemType.Active)
         {
             bought = PlayerInventory.Instance.TryAddItem(item);
             if (!bought)
-            {
-                // Hoàn lại corn nếu slot đầy
                 PlayerWallet.Instance?.Earn(item.buyCost);
-            }
         }
         else
         {

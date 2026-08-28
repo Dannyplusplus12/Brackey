@@ -61,7 +61,7 @@ public class CharacterFeedPopup : MonoBehaviour
         tmp.fontSize             = fontSize;
         tmp.fontStyle            = FontStyles.Bold;
         tmp.alignment            = TextAlignmentOptions.Left;
-        tmp.enableWordWrapping   = false;
+        tmp.textWrappingMode     = TMPro.TextWrappingModes.NoWrap;
         tmp.overflowMode         = TextOverflowModes.Overflow;
         tmp.sortingOrder         = sortingOrder;
 

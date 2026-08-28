@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
+  m_Name: Viking_ItemData
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  displayName: VIKING
+  icon: {fileID: 21300000, guid: 7a4783cbae19a224a83a250df5ec68c8, type: 3}
+  itemType: 2
+  rarity: 1
+  description: '<b>Viking</b>
+
+    "Im a viking. These tuff is easy"
+
+
+    <color=#E82020>+2</color>
+    <sprite name="stat_angry"> when hungy
+
+    <color=#E82020>+1</color> <sprite
+    name="stat_angry"> when 1 ally die'
+  buyCost: 3
+  sellValue: 1
+  characterPrefab: {fileID: 4535559801046744120, guid: 67da874244924ea43b701364e2b06ad3, type: 3}
+  targetType: 0
+  targetCharacterType: {fileID: 0}
+  statDelta:
+    damage: 10
+    moveSpeed: 20
+    maxHP: 0
+    attackInterval: 0
+    attackRange: 0

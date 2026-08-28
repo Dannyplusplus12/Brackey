@@ -48,4 +48,39 @@ public struct TooltipData
             gap             = gap,
         };
     }
+
+    // Hover trên roster entry — tên + description từ CharacterStats; StatBar lo phần số
+    public static TooltipData FromCharacterLive(
+        CharacterBase    character,
+        RectTransform    source,
+        TooltipDirection direction = TooltipDirection.Top,
+        bool             alignEnd  = false,
+        float            gap       = 6f)
+    {
+        if (character == null) return default;
+        var s = character.Stats;
+        string desc = string.IsNullOrEmpty(s.description)
+            ? $"<b>{s.name}</b>"
+            : $"<b>{s.name}</b>\n{s.description}";
+        return new TooltipData { richDescription = desc, sourceRect = source,
+            direction = direction, alignEnd = alignEnd, gap = gap };
+    }
+
+    // Hover trên shop item character — tên + description từ CharacterStats; StatBar lo phần số
+    public static TooltipData FromCharacterStats(
+        CharacterStats   stats,
+        RectTransform    source,
+        TooltipDirection direction = TooltipDirection.Top,
+        bool             alignEnd  = false,
+        float            gap       = 6f)
+    {
+        if (stats == null) return default;
+        string desc = string.IsNullOrEmpty(stats.description)
+            ? $"<b>{stats.name}</b>"
+            : $"<b>{stats.name}</b>\n{stats.description}";
+        return new TooltipData { richDescription = desc, sourceRect = source,
+            direction = direction, alignEnd = alignEnd, gap = gap };
+    }
+
+    static string Fmt(float v) => (v % 1f == 0f) ? v.ToString("0") : v.ToString("0.#");
 }

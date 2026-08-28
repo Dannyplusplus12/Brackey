@@ -68,6 +68,10 @@ public class CharacterStats : ScriptableObject
     [Tooltip("Corn player nhận khi giết character này (chỉ có ý nghĩa với Enemy)")]
     public int killReward = 1;
 
+    [Header("Description (hiện trong tooltip)")]
+    [TextArea(2, 4)]
+    public string description;
+
     [Header("Sprites")]
     public Sprite idleSprite;
     public Sprite attackSprite;

@@ -38,10 +38,28 @@ public class ItemTooltipTrigger : MonoBehaviour,
     {
         var item = GetItem();
         if (item == null) return;
+
+        // Character item → đọc description từ CharacterStats (1 nơi duy nhất)
+        if (item.itemType == ItemType.Character && item.characterPrefab != null)
+        {
+            var stats = item.characterPrefab.GetComponent<CharacterBase>()?.Stats;
+            if (stats != null)
+            {
+                CharacterStatBar.Instance?.ShowBase(stats);
+                TooltipSystem.Show(TooltipData.FromCharacterStats(stats, _rect, direction, alignEnd, gap));
+            }
+            return;
+        }
+
+        // StatBoost / Active → hiện description như cũ
         TooltipSystem.Show(TooltipData.FromItem(item, _rect, direction, alignEnd, gap));
     }
 
-    public void OnPointerExit(PointerEventData eventData) => TooltipSystem.Hide();
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        TooltipSystem.Hide();
+        CharacterStatBar.Instance?.Hide();
+    }
 
     ItemData GetItem() => _slot != null ? _slot.GetCurrentItem() : staticItem;
 }

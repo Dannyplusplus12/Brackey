@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Tạo 1 entry cho mỗi nhân vật phe Ally đang có trong scene, gắn vào Content của ScrollView.
-// Quét 1 lần lúc Start vì nhân vật sống xuyên suốt Shop/Arena (không despawn giữa 2 state).
-// GetFeedOrder() trả về danh sách character theo thứ tự UI hiện tại (dùng cho FeedingManager).
+// Tạo 1 entry cho mỗi nhân vật phe Ally.
+// - Lúc Start: quét toàn scene (char có sẵn từ đầu).
+// - Sau đó: subscribe CharacterSpawner.OnCharacterSpawned → thêm entry lên đầu roster.
+// GetFeedOrder() trả về danh sách character theo thứ tự UI (dùng cho FeedingManager).
 public class CharacterRosterUI : MonoBehaviour
 {
     public static CharacterRosterUI Instance { get; private set; }
@@ -16,15 +17,31 @@ public class CharacterRosterUI : MonoBehaviour
         Instance = this;
     }
 
+    void OnEnable()  => CharacterSpawner.OnCharacterSpawned += HandleCharacterSpawned;
+    void OnDisable() => CharacterSpawner.OnCharacterSpawned -= HandleCharacterSpawned;
+
     void Start()
     {
+        // Char có sẵn trong scene khi game start (đặt tay trong editor)
         foreach (CharacterBase character in FindObjectsByType<CharacterBase>(FindObjectsSortMode.None))
         {
             if (character.Faction != Faction.Ally) continue;
-
-            CharacterRosterEntry entry = Instantiate(entryPrefab, content);
-            entry.Bind(character);
+            AddEntry(character, atTop: false);
         }
+    }
+
+    // Gọi từ OnCharacterSpawned — char mới lên đầu roster
+    void HandleCharacterSpawned(CharacterBase character)
+    {
+        if (character.Faction != Faction.Ally) return;
+        AddEntry(character, atTop: true);
+    }
+
+    void AddEntry(CharacterBase character, bool atTop)
+    {
+        var entry = Instantiate(entryPrefab, content);
+        entry.Bind(character);
+        if (atTop) entry.transform.SetAsFirstSibling();
     }
 
     // Trả về danh sách character theo thứ tự entry trong Content (trên → dưới).

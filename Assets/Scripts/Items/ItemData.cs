@@ -1,5 +1,14 @@
 using UnityEngine;
 
+public enum ItemRarity
+{
+    Common    = 0,
+    Uncommon  = 1,
+    Rare      = 2,
+    Epic      = 3,
+    Legendary = 4,
+}
+
 // Loại item theo đối tượng áp dụng — dùng cho StatBoost và Active stat items.
 // SpecialCondition items không cần field này (logic hoàn toàn custom trong subclass/handler).
 public enum ItemTargetType
@@ -15,6 +24,7 @@ public class ItemData : ScriptableObject
     public string displayName;
     public Sprite icon;
     public ItemType itemType;
+    public ItemRarity rarity = ItemRarity.Common;
 
     [TextArea]
     [Tooltip("Dùng cho box thông tin khi hover (chưa làm UI hover)")]

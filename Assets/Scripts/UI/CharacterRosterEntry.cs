@@ -7,7 +7,8 @@ using TMPro;
 // 1 card trong roster: portrait + angry bar dọc (bên phải) + HP bar ngang (bên dưới).
 // Hỗ trợ kéo-thả để đổi thứ tự trong danh sách.
 public class CharacterRosterEntry : MonoBehaviour,
-    IBeginDragHandler, IDragHandler, IEndDragHandler
+    IBeginDragHandler, IDragHandler, IEndDragHandler,
+    IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] Image portraitImage;
 
@@ -166,6 +167,26 @@ public class CharacterRosterEntry : MonoBehaviour,
         float pct = max > 0f ? Mathf.Clamp01(target.CurrentHP / max) : 1f;
         hpFillRT.anchorMax = new Vector2(pct, 1f);
         hpFillRT.offsetMax = Vector2.zero;
+    }
+
+    // ── Hover → StatBar ───────────────────────────────────────────────
+    [Header("Tooltip Position")]
+    [SerializeField] TooltipDirection tooltipDirection = TooltipDirection.Right;
+    [SerializeField] bool             tooltipAlignEnd  = false;
+    [SerializeField] float            tooltipGap       = 8f;
+
+    public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _)
+    {
+        if (target == null) return;
+        TooltipSystem.ShowImmediate(TooltipData.FromCharacterLive(target, rectTransform,
+            tooltipDirection, tooltipAlignEnd, tooltipGap));
+        CharacterStatBar.Instance?.ShowLive(target);
+    }
+
+    public void OnPointerExit(UnityEngine.EventSystems.PointerEventData _)
+    {
+        TooltipSystem.Hide();
+        CharacterStatBar.Instance?.Hide();
     }
 
     // ── Drag handlers ─────────────────────────────────────────────────

@@ -35,7 +35,9 @@ public abstract class CharacterBase : MonoBehaviour
     public bool IsDragging { get; private set; }
     public CharacterBase CurrentTarget => currentTarget;
     public float DebugEffectiveMoveSpeed => EffectiveMoveSpeed;
-    public float MaxHP => EffectiveMaxHP;
+    public float MaxHP      => EffectiveMaxHP;
+    public float LiveDamage => EffectiveDamage;
+    public float LiveSpeed  => EffectiveMoveSpeed;
 
     // Số đòn đánh đã thực hiện từ đầu wave. Reset mỗi ExitCombat.
     // Dùng trong subclass để trigger skill mỗi X đòn.

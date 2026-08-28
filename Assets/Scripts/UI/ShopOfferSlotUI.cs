@@ -5,8 +5,15 @@ using UnityEngine.UI;
 // ShopOfferManager - gán tay trong Inspector cho từng ô (0-3).
 public class ShopOfferSlotUI : MonoBehaviour, IItemSlot
 {
-    [SerializeField] int slotIndex;
-    [SerializeField] Image icon;
+    [SerializeField] int   slotIndex;
+    [SerializeField] Image cardBg;   // Image nền thẻ — đổi sprite theo ItemType
+    [SerializeField] Image icon;     // Icon item (đặt đè lên cardBg)
+
+    [Header("Card sprites theo loại item")]
+    [SerializeField] Sprite cardActive;
+    [SerializeField] Sprite cardStatBoost;
+    [SerializeField] Sprite cardCharacter;
+    [SerializeField] Sprite cardEmpty;   // (tuỳ chọn) sprite hiện khi ô trống
 
     void OnEnable()
     {
@@ -22,9 +29,34 @@ public class ShopOfferSlotUI : MonoBehaviour, IItemSlot
     void Refresh()
     {
         ItemData item = ShopOfferManager.Instance != null ? ShopOfferManager.Instance.GetOffer(slotIndex) : null;
-        icon.sprite = item != null ? item.icon : null;
+
+        // Icon
+        icon.sprite  = item != null ? item.icon : null;
         icon.enabled = item != null;
+
+        // Card background
+        if (cardBg != null)
+        {
+            if (item != null)
+            {
+                cardBg.sprite  = GetCardSprite(item.itemType);
+                cardBg.enabled = true;
+            }
+            else
+            {
+                cardBg.sprite  = cardEmpty;
+                cardBg.enabled = cardEmpty != null;
+            }
+        }
     }
+
+    Sprite GetCardSprite(ItemType type) => type switch
+    {
+        ItemType.Active    => cardActive,
+        ItemType.StatBoost => cardStatBoost,
+        ItemType.Character => cardCharacter,
+        _                  => null,
+    };
 
     // Gán vào OnClick() của Button trên cùng GameObject trong Inspector.
     public void OnClickBuy()

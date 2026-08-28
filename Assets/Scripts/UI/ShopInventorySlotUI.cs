@@ -7,8 +7,15 @@ using UnityEngine.UI;
 // cách tương tác khác hẳn - 2 script cùng đọc/ghi chung PlayerInventory.
 public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlot
 {
-    [SerializeField] int slotIndex;
-    [SerializeField] Image icon;
+    [SerializeField] int   slotIndex;
+    [SerializeField] Image cardBg;   // Image nền thẻ — đổi sprite theo ItemType
+    [SerializeField] Image icon;     // Icon item (đặt đè lên cardBg)
+
+    [Header("Card sprites theo loại item")]
+    [SerializeField] Sprite cardActive;
+    [SerializeField] Sprite cardStatBoost;
+    [SerializeField] Sprite cardCharacter;
+    [SerializeField] Sprite cardEmpty;
 
     static ShopInventorySlotUI selected;
 
@@ -27,9 +34,32 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
     void Refresh()
     {
         ItemData item = PlayerInventory.Instance != null ? PlayerInventory.Instance.GetSlot(slotIndex) : null;
-        icon.sprite = item != null ? item.icon : null;
+
+        icon.sprite  = item != null ? item.icon : null;
         icon.enabled = item != null;
+
+        if (cardBg != null)
+        {
+            if (item != null)
+            {
+                cardBg.sprite  = GetCardSprite(item.itemType);
+                cardBg.enabled = true;
+            }
+            else
+            {
+                cardBg.sprite  = cardEmpty;
+                cardBg.enabled = cardEmpty != null;
+            }
+        }
     }
+
+    Sprite GetCardSprite(ItemType type) => type switch
+    {
+        ItemType.Active    => cardActive,
+        ItemType.StatBoost => cardStatBoost,
+        ItemType.Character => cardCharacter,
+        _                  => null,
+    };
 
     public void OnPointerClick(PointerEventData eventData)
     {
