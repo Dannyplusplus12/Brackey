@@ -53,7 +53,6 @@ public class DefeatScreenUI : MonoBehaviour
 
     void Show()
     {
-        gameObject.SetActive(true);
         PopulateStats();
         StopAllCoroutines();
         StartCoroutine(FadeIn());

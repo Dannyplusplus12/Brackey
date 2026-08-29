@@ -32,11 +32,36 @@ public class GameManager : MonoBehaviour
     bool _pendingShop;
     bool _pendingWave;
     bool _pendingDefeat;
+    bool _waveEverStarted; // true sau khi StartWave() được gọi lần đầu
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+    }
+
+    void OnEnable()
+    {
+        CharacterBase.OnAllyDied        += CheckDefeat;
+        CharacterBase.OnAllyBecameEnemy += CheckDefeat;
+    }
+    void OnDisable()
+    {
+        CharacterBase.OnAllyDied        -= CheckDefeat;
+        CharacterBase.OnAllyBecameEnemy -= CheckDefeat;
+    }
+
+    // Gọi mỗi khi 1 ally chết hoặc đổi phe — check defeat ngay lập tức.
+    // Dùng event-driven thay vì poll trong Update để bắt được cả khi wave chưa/đã active.
+    void CheckDefeat(CharacterBase _)
+    {
+        if (CurrentState != GameState.Arena) return;
+        if (_pendingDefeat || _pendingShop) return;
+        if (Time.time - _arenaEnterTime < arenaClearCheckDelay) return;
+        if (CharacterGrid.CountAlive(Faction.Ally) > 0) return; // còn ally sống
+
+        _pendingDefeat = true;
+        StartCoroutine(TriggerDefeat());
     }
 
     void Start()
@@ -61,15 +86,8 @@ public class GameManager : MonoBehaviour
         {
             _pendingShop = true;
             StartCoroutine(DelayedEnterShop());
-            return;
         }
-
-        // Thua: hết ally (kể cả những con đã SwitchToEnemy)
-        if (CharacterGrid.CountAlive(Faction.Ally) == 0)
-        {
-            _pendingDefeat = true;
-            StartCoroutine(TriggerDefeat());
-        }
+        // Defeat được xử lý event-driven qua OnAllyDied() — không poll ở đây nữa.
     }
 
     IEnumerator TriggerDefeat()
@@ -137,6 +155,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(postFeedDelay);
         _pendingWave = false;
         _arenaEnterTime = Time.time;
+        _waveEverStarted = true;
         WaveManager.Instance?.StartWave();
     }
 
@@ -145,6 +164,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         _pendingWave = false;
         _arenaEnterTime = Time.time;
+        _waveEverStarted = true;
         WaveManager.Instance?.StartWave();
     }
 

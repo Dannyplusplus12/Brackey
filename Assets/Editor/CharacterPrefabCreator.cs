@@ -19,10 +19,75 @@ public static class CharacterPrefabCreator
         { "DOG Z",     "DogZ"     },
         { "FRANK Z",   "FrankZ"   },
         { "NGUOI SOI", "NguoiSoi" },
+        { "PIRATE",    "Pirate"   },
         { "SUMO",      "Sumo"     },
         { "VIKING",    "Viking"   },
         { "ZOMIBIE",   "Zombie"   },
     };
+
+    // Menu item chạy đơn lẻ cho PIRATE — không đụng đến prefab/asset các char khác.
+    [MenuItem("Tools/Characters/Create PIRATE Prefab")]
+    public static void CreatePirate()
+    {
+        string folder = CharRootFolder + "/PIRATE";
+        if (!AssetDatabase.IsValidFolder(folder))
+        {
+            EditorUtility.DisplayDialog("Error", $"Folder không tồn tại: {folder}", "OK");
+            return;
+        }
+
+        bool wasNew = ProcessCharacter(folder, "PIRATE", "Pirate");
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        // Tạo / cập nhật ItemData để PIRATE xuất hiện trong shop & gacha pool
+        CreateOrUpdateItemData(folder, "PIRATE");
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        string msg = wasNew ? "Tạo mới prefab + ItemData PIRATE thành công!" : "Cập nhật prefab + ItemData PIRATE thành công!";
+        Debug.Log($"[CharPrefab] {msg}");
+        EditorUtility.DisplayDialog("PIRATE Prefab", msg, "OK");
+    }
+
+    // Tạo ItemData asset (Character type) và wire characterPrefab nếu prefab đã tồn tại.
+    // Idempotent: chạy lại chỉ re-wire prefab, không đổi buyCost / rarity do user chỉnh tay.
+    static void CreateOrUpdateItemData(string charFolder, string displayName)
+    {
+        string itemDataPath = $"{CharRootFolder}/{displayName}_ItemData.asset";
+        string prefabPath   = $"{charFolder}/{displayName}.prefab";
+
+        ItemData item = AssetDatabase.LoadAssetAtPath<ItemData>(itemDataPath);
+        bool isNew = item == null;
+
+        if (isNew)
+        {
+            item = ScriptableObject.CreateInstance<ItemData>();
+            item.displayName = displayName;
+            item.itemType    = ItemType.Character;
+            item.rarity      = ItemRarity.Rare;
+            item.buyCost     = 8;
+            item.sellValue   = 1;
+            item.description = "Cướp biển lắm mưu. Mỗi đòn chẵn: 5% kiếm 5 corn. Mỗi wave sống sót tỉ lệ tăng thêm 1%.";
+            AssetDatabase.CreateAsset(item, itemDataPath);
+        }
+
+        // Wire prefab (luôn cập nhật phòng khi prefab vừa được tạo mới)
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        if (prefab != null)
+        {
+            var so = new SerializedObject(item);
+            so.FindProperty("characterPrefab").objectReferenceValue = prefab;
+            so.ApplyModifiedProperties();
+        }
+        else
+        {
+            Debug.LogWarning($"[CharPrefab] PIRATE: chưa tìm thấy prefab tại {prefabPath}. Wire characterPrefab thủ công sau khi tạo prefab.");
+        }
+
+        EditorUtility.SetDirty(item);
+        Debug.Log($"[CharPrefab] ItemData PIRATE: {(isNew ? "tạo mới" : "cập nhật")} → {itemDataPath}");
+    }
 
     [MenuItem("Tools/Characters/Create All Character Prefabs")]
     public static void CreateAll()

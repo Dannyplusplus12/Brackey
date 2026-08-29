@@ -163,6 +163,8 @@ public abstract class CharacterBase : MonoBehaviour
     public static event System.Action<CharacterBase> OnAllyDied;
     // Fire khi 1 enemy chết — RunTracker dùng để đếm kill.
     public static event System.Action<CharacterBase> OnEnemyDied;
+    // Fire khi ally đổi phe sang Enemy (angry full) — GameManager dùng để check defeat.
+    public static event System.Action<CharacterBase> OnAllyBecameEnemy;
     // Fire khi bất kỳ nhân vật nào nhận sát thương (victim, amount, attacker — attacker có thể null).
     public static event System.Action<CharacterBase, float, CharacterBase> OnDamageTaken;
     // Fire khi bất kỳ nhân vật nào tăng angry (amount = lượng thực tế tăng sau clamp).
@@ -177,6 +179,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         OnAllyDied           = null;
         OnEnemyDied          = null;
+        OnAllyBecameEnemy    = null;
         OnDamageTaken        = null;
         OnAngryAdded         = null;
         OnSkipFeed           = null;
@@ -692,6 +695,7 @@ public abstract class CharacterBase : MonoBehaviour
         CharacterGrid.Unregister(this);
         faction = Faction.Enemy;
         CharacterGrid.Register(this);
+        OnAllyBecameEnemy?.Invoke(this);
         currentTarget = null;
 
         // Phủ màu đỏ lên sprite để báo hiệu đã chuyển phe.

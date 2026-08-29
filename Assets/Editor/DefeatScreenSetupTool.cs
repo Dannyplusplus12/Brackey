@@ -59,8 +59,8 @@ public static class DefeatScreenSetupTool
         cg.interactable   = false;
         cg.blocksRaycasts = false;
 
-        // Inactive mặc định — DefeatScreenUI.Show() sẽ SetActive(true)
-        root.SetActive(false);
+        // KHÔNG SetActive(false) — DefeatScreenUI.Awake() tự ẩn qua CanvasGroup (alpha=0).
+        // Phải giữ active để OnEnable chạy và subscribe GameManager.OnDefeat.
 
         // ── Overlay (Image xám mờ phủ màn hình) ──────────────────────────────
         GameObject overlay = EnsureChild(root, "Overlay");
