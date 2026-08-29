@@ -1,0 +1,395 @@
+fileFormatVersion: 2
+guid: d7d207a5744931d4698a5b3b0a0d7967
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 340153405060392036
+    second: ITEM DO AN_0
+  - first:
+      213: 1157826264505806719
+    second: ITEM DO AN_1
+  - first:
+      213: 2546385371643654242
+    second: ITEM DO AN_2
+  - first:
+      213: 5608916884562943224
+    second: ITEM DO AN_3
+  - first:
+      213: 8279581486026164144
+    second: ITEM DO AN_4
+  - first:
+      213: -7026286032622051285
+    second: ITEM DO AN_5
+  - first:
+      213: 8772674364097690123
+    second: ITEM DO AN_6
+  - first:
+      213: 1886441404763586045
+    second: ITEM DO AN_7
+  - first:
+      213: 3938427444234672165
+    second: ITEM DO AN_8
+  - first:
+      213: 55480689336045100
+    second: ITEM DO AN_9
+  - first:
+      213: 3474205351203274008
+    second: ITEM DO AN_10
+  - first:
+      213: -524819032852976071
+    second: ITEM DO AN_11
+  - first:
+      213: -1472951928115924048
+    second: ITEM DO AN_12
+  - first:
+      213: 672101550551116660
+    second: ITEM DO AN_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ITEM DO AN_0
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 740
+        width: 301
+        height: 261
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 464a3cd38b778b400800000000000000
+      internalID: 340153405060392036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_4
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 769
+        width: 190
+        height: 257
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b78d739e7bf6e270800000000000000
+      internalID: 8279581486026164144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_5
+      rect:
+        serializedVersion: 2
+        x: 1120
+        y: 764
+        width: 182
+        height: 252
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b202647841e9d7e90800000000000000
+      internalID: -7026286032622051285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_6
+      rect:
+        serializedVersion: 2
+        x: 1337
+        y: 758
+        width: 250
+        height: 211
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0af732cadcceb970800000000000000
+      internalID: 8772674364097690123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_7
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 746
+        width: 290
+        height: 308
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfdb58c767cfd2a10800000000000000
+      internalID: 1886441404763586045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_8
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 290
+        width: 239
+        height: 301
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 528d143d4ea18a630800000000000000
+      internalID: 3938427444234672165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_9
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 350
+        width: 288
+        height: 178
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2ec4cb946b15c000800000000000000
+      internalID: 55480689336045100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_10
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 325
+        width: 297
+        height: 240
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81d7b3b1c5bd63030800000000000000
+      internalID: 3474205351203274008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_12
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 349
+        width: 239
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b37c6186060f8be0800000000000000
+      internalID: -1472951928115924048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ITEM DO AN_13
+      rect:
+        serializedVersion: 2
+        x: 1406
+        y: 424
+        width: 204
+        height: 138
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47ba69d9cc8c35900800000000000000
+      internalID: 672101550551116660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e78d789dfe0f49542b13948058bc14f6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      ITEM DO AN_0: 340153405060392036
+      ITEM DO AN_1: 1157826264505806719
+      ITEM DO AN_10: 3474205351203274008
+      ITEM DO AN_11: -524819032852976071
+      ITEM DO AN_12: -1472951928115924048
+      ITEM DO AN_13: 672101550551116660
+      ITEM DO AN_2: 2546385371643654242
+      ITEM DO AN_3: 5608916884562943224
+      ITEM DO AN_4: 8279581486026164144
+      ITEM DO AN_5: -7026286032622051285
+      ITEM DO AN_6: 8772674364097690123
+      ITEM DO AN_7: 1886441404763586045
+      ITEM DO AN_8: 3938427444234672165
+      ITEM DO AN_9: 55480689336045100
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
