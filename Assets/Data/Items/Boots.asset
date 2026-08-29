@@ -13,13 +13,16 @@ MonoBehaviour:
   m_Name: Boots
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName: Boots
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 9d16d945cd99d154eafb559d49c0ad63, type: 3}
   itemType: 1
   rarity: 1
-  description: '[Beggar] Each time buffing an ally: <color=#00BFFF>+0.04 attack speed</color>
-    and <color=#B48EE0>+5 damage permanently.</color>
+  description: '
 
-    Rarity: Uncommon'
+    [Beggar] Each time buffing an ally: <color=#00BFFF>+0.04 attack
+    speed</color> and <color=#B48EE0>+5 damage permanently.</color>
+
+    Rarity:
+    Uncommon'
   buyCost: 6
   sellValue: 1
   characterPrefab: {fileID: 0}

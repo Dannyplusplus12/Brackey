@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: Clover
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName: Clover
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5e99e0a0452fdd04fb073e86f82f90a6, type: 3}
   itemType: 1
   rarity: 0
-  description: '[Beggar] Each time buffing an ally: <color=#4CAF50>+10 Max HP permanently.</color>
+  description: '
+
+    [Beggar] Each time buffing an ally: <color=#4CAF50>+10 Max
+    HP permanently.</color>
 
     Rarity: Common'
   buyCost: 4

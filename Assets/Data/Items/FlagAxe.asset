@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: FlagAxe
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName: Flag Axe
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e93a0db2a1eaed2458d9e0d9c41d711a, type: 3}
   itemType: 1
   rarity: 0
-  description: '[Viking] Every 20 bonus Max HP: <color=#00BFFF>+0.01 attack speed
-    permanently.</color>
+  description: '
+
+    [Viking] Every 20 bonus Max HP: <color=#00BFFF>+0.01 attack
+    speed permanently.</color>
 
     Rarity: Common'
   buyCost: 4
