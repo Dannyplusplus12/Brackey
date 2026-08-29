@@ -34,6 +34,7 @@ public class CornDeltaPopup : MonoBehaviour
     void OnDelta(int delta)
     {
         if (delta == 0 || deltaAnchor == null || _canvasRt == null) return;
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.Shop) return;
         StartCoroutine(Animate(delta));
     }
 

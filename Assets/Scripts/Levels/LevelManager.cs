@@ -148,4 +148,14 @@ public class LevelManager : MonoBehaviour
     // ─── public helpers ──────────────────────────────────────────────────────
     public int CurrentLevelIndex => currentLevelIndex;
     public bool HasMoreLevels => levels != null && currentLevelIndex + 1 < levels.Length;
+
+    /// <summary>LevelData của wave đang diễn ra (enemies đã spawn).</summary>
+    public LevelData GetCurrentLevelData() =>
+        (levels != null && currentLevelIndex >= 0 && currentLevelIndex < levels.Length)
+        ? levels[currentLevelIndex] : null;
+
+    /// <summary>LevelData của wave tiếp theo (chưa spawn — dùng để preview award).</summary>
+    public LevelData GetNextLevelData() =>
+        (levels != null && currentLevelIndex + 1 < levels.Length)
+        ? levels[currentLevelIndex + 1] : null;
 }

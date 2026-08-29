@@ -36,10 +36,12 @@ public class GachaWheelUI : MonoBehaviour
     public float charOffset     = 130f;
 
     [Header("Spin Config")]
-    public int   extraSpins    = 6;
-    public float spinDuration  = 3.5f;
-    [Tooltip("Corn cần trả mỗi lần quay (0 = miễn phí)")]
-    public int   spinCost      = 0;
+    public int   extraSpins        = 6;
+    public float spinDuration      = 3.5f;
+    [Tooltip("Giá Corn lần đầu tiên")]
+    public int   baseCost          = 5;
+    [Tooltip("Tăng thêm mỗi lần roll")]
+    public int   costIncreasePerRoll = 5;
 
     [Header("References — tạo bởi Setup Tool, không gán tay")]
     public RectTransform  wheelContainer;
@@ -55,6 +57,7 @@ public class GachaWheelUI : MonoBehaviour
     bool          _isSpinning  = false;
     GachaPackData _currentPack;
     Button        _centerBtn;
+    int           _rollCount = 0;   // số lần đã roll, reset khi vào Shop mới
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -65,8 +68,8 @@ public class GachaWheelUI : MonoBehaviour
 
     void OnEnable()
     {
-        // Load trực tiếp từ characterPool gán trong Inspector
         RefreshCharacterSprites();
+        UpdateCostText();
     }
 
 #if UNITY_EDITOR
@@ -89,6 +92,7 @@ public class GachaWheelUI : MonoBehaviour
     {
         if (_isSpinning) return;
 
+        int spinCost = CurrentCost();
         if (spinCost > 0 && !PlayerWallet.Instance.TrySpend(spinCost))
         {
             Debug.Log("[GachaWheel] Không đủ Corn.");
@@ -106,6 +110,7 @@ public class GachaWheelUI : MonoBehaviour
         if (spinCostText != null)
             spinCostText.text = pack.spinCost > 0 ? $"{pack.spinCost} Corn" : "Free";
         RefreshCharacterSprites();
+        UpdateCostText();
         SetCenterInteractable(true);
     }
 
@@ -176,7 +181,17 @@ public class GachaWheelUI : MonoBehaviour
     void OnReceive(ItemData item)
     {
         if (item?.characterPrefab != null) CharacterSpawner.Spawn(item.characterPrefab);
+        _rollCount++;
+        UpdateCostText();
         SetCenterInteractable(true);
+    }
+
+    int CurrentCost() => baseCost + _rollCount * costIncreasePerRoll;
+
+    void UpdateCostText()
+    {
+        if (spinCostText != null)
+            spinCostText.text = CurrentCost().ToString();
     }
 
     void SetCenterInteractable(bool on)

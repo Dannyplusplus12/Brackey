@@ -64,8 +64,18 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(shopDelay);
         _pendingShop = false;
-        PlayerWallet.Instance?.Earn(waveWinReward);
+        PlayerWallet.Instance?.Earn(CurrentWaveReward());
         EnterShop();
+    }
+
+    /// <summary>
+    /// Reward của wave vừa thắng — đọc từ LevelData hiện tại nếu có,
+    /// fallback về GameManager.waveWinReward (dùng làm default/override).
+    /// </summary>
+    public int CurrentWaveReward()
+    {
+        var data = LevelManager.Instance?.GetCurrentLevelData();
+        return data != null ? data.waveWinReward : waveWinReward;
     }
 
     // Gọi từ nút "Bắt đầu Wave"

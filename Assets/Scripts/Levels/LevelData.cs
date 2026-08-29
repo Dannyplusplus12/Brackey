@@ -23,4 +23,8 @@ public class LevelData : ScriptableObject
 
     [Tooltip("Các nhóm enemy spawn lần lượt từ trên xuống")]
     public EnemyGroup[] groups;
+
+    [Header("Economy")]
+    [Tooltip("Corn nhận được khi thắng wave này")]
+    public int waveWinReward = 5;
 }
