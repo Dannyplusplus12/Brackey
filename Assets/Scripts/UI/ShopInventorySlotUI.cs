@@ -67,7 +67,7 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
         if (priceBadge != null)
             priceBadge.SetActive(item != null && inShop);
         if (priceText != null && item != null)
-            priceText.text = item.sellValue.ToString();
+            priceText.text = (item.buyCost / 2).ToString();
     }
 
     Sprite GetCardSprite(ItemType type) => type switch

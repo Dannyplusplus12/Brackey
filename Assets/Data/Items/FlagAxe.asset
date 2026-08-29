@@ -10,20 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: Bread
+  m_Name: FlagAxe
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Bread
-  icon: {fileID: -1472951928115924048, guid: d7d207a5744931d4698a5b3b0a0d7967, type: 3}
-  itemType: 0
+  displayName: Flag Axe
+  icon: {fileID: 0}
+  itemType: 1
   rarity: 0
-  description: 'On activation: All allies heal <color=#4CAF50>60% Max HP.</color>
+  description: '[Viking] Every 20 bonus Max HP: <color=#00BFFF>+0.01 attack speed
+    permanently.</color>
 
     Rarity: Common'
-  buyCost: 2
+  buyCost: 4
   sellValue: 1
   characterPrefab: {fileID: 0}
-  targetType: 0
-  targetCharacterType: {fileID: 0}
+  targetType: 1
+  targetCharacterType: {fileID: 11400000, guid: 6e63f198b84ca8d46a29da741be54984, type: 2}
   statDelta:
     damage: 0
     moveSpeed: 0

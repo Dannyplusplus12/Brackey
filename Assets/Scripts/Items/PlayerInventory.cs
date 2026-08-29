@@ -60,7 +60,7 @@ public class PlayerInventory : MonoBehaviour
         if (item == null) return;
 
         slots[index] = null;
-        PlayerWallet.Instance?.Earn(item.sellValue);
+        PlayerWallet.Instance?.Earn(item.buyCost / 2);
         OnInventoryChanged?.Invoke();
     }
 
@@ -69,7 +69,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!staticItems.Remove(item)) return;
         ApplyStatDelta(item, add: false);
-        PlayerWallet.Instance?.Earn(item.sellValue);
+        PlayerWallet.Instance?.Earn(item.buyCost / 2);
         OnStaticItemsChanged?.Invoke();
     }
 

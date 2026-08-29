@@ -10,20 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: Bread
+  m_Name: Lightning
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Bread
-  icon: {fileID: -1472951928115924048, guid: d7d207a5744931d4698a5b3b0a0d7967, type: 3}
-  itemType: 0
-  rarity: 0
-  description: 'On activation: All allies heal <color=#4CAF50>60% Max HP.</color>
+  displayName: Lightning
+  icon: {fileID: 21300000, guid: a14b5a918191ce94f9666383eb4f85c8, type: 3}
+  itemType: 1
+  rarity: 1
+  description: '
 
-    Rarity: Common'
-  buyCost: 2
+    [Sumo] On hit: <color=#00BFFF>+0.1 attack speed</color> until
+    end of round (Max: 0.5 per item).
+
+    Rarity: Uncommon'
+  buyCost: 6
   sellValue: 1
   characterPrefab: {fileID: 0}
-  targetType: 0
-  targetCharacterType: {fileID: 0}
+  targetType: 1
+  targetCharacterType: {fileID: 11400000, guid: db2b33774fc70d04a8cdf99ac967cbc5, type: 2}
   statDelta:
     damage: 0
     moveSpeed: 0

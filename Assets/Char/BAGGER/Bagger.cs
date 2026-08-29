@@ -16,6 +16,13 @@ using UnityEngine;
 
 public class Bagger : CharacterBase
 {
+    // Fire khi TriggerBeg() kích hoạt (mỗi 4 đòn HOẶC khi ally chết).
+    // SpecialItemTracker dùng để áp Clover / Boots effect.
+    public static event System.Action<Bagger> OnBegTriggered;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetBaggerStaticEvents() => OnBegTriggered = null;
+
     // Tracks every Beg buff applied this round: specific ally instance → delta applied.
     // Dùng per-instance bonus để buff đúng 1 nhân vật, không lan sang cùng loại.
     private readonly List<(CharacterBase ally, StatDelta delta)> _begBuffs = new();
@@ -65,6 +72,7 @@ public class Bagger : CharacterBase
         _begBuffs.Add((ally, buff));
 
         VFXManager.PlayBuffArrow(ally.BodyCenter, VFXManager.ColorDamage); // VFX trên ally
+        OnBegTriggered?.Invoke(this);
     }
 
     // ── Skill 2 — Terrified Growth ─────────────────────────────────────────────

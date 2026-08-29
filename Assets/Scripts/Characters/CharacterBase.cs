@@ -46,7 +46,12 @@ public abstract class CharacterBase : MonoBehaviour
     // ── Per-instance bonus — áp lên đúng 1 nhân vật cụ thể, không ảnh hưởng type khác ──
     // Dùng khi skill 1 char cần buff trực tiếp 1 char khác (VD: Bagger beg cho Viking gần nhất).
     private StatDelta _instanceBonus;
-    public void AddInstanceBonus(StatDelta delta)    { _instanceBonus.Add(delta); }
+    public void AddInstanceBonus(StatDelta delta)
+    {
+        _instanceBonus.Add(delta);
+        if (delta.maxHP > 0f)
+            OnInstanceMaxHPAdded?.Invoke(this, delta.maxHP);
+    }
     public void RemoveInstanceBonus(StatDelta delta) { _instanceBonus.Subtract(delta); }
 
     // ── Effective stats = (base + flat) * (1 + percent) ────────────────────
@@ -106,6 +111,8 @@ public abstract class CharacterBase : MonoBehaviour
     protected CharacterBase currentTarget;
     protected float attackTimer;
     float waitTimer;
+    float retargetTimer;                    // đếm ngược đến lần retarget tiếp theo
+    const float RetargetInterval = 1f;     // giây giữa các lần tìm lại kẻ thù gần nhất
     CharacterState waitNextState;
     Coroutine attackVisualRoutine;
     bool skipLeashClaim;
@@ -154,17 +161,26 @@ public abstract class CharacterBase : MonoBehaviour
 
     // Fire khi 1 ally chết — các ally khác subscribe để tăng angry.
     public static event System.Action<CharacterBase> OnAllyDied;
-    // Fire khi bất kỳ nhân vật nào nhận sát thương (trước khi HP giảm).
-    public static event System.Action<CharacterBase, float> OnDamageTaken;
+    // Fire khi 1 enemy chết — RunTracker dùng để đếm kill.
+    public static event System.Action<CharacterBase> OnEnemyDied;
+    // Fire khi bất kỳ nhân vật nào nhận sát thương (victim, amount, attacker — attacker có thể null).
+    public static event System.Action<CharacterBase, float, CharacterBase> OnDamageTaken;
     // Fire khi bất kỳ nhân vật nào tăng angry (amount = lượng thực tế tăng sau clamp).
     public static event System.Action<CharacterBase, float> OnAngryAdded;
+    // Fire khi nhân vật bị bỏ đói (SkipFeed) — Serum item dùng event này.
+    public static event System.Action<CharacterBase> OnSkipFeed;
+    // Fire khi AddInstanceBonus được gọi với maxHP > 0 — Flag Axe dùng event này.
+    public static event System.Action<CharacterBase, float> OnInstanceMaxHPAdded;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStaticEvents()
     {
-        OnAllyDied   = null;
-        OnDamageTaken = null;
-        OnAngryAdded  = null;
+        OnAllyDied           = null;
+        OnEnemyDied          = null;
+        OnDamageTaken        = null;
+        OnAngryAdded         = null;
+        OnSkipFeed           = null;
+        OnInstanceMaxHPAdded = null;
     }
 
     protected virtual void OnEnable()
@@ -198,6 +214,8 @@ public abstract class CharacterBase : MonoBehaviour
             ClaimLeashSlot();
 
         CharacterGrid.Register(this);
+        if (faction == Faction.Ally && stats != null)
+            PlayerRoster.Register(stats);
         SetSprite(stats.idleSprite);
         VFXManager.PlaySpawnPop(BodyCenter);
 
@@ -325,19 +343,25 @@ public abstract class CharacterBase : MonoBehaviour
         if (currentTarget != null && currentTarget.IsDead)
         {
             currentTarget = null;
-            EnterWaiting(CharacterState.Seeking);
+            retargetTimer = 0f;
+            EnterState(CharacterState.Seeking);
             return Vector2.zero;
         }
 
-        if (currentTarget == null)
+        // Mỗi RetargetInterval giây: tìm lại kẻ thù gần nhất, bỏ target cũ nếu có gần hơn
+        retargetTimer -= Time.deltaTime;
+        if (retargetTimer <= 0f)
+        {
             currentTarget = FindNearestEnemy();
+            retargetTimer = RetargetInterval;
+        }
 
         if (currentTarget == null)
             return Vector2.zero; // không còn địch nào: đứng yên tại chỗ, chờ hết wave mới về vị trí
 
-        float distToTarget = Vector2.Distance(transform.position, currentTarget.transform.position);
         SetFacing(currentTarget.BodyCenter - BodyCenter);
 
+        float distToTarget = Vector2.Distance(BodyCenter, currentTarget.BodyCenter);
         if (distToTarget <= EffectiveAttackRange)
         {
             EnterState(CharacterState.Attacking);
@@ -353,11 +377,12 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (currentTarget == null || currentTarget.IsDead)
         {
+            retargetTimer = 0f; // tìm enemy mới ngay frame tiếp theo
             EnterState(CharacterState.Seeking);
             return;
         }
 
-        float distToTarget = Vector2.Distance(transform.position, currentTarget.transform.position);
+        float distToTarget = Vector2.Distance(BodyCenter, currentTarget.BodyCenter);
         if (distToTarget > EffectiveAttackRange)
         {
             EnterState(CharacterState.Seeking);
@@ -565,7 +590,8 @@ public abstract class CharacterBase : MonoBehaviour
         leashCenter = transform.position;
         AddAngry(stats.angryOnRoundStart, AngryReason.RoundStart);
         currentTarget = null;
-        EnterWaiting(CharacterState.Seeking); // delay ngẫu nhiên trước khi bắt đầu di chuyển
+        retargetTimer = 0f; // tìm enemy ngay từ đầu wave
+        EnterState(CharacterState.Seeking);
     }
 
     public virtual void ExitCombat()
@@ -573,7 +599,7 @@ public abstract class CharacterBase : MonoBehaviour
         if (IsDead) return;
         currentTarget = null;
         attackCount = 0;
-        EnterWaiting(CharacterState.Leashing); // delay ngẫu nhiên trước khi quay về
+        EnterState(CharacterState.Leashing);
     }
 
     void OnGameStateChanged(GameState state)
@@ -601,11 +627,11 @@ public abstract class CharacterBase : MonoBehaviour
     // Debug toggle — tất cả nhân vật không nhận sát thương khi true
     public static bool DebugInvincible = false;
 
-    public virtual void TakeDamage(float amount)
+    public virtual void TakeDamage(float amount, CharacterBase attacker = null)
     {
         if (IsDead) return;
         if (DebugInvincible) return;
-        OnDamageTaken?.Invoke(this, amount);
+        OnDamageTaken?.Invoke(this, amount, attacker);
         CurrentHP -= amount;
         VFXManager.PlayBloodHit(BodyCenter, amount, EffectiveMaxHP);
         PlayHitReaction();
@@ -690,6 +716,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         AddAngry(stats.angryPerHunger, AngryReason.Hungry);
         VFXManager.PlayFeedAngry(BodyCenter);
+        OnSkipFeed?.Invoke(this);
     }
 
     protected virtual void Die()
@@ -700,7 +727,10 @@ public abstract class CharacterBase : MonoBehaviour
         if (faction == Faction.Ally)
             OnAllyDied?.Invoke(this);
         else
+        {
+            OnEnemyDied?.Invoke(this);
             PlayerWallet.Instance?.Earn(stats.killReward);
+        }
         OnDeath();
     }
 
@@ -714,8 +744,9 @@ public abstract class CharacterBase : MonoBehaviour
 
     protected virtual void ExecuteAttack(CharacterBase target)
     {
+        if (!gameObject.activeInHierarchy) return;
         attackCount++;
-        target.TakeDamage(EffectiveDamage);
+        target.TakeDamage(EffectiveDamage, this);
         FlashSprite(stats.attackSprite);
     }
 
@@ -752,6 +783,7 @@ public abstract class CharacterBase : MonoBehaviour
     // "Attack Visual Duration". Dùng cho cả ExecuteAttack và các skill override.
     protected void FlashSprite(Sprite sprite)
     {
+        if (!gameObject.activeInHierarchy) return;
         if (attackVisualRoutine != null) StopCoroutine(attackVisualRoutine);
         attackVisualRoutine = StartCoroutine(FlashSpriteRoutine(sprite));
     }

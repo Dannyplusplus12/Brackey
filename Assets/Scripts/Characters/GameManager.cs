@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     public static event System.Action<GameState> OnGameStateChanged;
+    /// <summary>Fire khi toàn bộ ally chết trong wave — DefeatScreenUI lắng nghe.</summary>
+    public static event System.Action OnDefeat;
 
     public GameState CurrentState { get; private set; } = GameState.Arena;
 
@@ -29,6 +31,7 @@ public class GameManager : MonoBehaviour
     float _arenaEnterTime;
     bool _pendingShop;
     bool _pendingWave;
+    bool _pendingDefeat;
 
     void Awake()
     {
@@ -49,15 +52,32 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (CurrentState != GameState.Arena) return;
-        if (_pendingShop || _pendingWave) return;
+        if (_pendingShop || _pendingWave || _pendingDefeat) return;
         if (!WaveManager.IsWaveActive) return;
         if (Time.time - _arenaEnterTime < arenaClearCheckDelay) return;
 
+        // Thắng: hết địch
         if (CharacterGrid.CountAlive(Faction.Enemy) == 0)
         {
             _pendingShop = true;
             StartCoroutine(DelayedEnterShop());
+            return;
         }
+
+        // Thua: hết ally (kể cả những con đã SwitchToEnemy)
+        if (CharacterGrid.CountAlive(Faction.Ally) == 0)
+        {
+            _pendingDefeat = true;
+            StartCoroutine(TriggerDefeat());
+        }
+    }
+
+    IEnumerator TriggerDefeat()
+    {
+        // Đợi một chút để VFX chết cuối cùng play xong
+        yield return new WaitForSeconds(1.2f);
+        WaveManager.Instance?.EndWave();
+        OnDefeat?.Invoke();
     }
 
     IEnumerator DelayedEnterShop()

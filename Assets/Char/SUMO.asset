@@ -15,7 +15,7 @@ MonoBehaviour:
   maxHP: 150
   damage: 20
   attackSpeed: 0.7
-  attackRange: 90
+  attackRange: 70
   attackVisualDuration: 0.5
   moveSpeed: 100
   separationRadius: 50
@@ -38,7 +38,7 @@ MonoBehaviour:
   hitShakeDuration: 0.12
   initialAngry: 0
   angryPerHunger: 20
-  angryOnAllyDeath: 10
+  angryOnAllyDeath: 20
   angryOnRoundStart: 0
   maxAngry: 100
   foodRequiredPerRound: 4

@@ -22,7 +22,7 @@ MonoBehaviour:
 
     Rarity:
     Common'
-  buyCost: 2
+  buyCost: 3
   sellValue: 1
   characterPrefab: {fileID: 0}
   targetType: 0

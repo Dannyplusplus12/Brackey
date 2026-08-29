@@ -14,6 +14,8 @@ public class ShopOfferManager : MonoBehaviour
     public static event System.Action OnOffersChanged;
     // Raised sau mỗi lần reroll hoặc reset wave — payload = cost LÚC ĐÓ (trước khi +1)
     public static event System.Action<int> OnRerollCostChanged;
+    // Raised khi mua thành công — RunTracker dùng để đếm item/char đã mua.
+    public static event System.Action<ItemData> OnItemBought;
 
     public const int OfferCount = 4;
 
@@ -109,16 +111,31 @@ public class ShopOfferManager : MonoBehaviour
         // Bước 1: chọn rarity tier theo weight
         int tier = RollRarityTier();
 
-        // Bước 2: tìm item trong tier đó, fallback xuống thấp hơn nếu trống
+        // Bước 2: tìm item trong tier đó (lọc theo roster), fallback xuống thấp hơn nếu trống
         for (int t = tier; t >= 0; t--)
         {
             var bucket = poolByRarity[t];
-            if (bucket.Count > 0)
-                return bucket[Random.Range(0, bucket.Count)];
+            var available = GetAvailable(bucket);
+            if (available.Count > 0)
+                return available[Random.Range(0, available.Count)];
         }
 
-        // Fallback toàn bộ pool (đề phòng tier cao hơn cũng trống)
-        return itemPool[Random.Range(0, itemPool.Count)];
+        // Fallback toàn bộ pool có thể hiện
+        var fallback = GetAvailable(itemPool);
+        return fallback.Count > 0 ? fallback[Random.Range(0, fallback.Count)] : null;
+    }
+
+    // Trả về danh sách item hợp lệ: không có targetCharacterType, hoặc player đã từng mua loại đó.
+    static List<ItemData> GetAvailable(List<ItemData> source)
+    {
+        var result = new List<ItemData>(source.Count);
+        foreach (var item in source)
+        {
+            if (item == null) continue;
+            if (item.targetCharacterType != null && !PlayerRoster.HasType(item.targetCharacterType)) continue;
+            result.Add(item);
+        }
+        return result;
     }
 
     int RollRarityTier()
@@ -173,6 +190,7 @@ public class ShopOfferManager : MonoBehaviour
 
         if (bought)
         {
+            OnItemBought?.Invoke(item);
             currentOffers[index] = null;
             OnOffersChanged?.Invoke();
         }

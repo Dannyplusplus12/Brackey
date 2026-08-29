@@ -1856,6 +1856,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 478252422}
   m_CullTransparentMesh: 1
+--- !u!1001 &490955672
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1774290566968798273, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_Name
+      value: SUMO (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 989.9075
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 641.83136
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3028291877433318826, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7045579895319797216, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7c2444dc47cb66a4bbcd3df4440db909, type: 3}
 --- !u!1 &495595305
 GameObject:
   m_ObjectHideFlags: 0
@@ -9619,6 +9680,7 @@ GameObject:
   - component: {fileID: 1309761903}
   - component: {fileID: 1309761907}
   - component: {fileID: 1309761908}
+  - component: {fileID: 1309761909}
   m_Layer: 0
   m_Name: ShopManagers
   m_TagString: Untagged
@@ -9683,11 +9745,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4facf47814306df47b3ba9ed2e51003e, type: 2}
   - {fileID: 11400000, guid: 7ee2884abcf17294ea673e912e7e2ede, type: 2}
   - {fileID: 11400000, guid: 1f58fb3b65f17b94097ee09da95461a4, type: 2}
+  - {fileID: 11400000, guid: 1b10b59fec3df4440abc7d88162bcc91, type: 2}
+  - {fileID: 11400000, guid: f6a895a0bfd399a46bf1e78782f7cfac, type: 2}
+  - {fileID: 11400000, guid: 8851ca7489dd8a94c84a633b14c4f532, type: 2}
+  - {fileID: 11400000, guid: 2728cc12c3403634bb1ac3826db5d618, type: 2}
   rerollBaseCost: 4
   rarityWeights:
-  - 60
+  - 70
   - 25
-  - 15
+  - 5
   - 0
   - 0
 --- !u!114 &1309761905
@@ -9742,6 +9808,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d68cda8dd76e0e4eb370346a9845ddc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemEffectHandler
+--- !u!114 &1309761909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1309761902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e0f3fcbe6dbd1447b823f5385ea9d6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpecialItemTracker
 --- !u!1 &1332956780
 GameObject:
   m_ObjectHideFlags: 0
@@ -14242,3 +14320,4 @@ SceneRoots:
   - {fileID: 701686754}
   - {fileID: 242416889}
   - {fileID: 612475016}
+  - {fileID: 490955672}

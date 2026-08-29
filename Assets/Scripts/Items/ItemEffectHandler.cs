@@ -39,7 +39,7 @@ public class ItemEffectHandler : MonoBehaviour
                 break;
 
             case "Bread":
-                HealAllAllies(30f);
+                HealAllAlliesPercent(0.6f);
                 break;
 
             case "Fried Egg":
@@ -79,7 +79,17 @@ public class ItemEffectHandler : MonoBehaviour
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    // Hồi HP cho toàn bộ ally còn sống, không vượt quá MaxHP hiện tại.
+    // Hồi % MaxHP cho toàn bộ ally còn sống (0.6 = 60% MaxHP mỗi char).
+    static void HealAllAlliesPercent(float pct)
+    {
+        if (pct <= 0f) return;
+        var allies = CharacterGrid.FindAllAlive(Faction.Ally);
+        foreach (var ally in allies)
+            ally.Heal(ally.MaxHP * pct);
+        Debug.Log($"[ItemEffectHandler] Bread: heal {pct * 100f:0}% MaxHP cho {allies.Count} ally.");
+    }
+
+    // Hồi HP flat cho toàn bộ ally còn sống, không vượt quá MaxHP hiện tại.
     static void HealAllAllies(float amount)
     {
         if (amount <= 0f) return;

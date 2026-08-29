@@ -24,7 +24,7 @@ MonoBehaviour:
   actionDelayMin: 0
   actionDelayMax: 0.3
   swayTiltAngle: 30
-  swayBounceHeight: 2.8
+  swayBounceHeight: 3
   swayFrequency: 15
   centerOffset: 3
   dragHeadOffset: 6
