@@ -9,8 +9,20 @@ using UnityEngine;
 // Thêm item mới: thêm case vào switch bên dưới hoặc match theo item.displayName / itemType.
 public class ItemEffectHandler : MonoBehaviour
 {
-    void OnEnable()  => PlayerInventory.OnSlotActivated += HandleActivate;
-    void OnDisable() => PlayerInventory.OnSlotActivated -= HandleActivate;
+    // Fried Egg buff tạm thời đang active — cần xoá khi hết wave.
+    bool friedEggBuffActive;
+
+    void OnEnable()
+    {
+        PlayerInventory.OnSlotActivated += HandleActivate;
+        WaveManager.OnWaveEnd           += RemoveFriedEggBuff;
+    }
+
+    void OnDisable()
+    {
+        PlayerInventory.OnSlotActivated -= HandleActivate;
+        WaveManager.OnWaveEnd           -= RemoveFriedEggBuff;
+    }
 
     void HandleActivate(int slotIndex, ItemData item)
     {
@@ -20,6 +32,18 @@ public class ItemEffectHandler : MonoBehaviour
         {
             case "War Flask":
                 HealAllAllies(item.statDelta.maxHP);
+                break;
+
+            case "Fish":
+                ReduceAngryAllAllies(10f);
+                break;
+
+            case "Bread":
+                HealAllAllies(30f);
+                break;
+
+            case "Fried Egg":
+                ApplyFriedEggBuff();
                 break;
 
             // Thêm item mới ở đây:
@@ -33,6 +57,28 @@ public class ItemEffectHandler : MonoBehaviour
         }
     }
 
+    // ── Fried Egg — buff tạm thời đến hết wave ────────────────────────────────
+
+    void ApplyFriedEggBuff()
+    {
+        // Stack thêm nếu kích hoạt nhiều lần trong cùng 1 wave
+        GlobalStatBonus.attackSpeedPercent += 0.5f;
+        GlobalStatBonus.damagePercent      += 0.3f;
+        friedEggBuffActive = true;
+        Debug.Log("[ItemEffectHandler] Fried Egg: +50% APS, +30% damage đến hết wave.");
+    }
+
+    void RemoveFriedEggBuff()
+    {
+        if (!friedEggBuffActive) return;
+        GlobalStatBonus.attackSpeedPercent -= 0.5f;
+        GlobalStatBonus.damagePercent      -= 0.3f;
+        friedEggBuffActive = false;
+        Debug.Log("[ItemEffectHandler] Fried Egg: buff hết hạn.");
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
     // Hồi HP cho toàn bộ ally còn sống, không vượt quá MaxHP hiện tại.
     static void HealAllAllies(float amount)
     {
@@ -42,6 +88,18 @@ public class ItemEffectHandler : MonoBehaviour
         foreach (var ally in allies)
             ally.Heal(amount);
 
-        Debug.Log($"[ItemEffectHandler] War Flask: heal {amount} HP cho {allies.Count} ally.");
+        Debug.Log($"[ItemEffectHandler] Heal {amount} HP cho {allies.Count} ally.");
+    }
+
+    // Giảm angry cho toàn bộ ally còn sống (pass số dương, hàm tự đổi sang âm).
+    static void ReduceAngryAllAllies(float amount)
+    {
+        if (amount <= 0f) return;
+
+        var allies = CharacterGrid.FindAllAlive(Faction.Ally);
+        foreach (var ally in allies)
+            ally.DebugAddAngry(-amount);
+
+        Debug.Log($"[ItemEffectHandler] Fish: giảm {amount} angry cho {allies.Count} ally.");
     }
 }

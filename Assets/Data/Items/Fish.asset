@@ -10,13 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: SwiftBoots
+  m_Name: Fish
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Swift Boots
-  icon: {fileID: 21300000, guid: 9d16d945cd99d154eafb559d49c0ad63, type: 3}
-  itemType: 1
+  displayName: Fish
+  icon: {fileID: 0}
+  itemType: 0
   rarity: 0
-  description: <color=#4CAF50>+0.3</color> <sprite name="stat_speed">
+  description: 'On activation: All allies <color=#E82020>-10 angry.</color>
+
+    Rarity:
+    Common'
   buyCost: 2
   sellValue: 1
   characterPrefab: {fileID: 0}
@@ -24,7 +27,7 @@ MonoBehaviour:
   targetCharacterType: {fileID: 0}
   statDelta:
     damage: 0
-    moveSpeed: 0.3
+    moveSpeed: 0
     maxHP: 0
     attackSpeed: 0
     attackRange: 0

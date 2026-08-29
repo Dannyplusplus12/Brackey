@@ -154,9 +154,18 @@ public abstract class CharacterBase : MonoBehaviour
 
     // Fire khi 1 ally chết — các ally khác subscribe để tăng angry.
     public static event System.Action<CharacterBase> OnAllyDied;
+    // Fire khi bất kỳ nhân vật nào nhận sát thương (trước khi HP giảm).
+    public static event System.Action<CharacterBase, float> OnDamageTaken;
+    // Fire khi bất kỳ nhân vật nào tăng angry (amount = lượng thực tế tăng sau clamp).
+    public static event System.Action<CharacterBase, float> OnAngryAdded;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStaticEvents() => OnAllyDied = null;
+    static void ResetStaticEvents()
+    {
+        OnAllyDied   = null;
+        OnDamageTaken = null;
+        OnAngryAdded  = null;
+    }
 
     protected virtual void OnEnable()
     {
@@ -596,6 +605,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (IsDead) return;
         if (DebugInvincible) return;
+        OnDamageTaken?.Invoke(this, amount);
         CurrentHP -= amount;
         VFXManager.PlayBloodHit(BodyCenter, amount, EffectiveMaxHP);
         PlayHitReaction();
@@ -633,7 +643,10 @@ public abstract class CharacterBase : MonoBehaviour
     public virtual void AddAngry(float amount, AngryReason reason)
     {
         if (IsDead || amount <= 0f) return;
+        float prev = CurrentAngry;
         CurrentAngry = Mathf.Min(CurrentAngry + amount, stats.maxAngry);
+        float actual = CurrentAngry - prev;
+        if (actual > 0f) OnAngryAdded?.Invoke(this, actual);
         if (CurrentAngry >= stats.maxAngry && faction == Faction.Ally)
             SwitchToEnemy();
     }

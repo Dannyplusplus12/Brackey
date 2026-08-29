@@ -10,20 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: GrowthVial
+  m_Name: ChickenLeg
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Growth Vial
-  icon: {fileID: 21300000, guid: 1837391e725d659489d6b122a006204c, type: 3}
+  displayName: Chicken Leg
+  icon: {fileID: 0}
   itemType: 1
   rarity: 0
-  description: <color=#4CAF50>+8%</color> <sprite name="stat_hp">
+  description: '<color=#B48EE0>+1 damage permanently.</color>
+
+    Rarity: Common'
   buyCost: 2
   sellValue: 1
   characterPrefab: {fileID: 0}
   targetType: 0
   targetCharacterType: {fileID: 0}
   statDelta:
-    damage: 0
+    damage: 1
     moveSpeed: 0
     maxHP: 0
     attackSpeed: 0
@@ -31,5 +33,5 @@ MonoBehaviour:
     foodCost: 0
     damagePercent: 0
     moveSpeedPercent: 0
-    maxHPPercent: 0.08
+    maxHPPercent: 0
     attackSpeedPercent: 0

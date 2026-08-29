@@ -36,7 +36,7 @@ MonoBehaviour:
   hitFlashDuration: 0.1
   hitShakeStrength: 0.6
   hitShakeDuration: 0.2
-  initialAngry: 0
+  initialAngry: 40
   angryPerHunger: 30
   angryOnAllyDeath: 0
   angryOnRoundStart: 0
