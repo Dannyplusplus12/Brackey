@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -17,19 +18,27 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
     [SerializeField] Sprite cardCharacter;
     [SerializeField] Sprite cardEmpty;
 
+    [Header("Price Badge (sell)")]
+    [SerializeField] GameObject priceBadge; // GO chứa Image nền + text giá bán — chỉ hiện trong Shop
+    [SerializeField] TMP_Text   priceText;  // text hiển thị sellValue
+
     static ShopInventorySlotUI selected;
 
     void OnEnable()
     {
         PlayerInventory.OnInventoryChanged += Refresh;
+        GameManager.OnGameStateChanged     += OnStateChanged;
         Refresh();
     }
 
     void OnDisable()
     {
         PlayerInventory.OnInventoryChanged -= Refresh;
+        GameManager.OnGameStateChanged     -= OnStateChanged;
         if (selected == this) selected = null;
     }
+
+    void OnStateChanged(GameState state) => Refresh();
 
     void Refresh()
     {
@@ -52,6 +61,13 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
                 cardBg.enabled = cardEmpty != null;
             }
         }
+
+        // Price badge — chỉ hiện trong Shop và khi có item
+        bool inShop = GameManager.Instance == null || GameManager.Instance.CurrentState == GameState.Shop;
+        if (priceBadge != null)
+            priceBadge.SetActive(item != null && inShop);
+        if (priceText != null && item != null)
+            priceText.text = item.sellValue.ToString();
     }
 
     Sprite GetCardSprite(ItemType type) => type switch

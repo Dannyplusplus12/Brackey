@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,10 @@ public class ShopOfferSlotUI : MonoBehaviour, IItemSlot
     [SerializeField] Sprite cardStatBoost;
     [SerializeField] Sprite cardCharacter;
     [SerializeField] Sprite cardEmpty;   // (tuỳ chọn) sprite hiện khi ô trống
+
+    [Header("Price Badge")]
+    [SerializeField] GameObject  priceBadge; // GO chứa Image nền + text giá — ẩn khi slot trống
+    [SerializeField] TMP_Text    priceText;  // text hiển thị buyCost
 
     void OnEnable()
     {
@@ -48,6 +53,12 @@ public class ShopOfferSlotUI : MonoBehaviour, IItemSlot
                 cardBg.enabled = cardEmpty != null;
             }
         }
+
+        // Price badge — hiện buyCost khi có item, ẩn khi trống
+        if (priceBadge != null)
+            priceBadge.SetActive(item != null);
+        if (priceText != null && item != null)
+            priceText.text = item.buyCost.ToString();
     }
 
     Sprite GetCardSprite(ItemType type) => type switch

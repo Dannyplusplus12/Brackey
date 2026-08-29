@@ -866,6 +866,507 @@ public static class GameUISetupTool
     }
 
     // =========================================================
+    // PRICE BADGE SETUP
+    // =========================================================
+
+    [MenuItem("Tools/Shop-Arena Setup/Setup Price Badges")]
+    public static void SetupPriceBadges()
+    {
+        var tmpType = System.Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+        if (tmpType == null)
+        {
+            Debug.LogError("[PriceBadge] Không tìm thấy TextMeshProUGUI. Import TMP trước.");
+            return;
+        }
+
+        int count = 0;
+
+        // ── ShopOfferSlotUI (buy price) ───────────────────────────────────────
+        foreach (var slot in Object.FindObjectsByType<ShopOfferSlotUI>(FindObjectsSortMode.None))
+            if (EnsurePriceBadge(slot.gameObject, slot, tmpType, "priceBadge", "priceText",
+                                 anchorCorner: new Vector2(0f, 0f),   // góc dưới trái
+                                 pivotCorner:  new Vector2(0f, 0f),
+                                 offset:       new Vector2(4f, 4f)))
+                count++;
+
+        // ── ShopInventorySlotUI (sell price) ─────────────────────────────────
+        foreach (var slot in Object.FindObjectsByType<ShopInventorySlotUI>(FindObjectsSortMode.None))
+            if (EnsurePriceBadge(slot.gameObject, slot, tmpType, "priceBadge", "priceText",
+                                 anchorCorner: new Vector2(0f, 0f),
+                                 pivotCorner:  new Vector2(0f, 0f),
+                                 offset:       new Vector2(4f, 4f)))
+                count++;
+
+        if (count > 0)
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+
+        Debug.Log($"[PriceBadge] Xong — đã xử lý {count} slot.\n\n" +
+                  "Việc cần làm:\n" +
+                  "  1. Chọn từng slot → PriceBadge → Image → kéo sprite nền giá của artist vào Source Image\n" +
+                  "  2. Chỉnh kích thước/vị trí PriceBadge RectTransform cho vừa thiết kế\n" +
+                  "  3. (Tuỳ chọn) Đổi font/size trên PriceText");
+    }
+
+    // Tạo PriceBadge GO với Image nền + TMP_Text con.
+    // Trả true nếu có thay đổi (tạo mới hoặc wire lại field).
+    static bool EnsurePriceBadge(GameObject slotGO, Component target, System.Type tmpType,
+                                  string badgeFieldName, string textFieldName,
+                                  Vector2 anchorCorner, Vector2 pivotCorner, Vector2 offset)
+    {
+        const string badgeName = "PriceBadge";
+        const string textName  = "PriceText";
+        bool dirty = false;
+
+        // ── 1. Tạo hoặc tìm PriceBadge ───────────────────────────────────────
+        Transform existingBadge = slotGO.transform.Find(badgeName);
+        GameObject badgeGO;
+        if (existingBadge != null)
+        {
+            badgeGO = existingBadge.gameObject;
+        }
+        else
+        {
+            badgeGO = new GameObject(badgeName, typeof(RectTransform), typeof(Image));
+            Undo.RegisterCreatedObjectUndo(badgeGO, "Create PriceBadge");
+            badgeGO.transform.SetParent(slotGO.transform, false);
+            badgeGO.transform.SetAsLastSibling(); // đè lên CardBg và Icon
+            dirty = true;
+        }
+
+        // Anchor ở góc chỉ định, kích thước cố định
+        RectTransform badgeRt = badgeGO.GetComponent<RectTransform>();
+        Undo.RecordObject(badgeRt, "Setup PriceBadge RectTransform");
+        badgeRt.anchorMin        = anchorCorner;
+        badgeRt.anchorMax        = anchorCorner;
+        badgeRt.pivot            = pivotCorner;
+        badgeRt.anchoredPosition = offset;
+        badgeRt.sizeDelta        = new Vector2(56f, 26f); // width đủ "999", height label
+
+        Image badgeImg = badgeGO.GetComponent<Image>();
+        Undo.RecordObject(badgeImg, "Setup PriceBadge Image");
+        badgeImg.raycastTarget = false;
+        badgeImg.color         = Color.white; // artist sẽ kéo sprite vào đây
+
+        // ── 2. Tạo hoặc tìm PriceText ────────────────────────────────────────
+        Transform existingText = badgeGO.transform.Find(textName);
+        GameObject textGO;
+        if (existingText != null)
+        {
+            textGO = existingText.gameObject;
+        }
+        else
+        {
+            textGO = new GameObject(textName, typeof(RectTransform));
+            Undo.RegisterCreatedObjectUndo(textGO, "Create PriceText");
+            textGO.transform.SetParent(badgeGO.transform, false);
+            dirty = true;
+        }
+
+        RectTransform textRt = textGO.GetComponent<RectTransform>();
+        Undo.RecordObject(textRt, "Setup PriceText RectTransform");
+        textRt.anchorMin  = Vector2.zero;
+        textRt.anchorMax  = Vector2.one;
+        textRt.offsetMin  = new Vector2(2f, 1f);
+        textRt.offsetMax  = new Vector2(-2f, -1f);
+
+        // Thêm TMP nếu chưa có
+        var existingTmp = textGO.GetComponent(tmpType);
+        if (existingTmp == null)
+        {
+            existingTmp = textGO.AddComponent(tmpType);
+            dirty = true;
+        }
+        tmpType.GetProperty("text")?.SetValue(existingTmp, "0");
+        tmpType.GetProperty("fontSize")?.SetValue(existingTmp, 18f);
+        tmpType.GetProperty("color")?.SetValue(existingTmp, Color.white);
+        var alignType = System.Type.GetType("TMPro.TextAlignmentOptions, Unity.TextMeshPro");
+        if (alignType != null)
+            tmpType.GetProperty("alignment")?.SetValue(existingTmp,
+                System.Enum.Parse(alignType, "Center"));
+        tmpType.GetProperty("raycastTarget")?.SetValue(existingTmp, false);
+
+        // ── 3. Wire fields vào component ─────────────────────────────────────
+        SerializedObject so = new SerializedObject(target);
+
+        var badgeProp = so.FindProperty(badgeFieldName);
+        if (badgeProp != null && badgeProp.objectReferenceValue == null)
+        {
+            badgeProp.objectReferenceValue = badgeGO;
+            dirty = true;
+        }
+
+        var textProp = so.FindProperty(textFieldName);
+        if (textProp != null && textProp.objectReferenceValue == null)
+        {
+            textProp.objectReferenceValue = existingTmp as Object;
+            dirty = true;
+        }
+
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(slotGO);
+        return dirty;
+    }
+
+    // =========================================================
+    // CORN DISPLAY PANEL
+    // =========================================================
+
+    // Dựng CornPanel ở trên cùng ShopRoot + DeltaAnchor bên ngoài panel (bên phải).
+    // CornPanel: Image nền + CornIcon + CornText (CornDisplay) + CornDeltaPopup.
+    // DeltaAnchor: RectTransform child của Canvas root — nơi popup delta xuất hiện.
+    [MenuItem("Tools/Shop-Arena Setup/Setup Corn Display Panel")]
+    public static void SetupCornDisplayPanel()
+    {
+        var tmpType = System.Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+        if (tmpType == null)
+        {
+            Debug.LogError("[CornPanel] Không tìm thấy TextMeshProUGUI. Import TMP trước.");
+            return;
+        }
+
+        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[CornPanel] Không tìm thấy Canvas. Chạy 'Build UI In Scene' trước.");
+            return;
+        }
+
+        // Tìm ShopRoot
+        Transform shopRoot = canvas.transform.Find("ShopRoot");
+        if (shopRoot == null)
+        {
+            Debug.LogError("[CornPanel] Không tìm thấy ShopRoot trong Canvas.");
+            return;
+        }
+
+        // ── 1. CornPanel ─────────────────────────────────────────────────────
+        const string panelName = "CornPanel";
+        GameObject panelGO = shopRoot.Find(panelName)?.gameObject;
+        if (panelGO == null)
+        {
+            panelGO = new GameObject(panelName, typeof(RectTransform), typeof(Image));
+            Undo.RegisterCreatedObjectUndo(panelGO, "Create CornPanel");
+            // Đặt thẳng vào Canvas root để luôn hiện cả Shop lẫn Arena
+            panelGO.transform.SetParent(canvas.transform, false);
+        }
+
+        // Anchor: top-left của ShopRoot, chiều ngang stretch, cao cố định
+        RectTransform panelRt = panelGO.GetComponent<RectTransform>();
+        Undo.RecordObject(panelRt, "Setup CornPanel RectTransform");
+        panelRt.anchorMin        = new Vector2(0f, 1f);
+        panelRt.anchorMax        = new Vector2(1f, 1f);
+        panelRt.pivot            = new Vector2(0.5f, 1f);
+        panelRt.anchoredPosition = Vector2.zero;
+        panelRt.sizeDelta        = new Vector2(0f, 54f); // chiều cao panel
+
+        Image panelImg = panelGO.GetComponent<Image>();
+        Undo.RecordObject(panelImg, "Setup CornPanel Image");
+        panelImg.color        = new Color(0.1f, 0.08f, 0.04f, 0.85f); // nền tối, tự thay sprite
+        panelImg.raycastTarget = false;
+
+        // ── 2. CornIcon ──────────────────────────────────────────────────────
+        const string iconName = "CornIcon";
+        GameObject iconGO = panelGO.transform.Find(iconName)?.gameObject;
+        if (iconGO == null)
+        {
+            iconGO = new GameObject(iconName, typeof(RectTransform), typeof(Image));
+            Undo.RegisterCreatedObjectUndo(iconGO, "Create CornIcon");
+            iconGO.transform.SetParent(panelGO.transform, false);
+        }
+
+        RectTransform iconRt = iconGO.GetComponent<RectTransform>();
+        Undo.RecordObject(iconRt, "Setup CornIcon RectTransform");
+        iconRt.anchorMin        = new Vector2(0f, 0.5f);
+        iconRt.anchorMax        = new Vector2(0f, 0.5f);
+        iconRt.pivot            = new Vector2(0f, 0.5f);
+        iconRt.anchoredPosition = new Vector2(8f, 0f);
+        iconRt.sizeDelta        = new Vector2(36f, 36f);
+
+        Image iconImg = iconGO.GetComponent<Image>();
+        Undo.RecordObject(iconImg, "Setup CornIcon Image");
+        iconImg.color         = Color.white; // kéo sprite corn vào đây
+        iconImg.raycastTarget = false;
+        iconImg.preserveAspect = true;
+
+        // ── 3. CornText (TMP + CornDisplay) ──────────────────────────────────
+        const string textName = "CornText";
+        GameObject textGO = panelGO.transform.Find(textName)?.gameObject;
+        if (textGO == null)
+        {
+            textGO = new GameObject(textName, typeof(RectTransform));
+            Undo.RegisterCreatedObjectUndo(textGO, "Create CornText");
+            textGO.transform.SetParent(panelGO.transform, false);
+        }
+
+        RectTransform textRt = textGO.GetComponent<RectTransform>();
+        Undo.RecordObject(textRt, "Setup CornText RectTransform");
+        textRt.anchorMin        = new Vector2(0f, 0f);
+        textRt.anchorMax        = new Vector2(1f, 1f);
+        textRt.offsetMin        = new Vector2(52f, 4f);  // bên phải icon
+        textRt.offsetMax        = new Vector2(-8f, -4f);
+
+        // TMP component
+        var existingTmp = textGO.GetComponent(tmpType);
+        if (existingTmp == null)
+            existingTmp = Undo.AddComponent(textGO, tmpType) as Component;
+
+        tmpType.GetProperty("text")?.SetValue(existingTmp, "0");
+        tmpType.GetProperty("fontSize")?.SetValue(existingTmp, 28f);
+        tmpType.GetProperty("fontStyle")?.SetValue(existingTmp,
+            System.Enum.Parse(System.Type.GetType("TMPro.FontStyles, Unity.TextMeshPro"), "Bold"));
+        tmpType.GetProperty("color")?.SetValue(existingTmp, new Color(1f, 0.92f, 0.3f)); // vàng corn
+        var alignType = System.Type.GetType("TMPro.TextAlignmentOptions, Unity.TextMeshPro");
+        if (alignType != null)
+            tmpType.GetProperty("alignment")?.SetValue(existingTmp,
+                System.Enum.Parse(alignType, "MidlineLeft"));
+        tmpType.GetProperty("raycastTarget")?.SetValue(existingTmp, false);
+
+        // CornDisplay component (đã có sẵn trong project)
+        CornDisplay cornDisplay = textGO.GetComponent<CornDisplay>();
+        if (cornDisplay == null)
+            cornDisplay = Undo.AddComponent<CornDisplay>(textGO);
+
+        // Set prefix = "" vì icon đã hiển thị riêng
+        SerializedObject cdSO = new SerializedObject(cornDisplay);
+        var prefixProp = cdSO.FindProperty("prefix");
+        if (prefixProp != null) prefixProp.stringValue = "";
+        cdSO.ApplyModifiedProperties();
+
+        // ── 4. CornDeltaPopup component trên panel ────────────────────────────
+        CornDeltaPopup deltaComp = panelGO.GetComponent<CornDeltaPopup>();
+        if (deltaComp == null)
+            deltaComp = Undo.AddComponent<CornDeltaPopup>(panelGO);
+
+        // ── 5. DeltaAnchor — child của Canvas root, bên ngoài panel ──────────
+        // Vị trí: bên phải ShopOfferPanel (nếu tìm được), không thì dùng offset từ CornPanel
+        const string anchorName = "CornDeltaAnchor";
+        GameObject anchorGO = canvas.transform.Find(anchorName)?.gameObject;
+        if (anchorGO == null)
+        {
+            anchorGO = new GameObject(anchorName, typeof(RectTransform));
+            Undo.RegisterCreatedObjectUndo(anchorGO, "Create CornDeltaAnchor");
+            anchorGO.transform.SetParent(canvas.transform, false); // child của Canvas, không clip
+        }
+
+        // Tìm ShopOfferPanel để đặt anchor bên phải nó
+        RectTransform offerPanelRt = null;
+        Transform offerPanel = shopRoot.Find("ShopOfferPanel");
+        if (offerPanel != null) offerPanelRt = offerPanel.GetComponent<RectTransform>();
+
+        RectTransform anchorRt = anchorGO.GetComponent<RectTransform>();
+        Undo.RecordObject(anchorRt, "Setup CornDeltaAnchor RectTransform");
+        if (offerPanelRt != null)
+        {
+            // Đặt anchor bên phải ShopOfferPanel, cùng độ cao CornPanel
+            anchorRt.anchorMin        = offerPanelRt.anchorMin;
+            anchorRt.anchorMax        = offerPanelRt.anchorMax;
+            anchorRt.pivot            = new Vector2(0f, 1f);
+            anchorRt.anchoredPosition = new Vector2(
+                offerPanelRt.anchoredPosition.x + offerPanelRt.sizeDelta.x * 0.5f + 16f,
+                offerPanelRt.anchoredPosition.y);
+            anchorRt.sizeDelta = Vector2.zero;
+        }
+        else
+        {
+            // Fallback: bên phải ShopRoot, cùng độ cao top
+            anchorRt.anchorMin        = new Vector2(0.15f, 1f);
+            anchorRt.anchorMax        = new Vector2(0.15f, 1f);
+            anchorRt.pivot            = new Vector2(0f, 1f);
+            anchorRt.anchoredPosition = new Vector2(0f, -8f);
+            anchorRt.sizeDelta        = Vector2.zero;
+        }
+
+        // Wire deltaAnchor vào CornDeltaPopup
+        SerializedObject deltaSO = new SerializedObject(deltaComp);
+        deltaSO.FindProperty("deltaAnchor").objectReferenceValue = anchorRt;
+        deltaSO.ApplyModifiedProperties();
+
+        // Lưu scene
+        EditorUtility.SetDirty(canvas.gameObject);
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
+        Selection.activeGameObject = panelGO;
+
+        Debug.Log("[CornPanel] Xong!\n\n" +
+                  "Cấu trúc:\n" +
+                  "  Canvas/CornPanel  (luôn hiện, tự kéo đến vị trí muốn)\n" +
+                  "  ├── CornIcon      (Image — kéo sprite corn)\n" +
+                  "  └── CornText      (TMP + CornDisplay)\n" +
+                  "  Canvas/CornDeltaAnchor — kéo đến vị trí muốn popup xuất hiện\n\n" +
+                  "Việc cần làm:\n" +
+                  "  1. CornPanel → Image → kéo sprite nền panel\n" +
+                  "  2. CornIcon  → Image → kéo sprite corn icon\n" +
+                  "  3. CornPanel → CornDeltaPopup → Corn Icon → kéo cùng sprite corn\n" +
+                  "  4. Di chuyển CornDeltaAnchor trong Scene view cho đúng vị trí bên ngoài panel");
+    }
+
+    // =========================================================
+    // REROLL BUTTON SETUP
+    // =========================================================
+
+    // Thêm nhãn "ROLL" và badge giá vào nút Reroll trong ShopOfferPanel.
+    // Chọn GO reroll button trong Hierarchy trước khi chạy, hoặc tool tự tìm theo tên.
+    [MenuItem("Tools/Shop-Arena Setup/Setup Reroll Button")]
+    public static void SetupRerollButton()
+    {
+        var tmpType = System.Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro");
+        if (tmpType == null)
+        {
+            Debug.LogError("[RerollSetup] Không tìm thấy TextMeshProUGUI. Import TMP trước.");
+            return;
+        }
+
+        // ── Tìm nút reroll ───────────────────────────────────────────────────
+        // Ưu tiên GO đang chọn, nếu không tìm theo tên phổ biến
+        GameObject btnGO = Selection.activeGameObject;
+        if (btnGO == null || btnGO.GetComponent<UnityEngine.UI.Button>() == null)
+        {
+            // Thử tìm theo tên
+            string[] candidateNames = { "ScrollButton", "RerollButton", "Reroll", "BtnReroll" };
+            foreach (var name in candidateNames)
+            {
+                GameObject found = GameObject.Find(name);
+                if (found != null && found.GetComponent<UnityEngine.UI.Button>() != null)
+                {
+                    btnGO = found;
+                    break;
+                }
+            }
+        }
+
+        if (btnGO == null || btnGO.GetComponent<UnityEngine.UI.Button>() == null)
+        {
+            Debug.LogError("[RerollSetup] Không tìm thấy nút Reroll. " +
+                           "Chọn GameObject Button chứa nút reroll trong Hierarchy rồi chạy lại.");
+            return;
+        }
+
+        bool dirty = false;
+
+        // ── 1. ROLL Label ────────────────────────────────────────────────────
+        const string labelName = "RollLabel";
+        GameObject labelGO = btnGO.transform.Find(labelName)?.gameObject;
+        if (labelGO == null)
+        {
+            labelGO = new GameObject(labelName, typeof(RectTransform));
+            Undo.RegisterCreatedObjectUndo(labelGO, "Create RollLabel");
+            labelGO.transform.SetParent(btnGO.transform, false);
+            dirty = true;
+        }
+
+        // Stretch full button, text căn giữa
+        RectTransform labelRt = labelGO.GetComponent<RectTransform>();
+        Undo.RecordObject(labelRt, "Setup RollLabel RectTransform");
+        labelRt.anchorMin         = Vector2.zero;
+        labelRt.anchorMax         = Vector2.one;
+        labelRt.offsetMin         = new Vector2(0f, 16f);  // để trống phần dưới cho badge giá
+        labelRt.offsetMax         = Vector2.zero;
+
+        var existingTmp = labelGO.GetComponent(tmpType);
+        if (existingTmp == null)
+        {
+            existingTmp = Undo.AddComponent(labelGO, tmpType) as Component;
+            dirty = true;
+        }
+        tmpType.GetProperty("text")?.SetValue(existingTmp, "ROLL");
+        tmpType.GetProperty("fontSize")?.SetValue(existingTmp, 28f);
+        tmpType.GetProperty("color")?.SetValue(existingTmp, Color.white);
+        var alignType = System.Type.GetType("TMPro.TextAlignmentOptions, Unity.TextMeshPro");
+        if (alignType != null)
+            tmpType.GetProperty("alignment")?.SetValue(existingTmp,
+                System.Enum.Parse(alignType, "Center"));
+        tmpType.GetProperty("raycastTarget")?.SetValue(existingTmp, false);
+
+        // ── 2. Price Badge (góc dưới trái, giống ShopOfferSlotUI) ────────────
+        const string badgeName = "PriceBadge";
+        const string textName  = "PriceText";
+
+        GameObject badgeGO = btnGO.transform.Find(badgeName)?.gameObject;
+        if (badgeGO == null)
+        {
+            badgeGO = new GameObject(badgeName, typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            Undo.RegisterCreatedObjectUndo(badgeGO, "Create RerollPriceBadge");
+            badgeGO.transform.SetParent(btnGO.transform, false);
+            badgeGO.transform.SetAsLastSibling();
+            dirty = true;
+        }
+
+        RectTransform badgeRt = badgeGO.GetComponent<RectTransform>();
+        Undo.RecordObject(badgeRt, "Setup RerollPriceBadge RectTransform");
+        badgeRt.anchorMin        = new Vector2(0f, 0f);
+        badgeRt.anchorMax        = new Vector2(0f, 0f);
+        badgeRt.pivot            = new Vector2(0f, 0f);
+        badgeRt.anchoredPosition = new Vector2(4f, 4f);
+        badgeRt.sizeDelta        = new Vector2(56f, 26f);
+
+        var badgeImg = badgeGO.GetComponent<UnityEngine.UI.Image>();
+        Undo.RecordObject(badgeImg, "Setup RerollPriceBadge Image");
+        badgeImg.raycastTarget = false;
+        badgeImg.color         = Color.white; // kéo sprite nền vào đây
+
+        // PriceText
+        GameObject textGO = badgeGO.transform.Find(textName)?.gameObject;
+        if (textGO == null)
+        {
+            textGO = new GameObject(textName, typeof(RectTransform));
+            Undo.RegisterCreatedObjectUndo(textGO, "Create RerollPriceText");
+            textGO.transform.SetParent(badgeGO.transform, false);
+            dirty = true;
+        }
+
+        RectTransform textRt = textGO.GetComponent<RectTransform>();
+        Undo.RecordObject(textRt, "Setup RerollPriceText RectTransform");
+        textRt.anchorMin = Vector2.zero;
+        textRt.anchorMax = Vector2.one;
+        textRt.offsetMin = new Vector2(2f, 1f);
+        textRt.offsetMax = new Vector2(-2f, -1f);
+
+        var textTmp = textGO.GetComponent(tmpType);
+        if (textTmp == null)
+        {
+            textTmp = Undo.AddComponent(textGO, tmpType) as Component;
+            dirty = true;
+        }
+        tmpType.GetProperty("text")?.SetValue(textTmp, "4");
+        tmpType.GetProperty("fontSize")?.SetValue(textTmp, 18f);
+        tmpType.GetProperty("color")?.SetValue(textTmp, Color.white);
+        if (alignType != null)
+            tmpType.GetProperty("alignment")?.SetValue(textTmp,
+                System.Enum.Parse(alignType, "Center"));
+        tmpType.GetProperty("raycastTarget")?.SetValue(textTmp, false);
+
+        // ── 3. RerollButtonUI component + wire fields ─────────────────────────
+        RerollButtonUI ui = btnGO.GetComponent<RerollButtonUI>();
+        if (ui == null)
+        {
+            ui = Undo.AddComponent<RerollButtonUI>(btnGO);
+            dirty = true;
+        }
+
+        SerializedObject so = new SerializedObject(ui);
+        so.FindProperty("rollLabel").objectReferenceValue  = existingTmp as Object;
+        so.FindProperty("priceBadge").objectReferenceValue = badgeGO;
+        so.FindProperty("priceText").objectReferenceValue  = textTmp as Object;
+        so.ApplyModifiedProperties();
+
+        // ── Lưu scene ─────────────────────────────────────────────────────────
+        EditorUtility.SetDirty(btnGO);
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(btnGO.scene);
+        Selection.activeGameObject = btnGO;
+
+        Debug.Log($"[RerollSetup] Xong trên '{btnGO.name}'!\n\n" +
+                  "Cấu trúc:\n" +
+                  $"  {btnGO.name} (RerollButtonUI)\n" +
+                  "  ├── RollLabel  (TMP — text 'ROLL', căn giữa)\n" +
+                  "  └── PriceBadge (Image — kéo sprite nền vào Source Image)\n" +
+                  "       └── PriceText (TMP — tự cập nhật theo rerollCost)\n\n" +
+                  "Việc cần làm:\n" +
+                  "  1. Chọn PriceBadge → Source Image → kéo sprite nền badge coin\n" +
+                  "  2. Chỉnh font/size RollLabel nếu cần\n" +
+                  "  3. Tự thay nền button theo ý bạn");
+    }
+
+    // =========================================================
     // STATIC ITEM ENTRY PREFAB
     // =========================================================
 

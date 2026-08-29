@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
+  m_Name: BAGGER
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
+  maxHP: 45
+  damage: 6
+  attackSpeed: 0.55
+  attackRange: 65
+  attackVisualDuration: 0.15
+  moveSpeed: 130
+  separationRadius: 35
+  separationStrength: 40
+  flipCooldown: 0.2
+  actionDelayMin: 0
+  actionDelayMax: 0.5
+  swayTiltAngle: 25
+  swayBounceHeight: 2.8
+  swayFrequency: 15
+  centerOffset: 2.5
+  dragHeadOffset: 5
+  dragTiltPerSpeed: 12
+  dragMaxTilt: 40
+  dragSpringStiffness: 130
+  dragSpringDamping: 5
+  hitFlashColor: {r: 1, g: 0.8, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  hitShakeStrength: 0.6
+  hitShakeDuration: 0.2
+  initialAngry: 12
+  angryPerHunger: 50
+  angryOnAllyDeath: 25
+  angryOnRoundStart: 12
+  maxAngry: 100
+  foodRequiredPerRound: 1
+  killReward: 1
+  description: '4th hit / ally dies: <color=#4FC3F7>+50%</color> <sprite name="stat_damage">
+    to nearest ally (this round)
+
+    Each <sprite name="stat_angry"> gained: <color=#FF6B1A>+0.1</color> <sprite name="stat_atkspeed">
+    forever
+
+    <color=#E82020>+50</color> <sprite name="stat_angry"> when hungry
+
+    <color=#E82020>+25</color> <sprite name="stat_angry"> when 1 ally die'
+  idleSprite: {fileID: 8155977494501743051, guid: 38bb7488b0017754892162f6d1787dda, type: 3}
+  attackSprite: {fileID: -1687117944462887543, guid: 4e137b1843291ec4c9bbf54bfec6aede, type: 3}
+  skillSprite: {fileID: -1687117944462887543, guid: 4e137b1843291ec4c9bbf54bfec6aede, type: 3}
+  portraitOffset: {x: 0, y: 0}
+  portraitScale: 1

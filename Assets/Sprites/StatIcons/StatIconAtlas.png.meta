@@ -115,15 +115,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: StatIconAtlas_0
+      name: stat_hp
       rect:
         serializedVersion: 2
-        x: 16
-        y: 2
-        width: 32
-        height: 59
+        x: 34
+        y: 700
+        width: 314
+        height: 252
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -137,15 +137,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: StatIconAtlas_1
+      name: stat_damage
       rect:
         serializedVersion: 2
-        x: 69
-        y: 9
-        width: 54
-        height: 50
+        x: 533
+        y: 662
+        width: 261
+        height: 309
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -162,12 +162,12 @@ TextureImporter:
       name: StatIconAtlas_2
       rect:
         serializedVersion: 2
-        x: 145
-        y: 3
-        width: 30
-        height: 58
+        x: 800
+        y: 756
+        width: 6
+        height: 7
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -181,15 +181,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: StatIconAtlas_3
+      name: stat_atkspeed
       rect:
         serializedVersion: 2
-        x: 201
-        y: 7
-        width: 46
-        height: 53
+        x: 993
+        y: 700
+        width: 300
+        height: 252
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -206,12 +206,12 @@ TextureImporter:
       name: StatIconAtlas_4
       rect:
         serializedVersion: 2
-        x: 265
-        y: 0
-        width: 46
-        height: 53
+        x: 533
+        y: 717
+        width: 5
+        height: 5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -228,12 +228,12 @@ TextureImporter:
       name: StatIconAtlas_5
       rect:
         serializedVersion: 2
-        x: 323
-        y: 3
-        width: 58
-        height: 58
+        x: 772
+        y: 678
+        width: 22
+        height: 25
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -246,11 +246,99 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: StatIconAtlas_6
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 293
+        width: 302
+        height: 302
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40facf931b340e8469ad79cb53422d0c
+      internalID: 1056918366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stat_speed
+      rect:
+        serializedVersion: 2
+        x: 503
+        y: 321
+        width: 296
+        height: 223
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 56e36b1f6a420ca42b74fcada79d3afc
+      internalID: -1928409937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stat_food
+      rect:
+        serializedVersion: 2
+        x: 957
+        y: 302
+        width: 273
+        height: 307
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a6f3db416500d04280de5ce5f7a7ebd
+      internalID: 821487113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stat_angry
+      rect:
+        serializedVersion: 2
+        x: 1369
+        y: 314
+        width: 275
+        height: 275
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26a97c42e8ff652408babc024208a2f9
+      internalID: 98618672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 6600521a41178694dba9661f0cbabc55
     internalID: 0
     vertices: []
     indices: 
@@ -258,14 +346,22 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceOnImport
+        value: False
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      StatIconAtlas_0: 3750567548456195787
-      StatIconAtlas_1: -1438993834471942441
       StatIconAtlas_2: 3999489298936601244
-      StatIconAtlas_3: 652746372518119342
       StatIconAtlas_4: -5758004324738198674
       StatIconAtlas_5: -3067117326695807496
+      StatIconAtlas_6: 1056918366
+      stat_angry: 98618672
+      stat_atkspeed: 652746372518119342
+      stat_damage: -1438993834471942441
+      stat_food: 821487113
+      stat_hp: 3750567548456195787
+      stat_speed: -1928409937
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

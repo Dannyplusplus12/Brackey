@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
+  m_Name: SUMO
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
+  maxHP: 160
+  damage: 20
+  attackSpeed: 0.7
+  attackRange: 90
+  attackVisualDuration: 0.4
+  moveSpeed: 80
+  separationRadius: 50
+  separationStrength: 60
+  flipCooldown: 0.5
+  actionDelayMin: 0.2
+  actionDelayMax: 0.6
+  swayTiltAngle: 18
+  swayBounceHeight: 1.5
+  swayFrequency: 16
+  centerOffset: 4
+  dragHeadOffset: 8
+  dragTiltPerSpeed: 6
+  dragMaxTilt: 25
+  dragSpringStiffness: 100
+  dragSpringDamping: 12
+  hitFlashColor: {r: 1, g: 0.13576366, b: 0, a: 1}
+  hitFlashDuration: 0.08
+  hitShakeStrength: 0.3
+  hitShakeDuration: 0.12
+  initialAngry: 5
+  angryPerHunger: 35
+  angryOnAllyDeath: 8
+  angryOnRoundStart: 5
+  maxAngry: 100
+  foodRequiredPerRound: 4
+  killReward: 3
+  description: '"Inner peace. Large appetite."
+
+
+    Near ally: <color=#4FC3F7>+20%</color>
+    <sprite name="stat_hp"> & <color=#4FC3F7>+20%</color> <sprite name="stat_damage">
+    (this round)
+
+    Each <sprite name="stat_food"> received: <color=#66BB6A>+1%</color>
+    <sprite name="stat_hp"> forever'
+  idleSprite: {fileID: 8303194314658244379, guid: ff634845c7dd3a74399b858983ff50a0, type: 3}
+  attackSprite: {fileID: 448532415101501820, guid: 8e80ef5fa3a64c745b8deb2870d28a2a, type: 3}
+  skillSprite: {fileID: 448532415101501820, guid: 8e80ef5fa3a64c745b8deb2870d28a2a, type: 3}
+  portraitOffset: {x: 0, y: 0}
+  portraitScale: 1

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 
 // Thanh stats trong tooltip — hiện khi hover vào roster entry hoặc shop item, ẩn khi rời.
-// Slots: 0=HP, 1=DMG, 2=SPD, 3=ANGRY, 4=FOOD
+// Slots: 0=HP, 1=DMG, 2=ATKSPD, 3=ANGRY, 4=FOOD
 // Setup: chạy Tools > Shop-Arena Setup > Build StatBar In TooltipPanel.
 [System.Serializable]
 public struct StatSlotUI
@@ -19,11 +19,11 @@ public class CharacterStatBar : MonoBehaviour
     [Header("Icons (gán sprite vào đây)")]
     [SerializeField] Sprite iconHP;
     [SerializeField] Sprite iconDamage;
-    [SerializeField] Sprite iconSpeed;
+    [SerializeField] Sprite iconAtkSpeed;
     [SerializeField] Sprite iconAngry;
     [SerializeField] Sprite iconFood;
 
-    [Header("Slots (thứ tự: HP, Damage, Speed, Angry, Food)")]
+    [Header("Slots (thứ tự: HP, Damage, AtkSpeed, Angry, Food)")]
     [SerializeField] StatSlotUI[] slots = new StatSlotUI[5];
 
     void Awake()
@@ -38,7 +38,7 @@ public class CharacterStatBar : MonoBehaviour
         gameObject.SetActive(true);
         SetSlot(0, iconHP,     FormatStat(s.maxHP),              "HP",    s.maxHP.ToString("0"));
         SetSlot(1, iconDamage, FormatStat(s.damage),             "DMG",   s.damage.ToString("0"));
-        SetSlot(2, iconSpeed,  FormatStat(s.moveSpeed),          "SPD",   s.moveSpeed.ToString("0.#"));
+        SetSlot(2, iconAtkSpeed, FormatStat(s.attackSpeed),       "ATKSPD", s.attackSpeed.ToString("0.##"));
         SetSlot(3, iconAngry,  $"{FormatStat(s.angryOnRoundStart)}/{FormatStat(s.maxAngry)}", "ANGRY",
                                $"{s.angryOnRoundStart:0}/{s.maxAngry:0}");
         SetSlot(4, iconFood,   s.foodRequiredPerRound.ToString(), "FOOD");
@@ -55,7 +55,7 @@ public class CharacterStatBar : MonoBehaviour
         SetSlot(0, iconHP,     $"{FormatStat(character.CurrentHP)}/{FormatStat(maxHP)}", "HP",
                                $"{character.CurrentHP:0}/{maxHP:0}");
         SetSlot(1, iconDamage, FormatStat(dmg),  "DMG", dmg.ToString("0"));
-        SetSlot(2, iconSpeed,  FormatStat(spd),  "SPD", spd.ToString("0.#"));
+        SetSlot(2, iconAtkSpeed, FormatStat(character.EffectiveAPS), "ATKSPD", character.EffectiveAPS.ToString("0.##"));
         SetSlot(3, iconAngry,  $"{FormatStat(character.CurrentAngry)}/{FormatStat(s.maxAngry)}", "ANGRY",
                                $"{character.CurrentAngry:0}/{s.maxAngry:0}");
         SetSlot(4, iconFood,   character.EffectiveFoodCost.ToString(), "FOOD");

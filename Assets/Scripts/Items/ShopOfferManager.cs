@@ -12,6 +12,8 @@ public class ShopOfferManager : MonoBehaviour
 {
     public static ShopOfferManager Instance { get; private set; }
     public static event System.Action OnOffersChanged;
+    // Raised sau mỗi lần reroll hoặc reset wave — payload = cost LÚC ĐÓ (trước khi +1)
+    public static event System.Action<int> OnRerollCostChanged;
 
     public const int OfferCount = 4;
 
@@ -97,6 +99,7 @@ public class ShopOfferManager : MonoBehaviour
         for (int i = 0; i < OfferCount; i++)
             currentOffers[i] = PickRandomItem();
         OnOffersChanged?.Invoke();
+        OnRerollCostChanged?.Invoke(_rerollCost);
     }
 
     ItemData PickRandomItem()
@@ -154,13 +157,13 @@ public class ShopOfferManager : MonoBehaviour
             var spawned = CharacterSpawner.Spawn(item.characterPrefab);
             bought = spawned != null;
             if (!bought)
-                PlayerWallet.Instance?.Earn(item.buyCost);
+                PlayerWallet.Instance?.EarnSilent(item.buyCost); // refund, không hiện delta
         }
         else if (item.itemType == ItemType.Active)
         {
             bought = PlayerInventory.Instance.TryAddItem(item);
             if (!bought)
-                PlayerWallet.Instance?.Earn(item.buyCost);
+                PlayerWallet.Instance?.EarnSilent(item.buyCost); // refund, không hiện delta
         }
         else
         {

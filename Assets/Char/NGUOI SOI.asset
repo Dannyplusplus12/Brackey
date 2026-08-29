@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
+  m_Name: NGUOI SOI
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
+  maxHP: 70
+  damage: 8
+  attackSpeed: 1
+  attackRange: 70
+  attackVisualDuration: 0.15
+  moveSpeed: 160
+  separationRadius: 38
+  separationStrength: 45
+  flipCooldown: 0.3
+  actionDelayMin: 0
+  actionDelayMax: 0.3
+  swayTiltAngle: 30
+  swayBounceHeight: 2.8
+  swayFrequency: 15
+  centerOffset: 3
+  dragHeadOffset: 6
+  dragTiltPerSpeed: 12
+  dragMaxTilt: 40
+  dragSpringStiffness: 130
+  dragSpringDamping: 5
+  hitFlashColor: {r: 1, g: 0.3, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  hitShakeStrength: 0.5
+  hitShakeDuration: 0.18
+  initialAngry: 50
+  angryPerHunger: 20
+  angryOnAllyDeath: 10
+  angryOnRoundStart: 0
+  maxAngry: 100
+  foodRequiredPerRound: 2
+  killReward: 2
+  description: 'Each hit: <color=#FF6B1A>+5%</color> <sprite name="stat_atkspeed">
+    & <color=#FF6B1A>+5%</color> <sprite name="stat_damage"> (this round)
+
+    Each
+    <sprite name="stat_angry"> gained: <color=#E82020>+1</color> <sprite name="stat_damage">
+    forever
+
+    <color=#E82020>+20</color> <sprite name="stat_angry"> when hungy
+
+    <color=#E82020>+10</color>
+    <sprite name="stat_angry"> when 1 ally die'
+  idleSprite: {fileID: -2466381354885757933, guid: 8d974c8f87d4dd442b5782b63da0836e, type: 3}
+  attackSprite: {fileID: 433260406738338109, guid: 59618a4cdbc1f8744b9f4b0c99cdab94, type: 3}
+  skillSprite: {fileID: 433260406738338109, guid: 59618a4cdbc1f8744b9f4b0c99cdab94, type: 3}
+  portraitOffset: {x: 0, y: 0}
+  portraitScale: 1

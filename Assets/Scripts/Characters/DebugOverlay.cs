@@ -27,6 +27,9 @@ public class DebugOverlay : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             SpawnDebugChar(allyPrefab, Faction.Ally);
 
+        if (Input.GetKeyDown(KeyCode.I))
+            CharacterBase.DebugInvincible = !CharacterBase.DebugInvincible;
+
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
             SetTimeScaleIndex(timeScaleIndex - 1);
 
@@ -120,9 +123,49 @@ public class DebugOverlay : MonoBehaviour
             }
         }
 
+        // --- Sumo diagnostics ---
+        bool hasSumo = false;
+        foreach (Faction f in new[] { Faction.Ally, Faction.Enemy })
+        {
+            foreach (var c in CharacterGrid.GetAll(f))
+            {
+                if (c is not Sumo sumo) continue;
+                if (!hasSumo) { GUILayout.Space(4); GUILayout.Label("── Sumo ──"); hasSumo = true; }
+                string aura = sumo.AuraActive ? "<ON>" : "off";
+                GUILayout.Label($"  [{f}] {sumo.name}");
+                GUILayout.Label($"    HP   base={sumo.Stats.maxHP:F0}  perm+{sumo.PermHpBonusPct:F1}%  eff={sumo.MaxHP:F0}");
+                GUILayout.Label($"    Aura: {aura}  |  Times fed: {sumo.FeedCount}");
+                GUILayout.Label($"    Angry: {sumo.CurrentAngry:F0}/{sumo.Stats?.maxAngry:F0}");
+            }
+        }
+
+        // --- NguoiSoi diagnostics ---
+        bool hasWolf = false;
+        foreach (Faction f in new[] { Faction.Ally, Faction.Enemy })
+        {
+            foreach (var c in CharacterGrid.GetAll(f))
+            {
+                if (c is not NguoiSoi wolf) continue;
+                if (!hasWolf) { GUILayout.Space(4); GUILayout.Label("── Người Sói ──"); hasWolf = true; }
+                float effDmg = wolf.LiveDamage;
+                float effSpd = wolf.EffectiveAtkSpeed;
+                GUILayout.Label($"  [{f}] {wolf.name}");
+                GUILayout.Label($"    DMG  base={wolf.Stats.damage:F0}  perm+{wolf.PermDmgBonus:F0}  temp+{wolf.FrenzyDmgPct*100:F0}%  → {effDmg:F1}");
+                GUILayout.Label($"    SPD  base={wolf.Stats.attackSpeed:F2}  temp+{wolf.FrencySpdPct*100:F0}%  → {effSpd:F2}");
+                GUILayout.Label($"    Frenzy hits: {wolf.FrenzyHits}  |  Rage triggers: {wolf.RageTriggers}");
+                GUILayout.Label($"    Angry: {wolf.CurrentAngry:F0}/{wolf.Stats?.maxAngry:F0}");
+            }
+        }
+
         GUILayout.Space(6);
-        GUILayout.Label("E: spawn enemy  |  R: spawn ally  |  Space: toggle speed (wave)");
-        GUILayout.Label("1: slow timescale  |  2: fast timescale  (debug override)");
+        if (CharacterBase.DebugInvincible)
+        {
+            GUI.color = Color.yellow;
+            GUILayout.Label("⚠ INVINCIBLE ON (I to toggle)");
+            GUI.color = Color.white;
+        }
+        GUILayout.Label("E: spawn enemy  |  R: spawn ally  |  I: invincible toggle");
+        GUILayout.Label("1: slow timescale  |  2: fast timescale");
 
         CharacterBase dragged = CharacterDragHandler.CurrentlyDragged;
         if (dragged != null)

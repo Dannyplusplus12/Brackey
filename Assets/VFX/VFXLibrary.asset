@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ce9bdc5d97d8444cb001e63b8c2e3de, type: 3}
+  m_Name: VFXLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::VFXLibrary
+  bloodHit: {fileID: 3183507124708621576, guid: a9a97de10d4ee5b4083ef46aac15bde9, type: 3}
+  deathBurst: {fileID: 2869918662379787816, guid: 174f096e181623041844ac5747740650, type: 3}
+  buffArrow: {fileID: 5867971413540951012, guid: 747f470400379544f90d5bf5b30340a2, type: 3}
+  feedHappy: {fileID: 4965449136792041510, guid: cb0694f9402ca0e49a85482029688024, type: 3}
+  feedAngry: {fileID: 4965449136792041510, guid: cb0694f9402ca0e49a85482029688024, type: 3}
+  stunStars: {fileID: 5188067929165294761, guid: 361456cbefdc93f4db8e66c95169993d, type: 3}
+  spawnPop: {fileID: 5786098239753687868, guid: 6a8f6e31d0e2f3a44937aa1ac246b728, type: 3}

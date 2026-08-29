@@ -43,15 +43,21 @@ public abstract class CharacterBase : MonoBehaviour
     // Dùng trong subclass để trigger skill mỗi X đòn.
     protected int attackCount { get; private set; }
 
+    // ── Per-instance bonus — áp lên đúng 1 nhân vật cụ thể, không ảnh hưởng type khác ──
+    // Dùng khi skill 1 char cần buff trực tiếp 1 char khác (VD: Bagger beg cho Viking gần nhất).
+    private StatDelta _instanceBonus;
+    public void AddInstanceBonus(StatDelta delta)    { _instanceBonus.Add(delta); }
+    public void RemoveInstanceBonus(StatDelta delta) { _instanceBonus.Subtract(delta); }
+
     // ── Effective stats = (base + flat) * (1 + percent) ────────────────────
-    // flat   = GlobalStatBonus + perType flat
-    // percent= GlobalStatBonus + perType percent (stack cộng: 2×+10% = +20%)
+    // flat   = GlobalStatBonus + perType flat + instanceBonus flat
+    // percent= GlobalStatBonus + perType percent + instanceBonus percent
     protected float EffectiveDamage
     {
         get {
             var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.damage + GlobalStatBonus.damage + t.damage;
-            float pct  = GlobalStatBonus.damagePercent + t.damagePercent;
+            float flat = stats.damage + GlobalStatBonus.damage + t.damage + _instanceBonus.damage;
+            float pct  = GlobalStatBonus.damagePercent + t.damagePercent + _instanceBonus.damagePercent;
             return flat * (1f + pct);
         }
     }
@@ -59,8 +65,8 @@ public abstract class CharacterBase : MonoBehaviour
     {
         get {
             var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.moveSpeed + GlobalStatBonus.moveSpeed + t.moveSpeed;
-            float pct  = GlobalStatBonus.moveSpeedPercent + t.moveSpeedPercent;
+            float flat = stats.moveSpeed + GlobalStatBonus.moveSpeed + t.moveSpeed + _instanceBonus.moveSpeed;
+            float pct  = GlobalStatBonus.moveSpeedPercent + t.moveSpeedPercent + _instanceBonus.moveSpeedPercent;
             return flat * (1f + pct);
         }
     }
@@ -68,18 +74,18 @@ public abstract class CharacterBase : MonoBehaviour
     {
         get {
             var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.maxHP + GlobalStatBonus.maxHP + t.maxHP;
-            float pct  = GlobalStatBonus.maxHPPercent + t.maxHPPercent;
+            float flat = stats.maxHP + GlobalStatBonus.maxHP + t.maxHP + _instanceBonus.maxHP;
+            float pct  = GlobalStatBonus.maxHPPercent + t.maxHPPercent + _instanceBonus.maxHPPercent;
             return flat * (1f + pct);
         }
     }
     // Tổng APS = (base + flat) * (1 + percent)
-    protected float EffectiveAPS
+    public float EffectiveAPS
     {
         get {
             var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.attackSpeed + GlobalStatBonus.attackSpeed + t.attackSpeed;
-            float pct  = GlobalStatBonus.attackSpeedPercent + t.attackSpeedPercent;
+            float flat = stats.attackSpeed + GlobalStatBonus.attackSpeed + t.attackSpeed + _instanceBonus.attackSpeed;
+            float pct  = GlobalStatBonus.attackSpeedPercent + t.attackSpeedPercent + _instanceBonus.attackSpeedPercent;
             return flat * (1f + pct);
         }
     }
@@ -106,7 +112,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     readonly List<CharacterBase> nearbyBuffer = new();
 
-    float swayTimer;
+    protected float swayTimer;
     float swayStopTimer;
     const float SwayStopDelay = 0.12f; // giây đứng yên trước khi sway tắt hẳn
     float lastFlipTime = -999f;
@@ -184,6 +190,10 @@ public abstract class CharacterBase : MonoBehaviour
 
         CharacterGrid.Register(this);
         SetSprite(stats.idleSprite);
+        VFXManager.PlaySpawnPop(BodyCenter);
+
+        // Random phase để sway không bị sync giữa các char spawn cùng lúc
+        swayTimer = Random.Range(0f, Mathf.PI * 2f);
     }
 
     // Dùng cho spawn debug/thủ công: đặt thẳng vào vị trí chỉ định thay vì tự rải quân
@@ -250,6 +260,18 @@ public abstract class CharacterBase : MonoBehaviour
 
         Vector2 separation = ComputeSeparation();
         ApplyMovement(desiredMove + separation);
+
+        // Knockback — áp trực tiếp lên vị trí, ngoài vòng ApplyMovement (không cần normalize)
+        if (_knockbackVelocity.sqrMagnitude > 0.5f)
+        {
+            transform.position += (Vector3)(_knockbackVelocity * Time.deltaTime);
+            CharacterGrid.UpdatePosition(this);
+            _knockbackVelocity = Vector2.MoveTowards(_knockbackVelocity, Vector2.zero, KnockbackDecay * Time.deltaTime);
+        }
+        else
+        {
+            _knockbackVelocity = Vector2.zero;
+        }
     }
 
     // Tách sway ra LateUpdate và đo bằng delta vị trí thực tế (thay vì 1 cờ isMoving
@@ -304,7 +326,7 @@ public abstract class CharacterBase : MonoBehaviour
         if (currentTarget == null)
             return Vector2.zero; // không còn địch nào: đứng yên tại chỗ, chờ hết wave mới về vị trí
 
-        float distToTarget = Vector2.Distance(BodyCenter, currentTarget.BodyCenter);
+        float distToTarget = Vector2.Distance(transform.position, currentTarget.transform.position);
         SetFacing(currentTarget.BodyCenter - BodyCenter);
 
         if (distToTarget <= EffectiveAttackRange)
@@ -315,7 +337,7 @@ public abstract class CharacterBase : MonoBehaviour
             return Vector2.zero;
         }
 
-        return MoveToward(currentTarget.BodyCenter);
+        return MoveToward(currentTarget.transform.position);
     }
 
     protected virtual void TickAttacking()
@@ -326,7 +348,7 @@ public abstract class CharacterBase : MonoBehaviour
             return;
         }
 
-        float distToTarget = Vector2.Distance(BodyCenter, currentTarget.BodyCenter);
+        float distToTarget = Vector2.Distance(transform.position, currentTarget.transform.position);
         if (distToTarget > EffectiveAttackRange)
         {
             EnterState(CharacterState.Seeking);
@@ -372,7 +394,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     // ---------- Movement / Separation ----------
 
-    protected Vector2 MoveToward(Vector2 target)
+    protected virtual Vector2 MoveToward(Vector2 target)
     {
         Vector2 pos = transform.position;
         Vector2 dir = target - pos;
@@ -413,7 +435,7 @@ public abstract class CharacterBase : MonoBehaviour
     // Giả lập dáng đi bằng cách nghiêng sprite qua lại + nảy lên xuống, thay vì vẽ
     // animation đi bộ thật. Đo bằng delta vị trí thực tế mỗi frame (không dùng cờ nội
     // bộ) để không bị "giật về pha 0" khi separation làm di chuyển dao động quanh 0.
-    protected void UpdateVisualSway()
+    protected virtual void UpdateVisualSway()
     {
         float movedDist = ((Vector2)transform.position - (Vector2)lastPositionForSway).magnitude;
         lastPositionForSway = transform.position;
@@ -426,9 +448,10 @@ public abstract class CharacterBase : MonoBehaviour
 
         swayTimer += Time.deltaTime * stats.swayFrequency;
 
-        float tilt = moving ? Mathf.Sin(swayTimer) * stats.swayTiltAngle : 0f;
-        // Abs(Sin) để nảy luôn hướng lên, 2 lần nảy mỗi chu kỳ nghiêng trái-phải (giống bước chân trái/phải).
-        float bounce = moving ? Mathf.Abs(Mathf.Sin(swayTimer)) * stats.swayBounceHeight : 0f;
+        float sinV  = Mathf.Sin(swayTimer);
+        float tilt   = moving ? sinV * stats.swayTiltAngle : 0f;
+        // Bounce tính qua virtual hook — subclass có thể đổi hình dạng (vd: DogZ asymmetric).
+        float bounce = ComputeSwayBounce(sinV, moving);
 
         // Xoay quanh GIỮA nhân vật (feet + halfH) thay vì quanh chân (sprite pivot).
         // headToFeet phải âm (từ center xuống chân), sau đó xoay rồi cộng bounce ở center.
@@ -443,6 +466,11 @@ public abstract class CharacterBase : MonoBehaviour
         float bounceFactor = moving ? Mathf.Abs(Mathf.Sin(swayTimer)) : 0f;
         shadow?.UpdateShadow(bounceFactor);
     }
+
+    // Override trong subclass để thay đổi hình dạng bounce (vd: DogZ hất đầu cao hơn đuôi).
+    // sinValue = Mathf.Sin(swayTimer) ∈ [-1, 1]; moving = nhân vật đang di chuyển.
+    protected virtual float ComputeSwayBounce(float sinValue, bool moving)
+        => moving ? Mathf.Abs(sinValue) * stats.swayBounceHeight : 0f;
 
     // Giả lập cảm giác "cầm đầu kéo đi": root (= vị trí chuột) đại diện điểm đầu, thân/chân
     // (visualRoot) treo lệch xuống dưới 1 khoảng cố định, và nghiêng ngược hướng kéo theo
@@ -549,10 +577,27 @@ public abstract class CharacterBase : MonoBehaviour
         }
     }
 
+    // ── Knockback ─────────────────────────────────────────────────────────────
+    // Gọi từ bất kỳ nhân vật nào để đẩy nhân vật này ra xa theo hướng cho trước.
+    // force: pixels/giây ban đầu. Tự giảm dần mỗi frame theo KnockbackDecay.
+    private Vector2 _knockbackVelocity;
+    private const float KnockbackDecay = 600f; // pixels/s²
+
+    public void ApplyKnockback(Vector2 direction, float force)
+    {
+        if (IsDead) return;
+        _knockbackVelocity += direction.normalized * force;
+    }
+
+    // Debug toggle — tất cả nhân vật không nhận sát thương khi true
+    public static bool DebugInvincible = false;
+
     public virtual void TakeDamage(float amount)
     {
         if (IsDead) return;
+        if (DebugInvincible) return;
         CurrentHP -= amount;
+        VFXManager.PlayBloodHit(BodyCenter, amount, EffectiveMaxHP);
         PlayHitReaction();
 
         if (CurrentHP <= 0f)
@@ -582,6 +627,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (IsDead) return;
         CurrentHP = Mathf.Min(EffectiveMaxHP, CurrentHP + amount);
+        VFXManager.PlayBuffArrow(BodyCenter, VFXManager.ColorHP);
     }
 
     public virtual void AddAngry(float amount, AngryReason reason)
@@ -620,19 +666,22 @@ public abstract class CharacterBase : MonoBehaviour
     }
 
     // Gọi bởi FeedingManager khi có đủ corn. Hồi full HP, angry không tăng từ đói.
-    public void Feed()
+    public virtual void Feed()
     {
         CurrentHP = EffectiveMaxHP;
+        VFXManager.PlayFeedHappy(BodyCenter);
     }
 
     // Gọi bởi FeedingManager khi thiếu corn.
     public void SkipFeed()
     {
         AddAngry(stats.angryPerHunger, AngryReason.Hungry);
+        VFXManager.PlayFeedAngry(BodyCenter);
     }
 
     protected virtual void Die()
     {
+        VFXManager.PlayDeathBurst(BodyCenter);
         IsDead = true;
         CharacterGrid.Unregister(this);
         if (faction == Faction.Ally)
@@ -657,6 +706,14 @@ public abstract class CharacterBase : MonoBehaviour
         FlashSprite(stats.attackSprite);
     }
 
+    // Gọi trong ExecuteAttack() override của subclass khi skill kích hoạt (đòn X).
+    // Truyền màu tùy loại buff: VFXManager.ColorHP / ColorDamage / ColorSpeed.
+    protected void PlaySkillVFX(Color color)
+    {
+        Vector2 pos = vfxSpawnPoint != null ? (Vector2)vfxSpawnPoint.position : BodyCenter;
+        VFXManager.PlayBuffArrow(pos, color);
+    }
+
     // Spawn VFX prefab tại vfxSpawnPoint (fallback về gốc nhân vật nếu chưa gán).
     // Prefab tự hủy sau khi xong (particle Stop Action = Destroy, hoặc dùng Destroy(go, t)).
     protected void SpawnVFX(GameObject prefab)
@@ -670,7 +727,7 @@ public abstract class CharacterBase : MonoBehaviour
     protected CharacterBase FindNearestEnemy()
     {
         Faction opposing = faction == Faction.Ally ? Faction.Enemy : Faction.Ally;
-        return CharacterGrid.FindNearest(BodyCenter, opposing, this);
+        return CharacterGrid.FindNearest(transform.position, opposing, this);
     }
 
     protected CharacterBase FindLowestHpAlly()

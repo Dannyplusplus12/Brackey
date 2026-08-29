@@ -128,7 +128,6 @@ public static class StatIconSpriteAssetCreator
         // Dùng reflection để set backing fields — tránh guess SerializedProperty paths
         // (paths thay đổi giữa các version TMP/Unity)
         int count     = s_Names.Count;
-        var flags     = BindingFlags.NonPublic | BindingFlags.Instance;
         var assetType = typeof(TMP_SpriteAsset);
 
         var glyphList = new List<TMP_SpriteGlyph>();

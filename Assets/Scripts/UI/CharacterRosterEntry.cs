@@ -124,6 +124,7 @@ public class CharacterRosterEntry : MonoBehaviour,
         if (portraitImage != null)
         {
             portraitImage.sprite = stats.idleSprite;
+            portraitImage.preserveAspect = true;
             portraitImage.rectTransform.anchoredPosition = stats.portraitOffset;
             portraitImage.rectTransform.localScale = Vector3.one * stats.portraitScale;
         }

@@ -6,7 +6,9 @@ using UnityEngine;
 public class PlayerWallet : MonoBehaviour
 {
     public static PlayerWallet Instance { get; private set; }
-    public static event System.Action OnCornChanged;
+    public static event System.Action     OnCornChanged;
+    /// <summary>Raise ngay sau khi corn thay đổi. delta > 0 = earn, delta &lt; 0 = spend.</summary>
+    public static event System.Action<int> OnCornDelta;
 
     [Tooltip("Lượng corn ban đầu khi bắt đầu game")]
     [SerializeField] int startingCorn = 15;
@@ -25,6 +27,15 @@ public class PlayerWallet : MonoBehaviour
         if (amount <= 0) return;
         Corn += amount;
         OnCornChanged?.Invoke();
+        OnCornDelta?.Invoke(+amount);
+    }
+
+    // Hoàn tiền nội bộ (refund khi mua thất bại) — không trigger delta popup.
+    public void EarnSilent(int amount)
+    {
+        if (amount <= 0) return;
+        Corn += amount;
+        OnCornChanged?.Invoke();
     }
 
     // Trừ corn nếu đủ. Trả true = thành công, false = không đủ (không trừ gì).
@@ -34,6 +45,7 @@ public class PlayerWallet : MonoBehaviour
         if (Corn < amount) return false;
         Corn -= amount;
         OnCornChanged?.Invoke();
+        OnCornDelta?.Invoke(-amount);
         return true;
     }
 }

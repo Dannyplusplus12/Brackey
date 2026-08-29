@@ -57,7 +57,7 @@ public class ItemCreatorTool : EditorWindow
     [MenuItem("Tools/Items/Sync Item Pool")]
     public static void SyncItemPool()
     {
-        var manager = FindObjectOfType<ShopOfferManager>();
+        var manager = FindFirstObjectByType<ShopOfferManager>();
         if (manager == null)
         {
             EditorUtility.DisplayDialog("Sync Item Pool", "Không tìm thấy ShopOfferManager trong scene.", "OK");
@@ -323,7 +323,7 @@ public class ItemCreatorTool : EditorWindow
     // Tìm ShopOfferManager trong scene đang mở, thêm item vào itemPool nếu chưa có.
     static void AddToShopPool(ItemData item)
     {
-        var manager = FindObjectOfType<ShopOfferManager>();
+        var manager = FindFirstObjectByType<ShopOfferManager>();
         if (manager == null)
         {
             Debug.LogWarning("[ItemCreator] Không tìm thấy ShopOfferManager trong scene. Thêm item vào pool thủ công.");
@@ -348,7 +348,7 @@ public class ItemCreatorTool : EditorWindow
     // Tìm GO có ShopOfferManager, gắn ItemEffectHandler nếu chưa có.
     static void EnsureItemEffectHandler()
     {
-        var manager = FindObjectOfType<ShopOfferManager>();
+        var manager = FindFirstObjectByType<ShopOfferManager>();
         if (manager == null) return;
 
         var go = manager.gameObject;
