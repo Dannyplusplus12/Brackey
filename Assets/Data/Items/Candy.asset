@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Candy
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   displayName: Candy
-  icon: {fileID: 0}
+  icon: {fileID: 8279581486026164144, guid: d7d207a5744931d4698a5b3b0a0d7967, type: 3}
   itemType: 1
   rarity: 0
-  description: '<color=#00BFFF>+0.03 attack speed permanently.</color>
+  description: '
+
+    <color=#00BFFF>+0.03 attack speed permanently.</color>
 
     Rarity:
     Common'

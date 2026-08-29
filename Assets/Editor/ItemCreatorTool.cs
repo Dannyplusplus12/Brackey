@@ -71,6 +71,13 @@ public class ItemCreatorTool : EditorWindow
             Debug.Log("[SyncItemPool] Đã gắn ItemEffectHandler.");
         }
 
+        // Gắn SpecialItemTracker nếu chưa có (cần cho Mushroom, Lemon)
+        if (manager.gameObject.GetComponent<SpecialItemTracker>() == null)
+        {
+            manager.gameObject.AddComponent<SpecialItemTracker>();
+            Debug.Log("[SyncItemPool] Đã gắn SpecialItemTracker.");
+        }
+
         // Quét tất cả ItemData trong Assets/Data/Items/
         string[] guids = AssetDatabase.FindAssets("t:ItemData", new[] { "Assets/Data/Items" });
         var so   = new SerializedObject(manager);

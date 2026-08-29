@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: ChickenLeg
+  m_Name: Mushroom
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Chicken Leg
-  icon: {fileID: 3938427444234672165, guid: d7d207a5744931d4698a5b3b0a0d7967, type: 3}
+  displayName: Mushroom
+  icon: {fileID: 3474205351203274008, guid: d7d207a5744931d4698a5b3b0a0d7967, type: 3}
   itemType: 1
-  rarity: 0
+  rarity: 1
   description: '
 
-    <color=#B48EE0>+1 damage permanently.</color>
+    Every 10 damage taken: <color=#4CAF50>+1 Max HP permanently.</color>
 
     Rarity:
-    Common'
+    Uncommon'
   buyCost: 2
   sellValue: 1
   characterPrefab: {fileID: 0}
   targetType: 0
   targetCharacterType: {fileID: 0}
   statDelta:
-    damage: 1
+    damage: 0
     moveSpeed: 0
     maxHP: 0
     attackSpeed: 0

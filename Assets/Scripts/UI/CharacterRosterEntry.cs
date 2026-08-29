@@ -164,6 +164,10 @@ public class CharacterRosterEntry : MonoBehaviour,
         }
         RefreshAngry();
         RefreshHP();
+
+        // Refresh stat bar liên tục khi đang hover để hiện đúng live stats
+        if (isHovering)
+            CharacterStatBar.Instance?.ShowLive(target);
     }
 
     // Angry bar dọc: anchorMax.y = pct
@@ -192,9 +196,12 @@ public class CharacterRosterEntry : MonoBehaviour,
     [SerializeField] bool             tooltipAlignEnd  = false;
     [SerializeField] float            tooltipGap       = 8f;
 
+    bool isHovering;
+
     public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _)
     {
         if (target == null) return;
+        isHovering = true;
         TooltipSystem.ShowImmediate(TooltipData.FromCharacterLive(target, rectTransform,
             tooltipDirection, tooltipAlignEnd, tooltipGap));
         CharacterStatBar.Instance?.ShowLive(target);
@@ -202,9 +209,11 @@ public class CharacterRosterEntry : MonoBehaviour,
 
     public void OnPointerExit(UnityEngine.EventSystems.PointerEventData _)
     {
+        isHovering = false;
         TooltipSystem.Hide();
         CharacterStatBar.Instance?.Hide();
     }
+
 
     // ── Drag handlers ─────────────────────────────────────────────────
 
