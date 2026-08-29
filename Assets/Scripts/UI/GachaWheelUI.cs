@@ -68,8 +68,28 @@ public class GachaWheelUI : MonoBehaviour
 
     void OnEnable()
     {
+        GameManager.OnGameStateChanged += OnStateChanged;
+        // OnEnable chạy sau khi ShopRoot active (event Shop đã fire rồi)
+        // → cần reset ngay tại đây thay vì chờ event
+        if (GameManager.Instance?.CurrentState == GameState.Shop)
+            _rollCount = 0;
+
         RefreshCharacterSprites();
         UpdateCostText();
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= OnStateChanged;
+    }
+
+    void OnStateChanged(GameState state)
+    {
+        if (state == GameState.Shop)
+        {
+            _rollCount = 0;
+            UpdateCostText();
+        }
     }
 
 #if UNITY_EDITOR
