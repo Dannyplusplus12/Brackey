@@ -13,15 +13,16 @@ MonoBehaviour:
   m_Name: ZOMIBIE
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
   maxHP: 60
-  damage: 20
-  attackSpeed: 1.6667
+  damage: 15
+  attackSpeed: 0.8
   attackRange: 100
   attackVisualDuration: 0.15
   moveSpeed: 120
   separationRadius: 60
   separationStrength: 50
-  actionDelayMin: 0.2
-  actionDelayMax: 0.6
+  flipCooldown: 0.4
+  actionDelayMin: 0.1
+  actionDelayMax: 0.5
   swayTiltAngle: 30
   swayBounceHeight: 2.6
   swayFrequency: 14
@@ -42,6 +43,7 @@ MonoBehaviour:
   maxAngry: 10
   foodRequiredPerRound: 2
   killReward: 2
+  description: 
   idleSprite: {fileID: 21300000, guid: ecf035688ee6dae4eab40ea5c708a505, type: 3}
   attackSprite: {fileID: 21300000, guid: f520f472f3258e54abf6c150d0b43028, type: 3}
   skillSprite: {fileID: 21300000, guid: f520f472f3258e54abf6c150d0b43028, type: 3}

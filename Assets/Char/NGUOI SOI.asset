@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
   m_Name: NGUOI SOI
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
-  maxHP: 70
-  damage: 8
+  maxHP: 80
+  damage: 15
   attackSpeed: 1
   attackRange: 70
   attackVisualDuration: 0.15
@@ -43,17 +43,12 @@ MonoBehaviour:
   maxAngry: 100
   foodRequiredPerRound: 2
   killReward: 2
-  description: 'Each hit: <color=#FF6B1A>+5%</color> <sprite name="stat_atkspeed">
-    & <color=#FF6B1A>+5%</color> <sprite name="stat_damage"> (this round)
-
-    Each
-    <sprite name="stat_angry"> gained: <color=#E82020>+1</color> <sprite name="stat_damage">
-    forever
-
-    <color=#E82020>+20</color> <sprite name="stat_angry"> when hungy
-
-    <color=#E82020>+10</color>
-    <sprite name="stat_angry"> when 1 ally die'
+  description: "Each attack: <color=#00BFFF>+0.1 attack speed</color><sprite name=\"stat_atkspeed\">,
+    <color=#B48EE0>+5% damage</color><sprite name=\"stat_damage\"> and <color=#FF69B4>+10
+    speed</color><sprite name=\"stat_speed\"> until end of round.\n<color=#B48EE0>+20%
+    damage</color><sprite name=\"stat_damage\"> when hungry until end of round.\n\n<color=#E82020>+30
+    angry</color><sprite name=\"stat_angry\"> when hungry \n<color=#E82020>+10 angry</color><sprite
+    name=\"stat_angry\"> when ally die"
   idleSprite: {fileID: -2466381354885757933, guid: 8d974c8f87d4dd442b5782b63da0836e, type: 3}
   attackSprite: {fileID: 433260406738338109, guid: 59618a4cdbc1f8744b9f4b0c99cdab94, type: 3}
   skillSprite: {fileID: 433260406738338109, guid: 59618a4cdbc1f8744b9f4b0c99cdab94, type: 3}

@@ -24,7 +24,6 @@ public class Bagger : CharacterBase
     // Debug props
     public int   BegBuffCount => _begBuffs.Count;
     public int   RageTriggers => _rageTriggers;
-    public float PermSpdBonus => GlobalStatBonus.GetTypeBonus(stats).attackSpeed;
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -75,12 +74,8 @@ public class Bagger : CharacterBase
         base.AddAngry(amount, reason);
         if (amount <= 0f) return;
 
-        GlobalStatBonus.AddTypeBonus(stats, new StatDelta { attackSpeed = 0.1f });
+        AddInstanceBonus(new StatDelta { attackSpeed = 0.1f }); // cộng lên đúng Bagger này, không lan loài
         _rageTriggers++;
-
-        // STUB — Starved Trigger
-        // if (reason == AngryReason.Hungry)
-        //     TriggerStarvedEffect(); // TODO: design this
     }
 
     // ── Round End ──────────────────────────────────────────────────────────────

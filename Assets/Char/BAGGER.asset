@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
   m_Name: BAGGER
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
-  maxHP: 45
-  damage: 6
-  attackSpeed: 0.55
+  maxHP: 100
+  damage: 10
+  attackSpeed: 1
   attackRange: 65
   attackVisualDuration: 0.15
-  moveSpeed: 130
+  moveSpeed: 150
   separationRadius: 35
   separationStrength: 40
   flipCooldown: 0.2
@@ -36,22 +36,24 @@ MonoBehaviour:
   hitFlashDuration: 0.1
   hitShakeStrength: 0.6
   hitShakeDuration: 0.2
-  initialAngry: 12
+  initialAngry: 0
   angryPerHunger: 50
   angryOnAllyDeath: 25
-  angryOnRoundStart: 12
+  angryOnRoundStart: 0
   maxAngry: 100
-  foodRequiredPerRound: 1
+  foodRequiredPerRound: 2
   killReward: 1
   description: '4th hit / ally dies: <color=#4FC3F7>+50%</color> <sprite name="stat_damage">
     to nearest ally (this round)
 
-    Each <sprite name="stat_angry"> gained: <color=#FF6B1A>+0.1</color> <sprite name="stat_atkspeed">
-    forever
+    Each <sprite name="stat_angry"> gained: <color=#FF6B1A>+0.1</color>
+    <sprite name="stat_atkspeed"> forever
 
-    <color=#E82020>+50</color> <sprite name="stat_angry"> when hungry
+    <color=#E82020>+50</color> <sprite
+    name="stat_angry"> when hungry
 
-    <color=#E82020>+25</color> <sprite name="stat_angry"> when 1 ally die'
+    <color=#E82020>+25</color> <sprite name="stat_angry">
+    when 1 ally die'
   idleSprite: {fileID: 8155977494501743051, guid: 38bb7488b0017754892162f6d1787dda, type: 3}
   attackSprite: {fileID: -1687117944462887543, guid: 4e137b1843291ec4c9bbf54bfec6aede, type: 3}
   skillSprite: {fileID: -1687117944462887543, guid: 4e137b1843291ec4c9bbf54bfec6aede, type: 3}

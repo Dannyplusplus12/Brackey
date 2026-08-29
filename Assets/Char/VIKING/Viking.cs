@@ -4,7 +4,7 @@
 //   Every 3rd hit deals +100% damage (doubled for that strike only).
 //
 // SKILL 2 — Battle-Hardened (permanent for the run)
-//   Each wave survived: +4 flat damage & +4 max HP.
+//   Each wave survived: +4% damage & +4% max HP permanently (this Viking only).
 
 public class Viking : CharacterBase
 {
@@ -13,25 +13,25 @@ public class Viking : CharacterBase
         // Skill 1: 3rd hit (attackCount is pre-increment here: 0, 1, 2, 3...)
         bool powerStrike = attackCount % 3 == 2;
 
-        StatDelta bonus = default;
+        var bonus = default(StatDelta);
         if (powerStrike)
         {
             bonus = new StatDelta { damagePercent = 1.0f }; // +100% = double
-            GlobalStatBonus.AddTypeBonus(stats, bonus);
+            AddInstanceBonus(bonus); // per-instance: không ảnh hưởng Viking khác
         }
 
         base.ExecuteAttack(target); // deals damage, increments attackCount
 
         if (powerStrike)
-            GlobalStatBonus.RemoveTypeBonus(stats, bonus);
+            RemoveInstanceBonus(bonus);
     }
 
     public override void ExitCombat()
     {
         base.ExitCombat();
 
-        // Skill 2: only reward if alive and still an ally at wave end
+        // Skill 2: chỉ thưởng khi còn sống và vẫn là Ally cuối wave
         if (!IsDead && Faction == Faction.Ally)
-            GlobalStatBonus.AddTypeBonus(stats, new StatDelta { damage = 4f, maxHP = 4f });
+            AddInstanceBonus(new StatDelta { damagePercent = 0.04f, maxHPPercent = 0.04f });
     }
 }

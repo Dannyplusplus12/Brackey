@@ -1,10 +1,11 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
 /// Hiển thị "Award: +X 🌽" cho wave sắp tới.
-/// Đọc từ LevelData của level TIẾP THEO (chưa spawn).
+/// Đọc từ LevelData của level hiện tại (đã spawn vào scene khi vào Shop).
 /// Ẩn khi không còn level nào.
 ///
 /// Gắn lên AwardPanel trong ShopRoot.
@@ -17,7 +18,8 @@ public class LevelAwardPanelUI : MonoBehaviour
     void OnEnable()
     {
         GameManager.OnGameStateChanged += OnStateChanged;
-        Refresh();
+        // Delay để đảm bảo LevelManager.AdvanceAndSpawn() đã chạy xong
+        StartCoroutine(RefreshDelayed());
     }
 
     void OnDisable()
@@ -27,14 +29,18 @@ public class LevelAwardPanelUI : MonoBehaviour
 
     void OnStateChanged(GameState state)
     {
-        if (state == GameState.Shop) Refresh();
+        if (state == GameState.Shop) StartCoroutine(RefreshDelayed());
+    }
+
+    IEnumerator RefreshDelayed()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Refresh();
     }
 
     void Refresh()
     {
-        // Level tiếp theo = level sẽ đánh sau khi bấm "Bắt đầu Wave"
-        // currentLevelIndex đã tăng khi vào Shop (AdvanceAndSpawn chạy rồi)
-        // → GetCurrentLevelData() chính là level sắp đánh
+        // Khi vào Shop, LevelManager đã AdvanceAndSpawn() → currentLevelIndex là level sắp đánh
         var data   = LevelManager.Instance?.GetCurrentLevelData();
         int reward = data?.waveWinReward
                      ?? GameManager.Instance?.waveWinReward

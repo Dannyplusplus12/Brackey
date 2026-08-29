@@ -15,9 +15,9 @@ MonoBehaviour:
   displayName: BAGGER
   icon: {fileID: 8155977494501743051, guid: 38bb7488b0017754892162f6d1787dda, type: 3}
   itemType: 2
-  rarity: 0
-  description:
-  buyCost: 2
+  rarity: 2
+  description: 
+  buyCost: 8
   sellValue: 1
   characterPrefab: {fileID: 6225856516645929918, guid: 141b391a1dc1d0a449f2669543ce517a, type: 3}
   targetType: 0
@@ -28,3 +28,8 @@ MonoBehaviour:
     maxHP: 0
     attackSpeed: 0
     attackRange: 0
+    foodCost: 0
+    damagePercent: 0
+    moveSpeedPercent: 0
+    maxHPPercent: 0
+    attackSpeedPercent: 0

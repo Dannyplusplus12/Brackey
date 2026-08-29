@@ -30,6 +30,8 @@ Nếu GO bắt đầu inactive → `Awake` không chạy → `Instance = null` m
 <color=#A0A0A0>xám — phụ / lore / note</color>
 <color=#FF8C00>cam — cảnh báo</color>
 <color=#00BFFF>xanh dương — kỹ năng</color>
+<color=#FF69B4>hồng — đặc biệt / charm</color>
+<color=#B48EE0>tím nhạt — ma thuật / rare</color>
 ```
 
 ### Sprite icon (phải có TMP Sprite Asset đúng tên)

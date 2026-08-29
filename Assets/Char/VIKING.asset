@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
   maxHP: 100
   damage: 15
-  attackSpeed: 1
+  attackSpeed: 0.9
   attackRange: 80
   attackVisualDuration: 0.15
   moveSpeed: 150
@@ -22,7 +22,7 @@ MonoBehaviour:
   separationStrength: 50
   flipCooldown: 0.4
   actionDelayMin: 0
-  actionDelayMax: 0.8
+  actionDelayMax: 0.5
   swayTiltAngle: 30
   swayBounceHeight: 3
   swayFrequency: 14
@@ -37,20 +37,24 @@ MonoBehaviour:
   hitShakeStrength: 0.4
   hitShakeDuration: 0.15
   initialAngry: 20
-  angryPerHunger: 10
+  angryPerHunger: 20
   angryOnAllyDeath: 5
   angryOnRoundStart: 0
   maxAngry: 100
   foodRequiredPerRound: 2
   killReward: 2
-  description: 'Every 3rd hit: <color=#FF6B1A>+100%</color> <sprite name="stat_damage">
+  description: 'Every 3rd attack: <color=#B48EE0>+100% damage</color><sprite name="stat_damage">
 
-    Wave survived: <color=#E82020>+4</color> <sprite name="stat_damage"> & <color=#E82020>+4</color>
-    <sprite name="stat_hp"> forever
+    that
+    atack.
 
-    <color=#E82020>+10</color> <sprite name="stat_angry"> when hungry
+    Each wave survived: <color=#4CAF50>+4% Max HP<sprite name="stat_hp"></color>and
+    <color=#B48EE0>+4% damage</color><sprite name="stat_damage"> permanently.
 
-    <color=#E82020>+5</color> <sprite name="stat_angry"> when 1 ally die'
+
+
+    <color=#E82020>+20
+    angry</color><sprite name="stat_angry"> when hungry'
   idleSprite: {fileID: 21300000, guid: 7a4783cbae19a224a83a250df5ec68c8, type: 3}
   attackSprite: {fileID: 21300000, guid: c615328db9ee1254ab9dabc38647489b, type: 3}
   skillSprite: {fileID: 21300000, guid: c615328db9ee1254ab9dabc38647489b, type: 3}

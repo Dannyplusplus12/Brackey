@@ -55,7 +55,6 @@ MonoBehaviour:
   visualRoot: {fileID: 2896360733982249265}
   vfxSpawnPoint: {fileID: 0}
   shadow: {fileID: 0}
-  auraRange: 100
   chargeSpeed: 100
   knockbackForce: 350
   chargeDuration: 0.5

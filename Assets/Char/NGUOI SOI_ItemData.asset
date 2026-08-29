@@ -17,7 +17,7 @@ MonoBehaviour:
   itemType: 2
   rarity: 2
   description: 
-  buyCost: 8
+  buyCost: 10
   sellValue: 2
   characterPrefab: {fileID: 1612628368611430365, guid: 50a0b4aaee262b44e9974f8b594589ca, type: 3}
   targetType: 0
