@@ -53,7 +53,10 @@ public abstract class CharacterBase : MonoBehaviour
     {
         _instanceBonus.Add(delta);
         if (delta.maxHP > 0f)
+        {
             OnInstanceMaxHPAdded?.Invoke(this, delta.maxHP);
+            VFXManager.PlayBuffArrow(BodyCenter, VFXManager.ColorHP);
+        }
     }
     public void RemoveInstanceBonus(StatDelta delta) { _instanceBonus.Subtract(delta); }
 
@@ -683,7 +686,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (IsDead) return;
         CurrentHP = Mathf.Min(EffectiveMaxHP, CurrentHP + amount);
-        VFXManager.PlayBuffArrow(BodyCenter, VFXManager.ColorHP);
+        VFXManager.PlayHeal(BodyCenter);
     }
 
     public virtual void AddAngry(float amount, AngryReason reason)

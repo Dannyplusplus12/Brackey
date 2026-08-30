@@ -58,6 +58,18 @@ public class ItemEffectHandler : MonoBehaviour
                 ApplyHealthCoin();
                 break;
 
+            case "Gold Dice":
+                ApplyGoldDice();
+                break;
+
+            case "Damage Dice":
+                ApplyDamageDice();
+                break;
+
+            case "Health Dice":
+                ApplyHealthDice();
+                break;
+
             // Thêm item mới ở đây:
             // case "Item Name":
             //     DoEffect(item);
@@ -139,6 +151,75 @@ public class ItemEffectHandler : MonoBehaviour
         else
         {
             Debug.Log("[ItemEffectHandler] Health Coin: LOSE — không có gì.");
+        }
+    }
+
+    // ── Gold Dice — 4/6 +10 corn, 1/6 +40 corn, 1/6 mất tất ────────────────
+
+    static void ApplyGoldDice()
+    {
+        var wallet = PlayerWallet.Instance;
+        if (wallet == null) return;
+        float roll = UnityEngine.Random.value;
+        if (roll < 4f / 6f)
+        {
+            wallet.Earn(10);
+            Debug.Log("[ItemEffectHandler] Gold Dice: +10 corn.");
+        }
+        else if (roll < 5f / 6f)
+        {
+            wallet.Earn(40);
+            Debug.Log("[ItemEffectHandler] Gold Dice: JACKPOT +40 corn!");
+        }
+        else
+        {
+            int lost = wallet.Corn;
+            wallet.TrySpend(lost);
+            Debug.Log($"[ItemEffectHandler] Gold Dice: BUST — mất {lost} corn.");
+        }
+    }
+
+    // ── Damage Dice — 4/6 +10 dmg, 1/6 +40 dmg, 1/6 -30% damage ────────────
+
+    static void ApplyDamageDice()
+    {
+        float roll = UnityEngine.Random.value;
+        if (roll < 4f / 6f)
+        {
+            GlobalStatBonus.damage += 10f;
+            Debug.Log("[ItemEffectHandler] Damage Dice: +10 damage.");
+        }
+        else if (roll < 5f / 6f)
+        {
+            GlobalStatBonus.damage += 40f;
+            Debug.Log("[ItemEffectHandler] Damage Dice: JACKPOT +40 damage!");
+        }
+        else
+        {
+            GlobalStatBonus.damagePercent -= 0.3f;
+            Debug.Log("[ItemEffectHandler] Damage Dice: BUST — -30% damage vĩnh viễn.");
+        }
+    }
+
+    // ── Health Dice — 4/6 +40 MaxHP, 1/6 +100 MaxHP, 1/6 -50% MaxHP ─────────
+
+    static void ApplyHealthDice()
+    {
+        float roll = UnityEngine.Random.value;
+        if (roll < 4f / 6f)
+        {
+            GlobalStatBonus.maxHP += 40f;
+            Debug.Log("[ItemEffectHandler] Health Dice: +40 MaxHP.");
+        }
+        else if (roll < 5f / 6f)
+        {
+            GlobalStatBonus.maxHP += 100f;
+            Debug.Log("[ItemEffectHandler] Health Dice: JACKPOT +100 MaxHP!");
+        }
+        else
+        {
+            GlobalStatBonus.maxHPPercent -= 0.5f;
+            Debug.Log("[ItemEffectHandler] Health Dice: BUST — -50% MaxHP vĩnh viễn.");
         }
     }
 

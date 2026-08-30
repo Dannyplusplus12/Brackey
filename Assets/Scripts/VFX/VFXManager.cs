@@ -50,7 +50,7 @@ public class VFXManager : MonoBehaviour
     public static readonly Color ColorSpeed  = new Color(0.2f, 0.6f, 1f);   // xanh dương — tốc độ
 
     /// <summary>
-    /// Mũi tên bay lên nhanh khi được buff hoặc hồi chỉ số.
+    /// Mũi tên bay lên nhanh khi được buff/tăng chỉ số (maxHP, damage...).
     /// Truyền VFXManager.ColorHP / ColorDamage / ColorSpeed để chọn màu đúng loại.
     /// </summary>
     public static void PlayBuffArrow(Vector2 position, Color color)
@@ -63,6 +63,10 @@ public class VFXManager : MonoBehaviour
         main.startColor = new ParticleSystem.MinMaxGradient(color);
         ps.Play();
     }
+
+    /// <summary>Particle hiện khi nhân vật được hồi máu (Heal).</summary>
+    public static void PlayHeal(Vector2 position)
+        => SpawnAt(TryGetLib(out var lib) ? lib.healParticle : null, position);
 
     // ── Feed ─────────────────────────────────────────────────────────────────
 

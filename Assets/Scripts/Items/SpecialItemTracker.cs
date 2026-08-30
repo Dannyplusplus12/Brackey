@@ -39,22 +39,24 @@ public class SpecialItemTracker : MonoBehaviour
 
     void OnEnable()
     {
-        CharacterBase.OnDamageTaken      += HandleDamageTaken;
-        CharacterBase.OnAngryAdded       += HandleAngryAdded;
-        CharacterBase.OnSkipFeed         += HandleSkipFeed;
+        CharacterBase.OnDamageTaken        += HandleDamageTaken;
+        CharacterBase.OnAngryAdded         += HandleAngryAdded;
+        CharacterBase.OnSkipFeed           += HandleSkipFeed;
         CharacterBase.OnInstanceMaxHPAdded += HandleInstanceMaxHPAdded;
-        Bagger.OnBegTriggered            += HandleBegTriggered;
-        WaveManager.OnWaveEnd            += ResetRoundBuffs;
+        CharacterBase.OnEnemyDied          += HandleEnemyDied;
+        Bagger.OnBegTriggered              += HandleBegTriggered;
+        WaveManager.OnWaveEnd              += ResetRoundBuffs;
     }
 
     void OnDisable()
     {
-        CharacterBase.OnDamageTaken      -= HandleDamageTaken;
-        CharacterBase.OnAngryAdded       -= HandleAngryAdded;
-        CharacterBase.OnSkipFeed         -= HandleSkipFeed;
+        CharacterBase.OnDamageTaken        -= HandleDamageTaken;
+        CharacterBase.OnAngryAdded         -= HandleAngryAdded;
+        CharacterBase.OnSkipFeed           -= HandleSkipFeed;
         CharacterBase.OnInstanceMaxHPAdded -= HandleInstanceMaxHPAdded;
-        Bagger.OnBegTriggered            -= HandleBegTriggered;
-        WaveManager.OnWaveEnd            -= ResetRoundBuffs;
+        CharacterBase.OnEnemyDied          -= HandleEnemyDied;
+        Bagger.OnBegTriggered              -= HandleBegTriggered;
+        WaveManager.OnWaveEnd              -= ResetRoundBuffs;
     }
 
     void Update()
@@ -202,6 +204,28 @@ public class SpecialItemTracker : MonoBehaviour
             Debug.Log($"[Tracker] Flag Axe: {ch.name} +{apsGain:F2} APS");
         }
         flagAxeHpAccum[ch] = curr;
+    }
+
+    // ── Money ─────────────────────────────────────────────────────────────────
+    // +1 corn mỗi khi enemy chết (unstackable — luôn +1 dù có nhiều Money).
+    // 10% cơ hội +4 corn per item (stackable — mỗi item roll độc lập).
+
+    void HandleEnemyDied(CharacterBase enemy)
+    {
+        if (!HasStaticItem("Money")) return;
+        var wallet = PlayerWallet.Instance;
+        if (wallet == null) return;
+
+        // Flat +1 (unstackable)
+        wallet.Earn(1);
+
+        // 10% per item (stackable — roll độc lập cho từng item)
+        int count = CountStaticItems("Money");
+        for (int i = 0; i < count; i++)
+        {
+            if (UnityEngine.Random.value < 0.1f)
+                wallet.Earn(4);
+        }
     }
 
     // ── Hammer ────────────────────────────────────────────────────────────────

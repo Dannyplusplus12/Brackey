@@ -14,8 +14,11 @@ public class VFXLibrary : ScriptableObject
     public GameObject deathBurst;
 
     [Header("Buff / Heal")]
-    [Tooltip("Mũi tên + line bay lên nhanh khi được buff/hồi chỉ số.")]
+    [Tooltip("Mũi tên + line bay lên nhanh khi được buff/tăng chỉ số (maxHP, damage...).")]
     public GameObject buffArrow;
+
+    [Tooltip("Particle hiện khi nhân vật được hồi máu (Heal).")]
+    public GameObject healParticle;
 
     [Header("Feed")]
     [Tooltip("Icon vui bay lên chậm khi được feed đủ corn.")]
