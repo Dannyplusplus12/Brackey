@@ -18,10 +18,10 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    [Werewolf] Every 10 current angry: <color=#B48EE0>+5% damage.</color>
+    [Werewolf] Every <color=#E82020>10 angry<sprite name="stat_angry"></color>:
+    <color=#B48EE0>+5% damage<sprite name="stat_damage">.</color>
 
-    Rarity:
-    Uncommon'
+    Rarity: Uncommon'
   buyCost: 6
   sellValue: 1
   characterPrefab: {fileID: 0}

@@ -18,7 +18,8 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    Every 10 angry: <color=#00BFFF>+0.01 attack speed.</color>
+    Every <color=#E82020>10 angry<sprite name="stat_angry"></color>:
+    <color=#00BFFF>+0.01 attack speed<sprite name="stat_atkspeed">.</color>
 
     Rarity:
     Uncommon'

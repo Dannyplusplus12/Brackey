@@ -216,15 +216,15 @@ public class SpecialItemTracker : MonoBehaviour
         var wallet = PlayerWallet.Instance;
         if (wallet == null) return;
 
-        // Flat +1 (unstackable)
-        wallet.Earn(1);
+        // Flat +2 (unstackable)
+        wallet.Earn(2);
 
         // 10% per item (stackable — roll độc lập cho từng item)
         int count = CountStaticItems("Money");
         for (int i = 0; i < count; i++)
         {
             if (UnityEngine.Random.value < 0.1f)
-                wallet.Earn(4);
+                wallet.Earn(8);
         }
     }
 

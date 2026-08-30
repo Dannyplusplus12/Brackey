@@ -18,7 +18,8 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    Every 10 damage taken: <color=#4CAF50>+1 Max HP permanently.</color>
+    Every <color=#B48EE0>10 damage<sprite name="stat_damage"></color>
+    taken: <color=#4CAF50>+1 Max HP<sprite name="stat_hp"> permanently.</color>
 
     Rarity:
     Uncommon'

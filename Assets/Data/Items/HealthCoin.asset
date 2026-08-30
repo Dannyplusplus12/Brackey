@@ -19,7 +19,7 @@ MonoBehaviour:
   description: '
 
     On activation: 50% chance to gain <color=#4CAF50>+10 Max HP<sprite
-    name="stat_health">.</color>
+    name="stat_hp">.</color>
 
     Rarity: Common'
   buyCost: 4

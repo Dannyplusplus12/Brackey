@@ -19,7 +19,7 @@ MonoBehaviour:
   description: '
 
     [Sumo] Each time getting hit: Deals damage equal to <color=#4CAF50>5%
-    Max HP.</color>
+    Max HP<sprite name="stat_hp">.</color>
 
     Rarity: Common'
   buyCost: 4

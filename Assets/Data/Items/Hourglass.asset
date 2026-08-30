@@ -18,15 +18,16 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    [Pirate] Every 5 coins owned: <color=#B48EE0>+1 damage</color>
-    and <color=#4CAF50>+10 Max HP.</color>
+    [Pirate] Every <color=#FF8C00>5 corn<sprite name="stat_food"></color>:
+    <color=#B48EE0>+1 damage<sprite name="stat_damage"></color> and <color=#4CAF50>+10
+    Max HP<sprite name="stat_hp">.</color>
 
     Rarity: Uncommon'
   buyCost: 6
   sellValue: 1
   characterPrefab: {fileID: 9094000336568356389, guid: 4e64cc9557c20684dbd508586f91de94, type: 3}
   targetType: 1
-  targetCharacterType: {fileID: 11400000, guid: aecf6b6a5947d7a4abc017997771f9d6, type: 2}
+  targetCharacterType: {fileID: 11400000, guid: 996cdda31a3308348aa97c6a1757b32c, type: 2}
   statDelta:
     damage: 0
     moveSpeed: 0

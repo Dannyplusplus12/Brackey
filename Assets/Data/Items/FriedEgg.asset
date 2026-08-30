@@ -18,8 +18,9 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    On activation: <color=#00BFFF>+50% attack speed</color> and
-    <color=#B48EE0>+30% damage</color> until end of round.
+    On activation: <color=#00BFFF>+50% attack speed<sprite name="stat_atkspeed"></color>
+    and <color=#B48EE0>+30% damage<sprite name="stat_damage"></color> until end of
+    round.
 
     Rarity: Uncommon'
   buyCost: 2

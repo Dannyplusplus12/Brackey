@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    <color=#4CAF50>+5 Max HP permanently.</color>
+    <color=#4CAF50>+5 Max HP<sprite name="stat_hp"> permanently.</color>
 
     Rarity:
     Common'

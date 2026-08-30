@@ -43,11 +43,7 @@ MonoBehaviour:
   maxAngry: 100
   foodRequiredPerRound: 4
   killReward: 3
-  description: "Each ally death: <color=#B48EE0>+5 damage</color><sprite name=\"stat_damage\">
-    and <color=#00BFFF>+0.1 attack speed</color><sprite name=\"stat_atkspeed\"> permanently.\nEach
-    time eating: <color=#4CAF50>+10 Max HP</color><sprite name=\"stat_hp\"> permanently.\n\n\n<color=#E82020>+20
-    angry</color><sprite name=\"stat_angry\"> when hungry \n<color=#E82020>+10 angry</color><sprite
-    name=\"stat_angry\"> when ally die"
+  description: "Each ally death: <color=#B48EE0>+5 damage<sprite name=\"stat_damage\"></color> and <color=#00BFFF>+0.1 attack speed<sprite name=\"stat_atkspeed\"></color> permanently.\nEach time eating: <color=#4CAF50>+10 Max HP<sprite name=\"stat_hp\"></color> permanently.\n\n\n<color=#E82020>+20 angry<sprite name=\"stat_angry\"></color> when hungry\n<color=#E82020>+10 angry<sprite name=\"stat_angry\"></color> when ally dies"
   idleSprite: {fileID: 8303194314658244379, guid: ff634845c7dd3a74399b858983ff50a0, type: 3}
   attackSprite: {fileID: 448532415101501820, guid: 8e80ef5fa3a64c745b8deb2870d28a2a, type: 3}
   skillSprite: {fileID: 448532415101501820, guid: 8e80ef5fa3a64c745b8deb2870d28a2a, type: 3}

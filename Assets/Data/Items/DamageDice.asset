@@ -18,10 +18,10 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    On activation: 4/6 chance for <color=#B48EE0>+10 damage</color><sprite
-    name="stat_damage">, 1/6 chance for <color=#B48EE0>+40 damage</color><sprite
-    name="stat_damage">, 1/6 chance for <color=#B48EE0>-30% damage</color><sprite
-    name="stat_damage">.
+    On activation: 4/6 chance for <color=#B48EE0>+10 damage<sprite
+    name="stat_damage"></color>, 1/6 chance for <color=#B48EE0>+40 damage<sprite
+    name="stat_damage"></color>, 1/6 chance for <color=#B48EE0>-30% damage<sprite
+    name="stat_damage"></color>.
 
     Rarity: Uncommon'
   buyCost: 5

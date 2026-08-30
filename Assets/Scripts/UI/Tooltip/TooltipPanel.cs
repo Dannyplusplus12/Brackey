@@ -33,6 +33,14 @@ public class TooltipPanel : MonoBehaviour
 
         _rootCanvas = GetComponentInParent<Canvas>().rootCanvas;
         TooltipSystem.Register(this);
+
+        // Tooltip không được chặn raycast — nếu không sẽ gây flicker:
+        // tooltip hiện → che item → OnPointerExit → ẩn → OnPointerEnter → lặp vô tận
+        var group = GetComponent<CanvasGroup>();
+        if (group == null) group = gameObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
+        group.interactable   = false;
+
         gameObject.SetActive(false);
     }
 

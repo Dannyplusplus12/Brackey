@@ -18,9 +18,9 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    On activation: 4/6 chance for <color=#4CAF50>+40 Max HP</color><sprite
-    name="stat_hp">, 1/6 chance for <color=#4CAF50>+100 Max HP</color><sprite name="stat_hp">,
-    1/6 chance for <color=#4CAF50>-50% Max HP</color><sprite name="stat_hp">.
+    On activation: 4/6 chance for <color=#4CAF50>+40 Max HP<sprite
+    name="stat_hp"></color>, 1/6 chance for <color=#4CAF50>+100 Max HP<sprite name="stat_hp"></color>,
+    1/6 chance for <color=#4CAF50>-50% Max HP<sprite name="stat_hp"></color>.
 
     Rarity:
     Uncommon'

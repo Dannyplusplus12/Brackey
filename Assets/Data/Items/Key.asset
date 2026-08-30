@@ -18,15 +18,15 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    [Pirate] <color=#00BFFF>+0.3 attack speed</color> and <color=#00BFFF>+1%
-    coin drop chance.</color>
+    [Pirate] <color=#00BFFF>+0.3 attack speed<sprite name="stat_atkspeed"></color>
+    and <color=#FFD700>+1% corn drop<sprite name="stat_food"></color>.
 
     Rarity: Common'
   buyCost: 4
   sellValue: 1
   characterPrefab: {fileID: 9094000336568356389, guid: 4e64cc9557c20684dbd508586f91de94, type: 3}
   targetType: 1
-  targetCharacterType: {fileID: 11400000, guid: aecf6b6a5947d7a4abc017997771f9d6, type: 2}
+  targetCharacterType: {fileID: 11400000, guid: 996cdda31a3308348aa97c6a1757b32c, type: 2}
   statDelta:
     damage: 0
     moveSpeed: 0

@@ -19,7 +19,7 @@ MonoBehaviour:
   description: '
 
     [Beggar] Each time buffing an ally: <color=#4CAF50>+10 Max
-    HP permanently.</color>
+    HP<sprite name="stat_hp"> permanently.</color>
 
     Rarity: Common'
   buyCost: 4

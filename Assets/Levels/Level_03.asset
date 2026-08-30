@@ -15,6 +15,9 @@ MonoBehaviour:
   levelName: Level 2
   groups:
   - prefab: {fileID: 3497694148884708737, guid: 90391d2f4a629ef4c80ef5e01505595f, type: 3}
-    count: 3
+    count: 1
     spawnInterval: 0
-  waveWinReward: 15
+  - prefab: {fileID: 3497694148884708737, guid: 90391d2f4a629ef4c80ef5e01505595f, type: 3}
+    count: 1
+    spawnInterval: 0
+  waveWinReward: 30

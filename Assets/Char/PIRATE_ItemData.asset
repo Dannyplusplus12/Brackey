@@ -16,14 +16,7 @@ MonoBehaviour:
   icon: {fileID: -901256396567455822, guid: cfad608f48c9e83409be5c4c8737503a, type: 3}
   itemType: 2
   rarity: 2
-  description: 'Every 2nd attack: 5% chance to gain <color=#FFD700>+5 coin.
-
-    Each
-    wave survived: +1% coin drop chance.
-
-
-    <color=#E82020>+25 angry</color><sprite
-    name="stat_angry"> when hungry '
+  description: "Every 2nd attack: 5% chance to gain <color=#FFD700>+5 coin<sprite name=\"coin\"></color>.\n\nEach wave survived: <color=#FFD700>+1% coin drop<sprite name=\"coin\"></color>.\n\n<color=#E82020>+25 angry<sprite name=\"stat_angry\"></color> when hungry"
   buyCost: 8
   sellValue: 1
   characterPrefab: {fileID: 9094000336568356389, guid: 4e64cc9557c20684dbd508586f91de94, type: 3}

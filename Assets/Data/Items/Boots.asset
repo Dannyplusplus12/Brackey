@@ -19,10 +19,10 @@ MonoBehaviour:
   description: '
 
     [Beggar] Each time buffing an ally: <color=#00BFFF>+0.04 attack
-    speed</color> and <color=#B48EE0>+5 damage permanently.</color>
+    speed<sprite name="stat_atkspeed"></color> and <color=#B48EE0>+5 damage<sprite
+    name="stat_damage"> permanently.</color>
 
-    Rarity:
-    Uncommon'
+    Rarity: Uncommon'
   buyCost: 6
   sellValue: 1
   characterPrefab: {fileID: 6225856516645929918, guid: 141b391a1dc1d0a449f2669543ce517a, type: 3}

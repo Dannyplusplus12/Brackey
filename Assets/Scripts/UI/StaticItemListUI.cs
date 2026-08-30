@@ -74,7 +74,7 @@ public class StaticItemListUI : MonoBehaviour
         // Đảm bảo trigger tồn tại
         var trigger = go.GetComponent<ItemTooltipTrigger>()
                    ?? go.AddComponent<ItemTooltipTrigger>();
-        trigger.Setup(TooltipDirection.Top, end: false, g: 8f);
+        trigger.Setup(TooltipDirection.Left, end: false, g: 8f);
 
         // Icon — raycastTarget=true để event bubble lên root's ItemTooltipTrigger
         Image iconImg = FindChild<Image>(go, "Icon") ?? go.GetComponentInChildren<Image>();
@@ -112,7 +112,7 @@ public class StaticItemListUI : MonoBehaviour
         // ItemTooltipTrigger — thêm nếu prefab chưa có
         var trigger = entry.GetComponent<ItemTooltipTrigger>()
                    ?? entry.gameObject.AddComponent<ItemTooltipTrigger>();
-        trigger.Setup(TooltipDirection.Top, end: false, g: 8f);
+        trigger.Setup(TooltipDirection.Left, end: false, g: 8f);
 
         if (count <= 1) return;
 

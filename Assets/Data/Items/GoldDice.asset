@@ -18,9 +18,9 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    On activation: 4/6 chance to gain <color=#FF8C00>10 food</color><sprite
-    name="stat_food">, 1/6 chance to gain <color=#FF8C00>40 food</color><sprite name="stat_food">,
-    1/6 chance to lose all <color=#FF8C00>food</color><sprite name="stat_food">.
+    On activation: 4/6 chance to gain <color=#FF8C00>10 corn<sprite
+    name="stat_food"></color>, 1/6 chance to gain <color=#FF8C00>40 corn<sprite name="stat_food"></color>,
+    1/6 chance to lose all <color=#FF8C00>corn<sprite name="stat_food"></color>.
 
     Rarity:
     Uncommon'

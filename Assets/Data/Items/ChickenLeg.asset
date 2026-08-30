@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    <color=#B48EE0>+1 damage permanently.</color>
+    <color=#B48EE0>+2 damage<sprite name="stat_damage"> permanently.</color>
 
     Rarity:
     Common'
@@ -28,7 +28,7 @@ MonoBehaviour:
   targetType: 0
   targetCharacterType: {fileID: 0}
   statDelta:
-    damage: 1
+    damage: 2
     moveSpeed: 0
     maxHP: 0
     attackSpeed: 0

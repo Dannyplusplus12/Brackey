@@ -18,10 +18,10 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    [Viking] Each wave survived: <color=#B48EE0>+1 damage permanently.</color>
+    [Viking] Each wave survived: <color=#B48EE0>+1 damage<sprite
+    name="stat_damage"> permanently.</color>
 
-    Rarity:
-    Uncommon'
+    Rarity: Uncommon'
   buyCost: 6
   sellValue: 1
   characterPrefab: {fileID: 4535559801046744120, guid: 67da874244924ea43b701364e2b06ad3, type: 3}

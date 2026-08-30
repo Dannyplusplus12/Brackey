@@ -43,14 +43,7 @@ MonoBehaviour:
   maxAngry: 100
   foodRequiredPerRound: 3
   killReward: 1
-  description: 'Every 2nd attack: 5% chance to gain <color=#FFD700>+5 coin.
-
-    Each
-    wave survived: +1% coin drop chance.
-
-
-    <color=#E82020>+25 angry</color><sprite
-    name="stat_angry"> when hungry '
+  description: "Every 2nd attack: 5% chance to gain <color=#FFD700>+5 coin<sprite name=\"coin\"></color>.\n\nEach wave survived: <color=#FFD700>+1% coin drop<sprite name=\"coin\"></color>.\n\n<color=#E82020>+25 angry<sprite name=\"stat_angry\"></color> when hungry"
   idleSprite: {fileID: -901256396567455822, guid: cfad608f48c9e83409be5c4c8737503a, type: 3}
   attackSprite: {fileID: -6655496463225406622, guid: cfad608f48c9e83409be5c4c8737503a, type: 3}
   skillSprite: {fileID: 0}

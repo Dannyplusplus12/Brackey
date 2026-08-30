@@ -18,10 +18,11 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    [Viking] Every 20 bonus Max HP: <color=#00BFFF>+0.01 attack
-    speed permanently.</color>
+    [Viking] Every <color=#4CAF50>20 Max HP<sprite name="stat_hp"></color>:
+    <color=#00BFFF>+0.01 attack speed<sprite name="stat_atkspeed"> permanently.</color>
 
-    Rarity: Common'
+    Rarity:
+    Common'
   buyCost: 4
   sellValue: 1
   characterPrefab: {fileID: 4535559801046744120, guid: 67da874244924ea43b701364e2b06ad3, type: 3}

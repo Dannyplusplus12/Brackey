@@ -43,13 +43,7 @@ MonoBehaviour:
   maxAngry: 100
   foodRequiredPerRound: 2
   killReward: 0
-  description: '30% chance to chase a new target after each strike
-
-    <color=#E82020>+20</color>
-    <sprite name="stat_angry"> when hungry
-
-    <color=#E82020>+15</color> <sprite
-    name="stat_angry"> when 1 ally die'
+  description: "30% chance to chase a new target after each strike\n\n<color=#E82020>+20 angry<sprite name=\"stat_angry\"></color> when hungry\n\n<color=#E82020>+15 angry<sprite name=\"stat_angry\"></color> when 1 ally dies"
   idleSprite: {fileID: 7417431658602345801, guid: 2efbc58534598c54c9c5b2afa64221ef, type: 3}
   attackSprite: {fileID: 7551247066117493529, guid: de8fb788500cac4439fc20223725d544, type: 3}
   skillSprite: {fileID: 0}

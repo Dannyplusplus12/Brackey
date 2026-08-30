@@ -18,10 +18,10 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    <color=#00BFFF>+0.03 attack speed permanently.</color>
+    <color=#00BFFF>+0.03 attack speed<sprite name="stat_atkspeed">
+    permanently.</color>
 
-    Rarity:
-    Common'
+    Rarity: Common'
   buyCost: 2
   sellValue: 1
   characterPrefab: {fileID: 0}

@@ -19,7 +19,7 @@ MonoBehaviour:
   description: '
 
     [Werewolf] Each time getting hungry: <color=#4CAF50>+2 Max
-    HP permanently.</color>
+    HP<sprite name="stat_hp"> permanently.</color>
 
     Rarity: Common'
   buyCost: 4

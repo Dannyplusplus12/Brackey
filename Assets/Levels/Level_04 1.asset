@@ -18,6 +18,6 @@ MonoBehaviour:
     count: 3
     spawnInterval: 0
   - prefab: {fileID: 2553317289835612386, guid: 7e4bec949606d4f4b8d5b2c19935b585, type: 3}
-    count: 5
+    count: 0
     spawnInterval: 0
-  waveWinReward: 15
+  waveWinReward: 30

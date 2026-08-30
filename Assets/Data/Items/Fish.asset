@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    On activation: All allies <color=#E82020>-10 angry.</color>
+    On activation: All allies <color=#E82020>-30 angry<sprite name="stat_angry">.</color>
 
     Rarity:
     Common'

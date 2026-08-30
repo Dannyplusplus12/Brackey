@@ -2,7 +2,7 @@
 //
 // SKILL 1 — Plunder
 //   Every even attack (2nd, 4th, 6th...): earnChance% to earn 5 corn.
-//   Base chance = 5%, grows +1% per wave survived (Skill 2).
+//   Base chance = 5%, grows +4% per wave survived (Skill 2).
 //   Key item: each Key in StaticItems adds +1% on top.
 //
 // SKILL 2 — Sea Dog's Fortune (permanent for the run)
@@ -14,7 +14,7 @@ public class Pirate : CharacterBase
 {
     const int   PlunderReward     = 5;
     const float BaseEarnChance    = 0.05f;  // 5% base
-    const float ChanceGainPerWave = 0.01f;  // +1% per wave survived
+    const float ChanceGainPerWave = 0.04f;  // +4% per wave survived
     const float KeyBonusPerKey    = 0.01f;  // +1% per Key item
 
     [Header("Key Item")]

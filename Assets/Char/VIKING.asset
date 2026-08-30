@@ -18,7 +18,7 @@ MonoBehaviour:
   attackRange: 80
   attackVisualDuration: 0.15
   moveSpeed: 150
-  separationRadius: 40
+  separationRadius: 20
   separationStrength: 50
   flipCooldown: 0.4
   actionDelayMin: 0
@@ -43,18 +43,7 @@ MonoBehaviour:
   maxAngry: 100
   foodRequiredPerRound: 2
   killReward: 2
-  description: 'Every 3rd attack: <color=#B48EE0>+100% damage</color><sprite name="stat_damage">
-
-    that
-    atack.
-
-    Each wave survived: <color=#4CAF50>+4% Max HP<sprite name="stat_hp"></color>and
-    <color=#B48EE0>+4% damage</color><sprite name="stat_damage"> permanently.
-
-
-
-    <color=#E82020>+20
-    angry</color><sprite name="stat_angry"> when hungry'
+  description: "Every 3rd attack: <color=#B48EE0>+100% damage<sprite name=\"stat_damage\"></color> that attack.\n\nEach wave survived: <color=#4CAF50>+4% Max HP<sprite name=\"stat_hp\"></color> and <color=#B48EE0>+4% damage<sprite name=\"stat_damage\"></color> permanently.\n\n<color=#E82020>+20 angry<sprite name=\"stat_angry\"></color> when hungry"
   idleSprite: {fileID: 21300000, guid: 7a4783cbae19a224a83a250df5ec68c8, type: 3}
   attackSprite: {fileID: 21300000, guid: c615328db9ee1254ab9dabc38647489b, type: 3}
   skillSprite: {fileID: 21300000, guid: c615328db9ee1254ab9dabc38647489b, type: 3}

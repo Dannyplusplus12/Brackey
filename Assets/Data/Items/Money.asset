@@ -18,9 +18,9 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    Each enemy death: <color=#FF8C00>+1 food</color><sprite name="stat_food">
-    (unstackable). 10% chance per enemy death to drop <color=#FF8C00>+4 food</color><sprite
-    name="stat_food"> (stackable).
+    Each enemy death: <color=#FF8C00>+2 corn<sprite name="stat_food"></color>
+    (unstackable). 10% chance per enemy death to drop <color=#FF8C00>+8 corn<sprite
+    name="stat_food"></color> (stackable).
 
     Rarity: Common'
   buyCost: 6

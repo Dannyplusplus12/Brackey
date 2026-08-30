@@ -18,8 +18,8 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    On activation: 50% chance to double current <color=#FFD700>corn<sprite
-    name="stat_food"></color> or lose 50% of current <color=#FFD700>corn<sprite name="stat_food"></color>
+    On activation: 50% chance to double current <color=#FF8C00>corn<sprite
+    name="stat_food"></color> or lose 50% of current <color=#FF8C00>corn<sprite name="stat_food"></color>.
 
     Rarity:
     Common'

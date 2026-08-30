@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    <color=#FF69B4>+10 speed permanently.</color>
+    <color=#FF69B4>+10 speed<sprite name="stat_speed"> permanently.</color>
 
     Rarity:
     Common'

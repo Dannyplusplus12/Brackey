@@ -125,6 +125,8 @@ public abstract class CharacterBase : MonoBehaviour
     public Vector2 BodyCenter => (Vector2)transform.position + Vector2.up * (stats != null ? stats.centerOffset * transform.lossyScale.y : 0f);
 
     protected Vector2 leashCenter;
+    float _leashStuckTimer;
+    float _leashBestDist = float.MaxValue;
     protected CharacterBase currentTarget;
     protected float attackTimer;
     float waitTimer;
@@ -298,11 +300,34 @@ public abstract class CharacterBase : MonoBehaviour
             case CharacterState.Leashing:
                 Vector2 toLeash = leashCenter - (Vector2)transform.position;
                 if (toLeash.magnitude < 0.05f)
+                {
+                    _leashStuckTimer = 0f;
+                    _leashBestDist   = float.MaxValue;
                     EnterState(CharacterState.Idle);
+                }
                 else
                 {
                     desiredMove = toLeash.normalized;
                     SetFacing(toLeash);
+
+                    // Stuck detection: nếu không tiến gần hơn được trong 4s → nhà mới = chỗ đứng
+                    float dist = toLeash.magnitude;
+                    if (dist < _leashBestDist - 0.1f)   // tiến được → reset timer
+                    {
+                        _leashBestDist   = dist;
+                        _leashStuckTimer = 0f;
+                    }
+                    else
+                    {
+                        _leashStuckTimer += Time.deltaTime;
+                        if (_leashStuckTimer >= 4f)
+                        {
+                            leashCenter      = transform.position; // chỗ đứng = nhà mới
+                            _leashStuckTimer = 0f;
+                            _leashBestDist   = float.MaxValue;
+                            EnterState(CharacterState.Idle);
+                        }
+                    }
                 }
                 break;
         }
@@ -496,7 +521,7 @@ public abstract class CharacterBase : MonoBehaviour
         float movedDist = ((Vector2)transform.position - (Vector2)lastPositionForSway).magnitude;
         lastPositionForSway = transform.position;
 
-        if (movedDist > 0.001f)
+        if (movedDist > 0.008f)   // ngưỡng cao hơn để separation nhỏ không trigger sway
             swayStopTimer = SwayStopDelay;
         else
             swayStopTimer -= Time.deltaTime;
@@ -620,19 +645,18 @@ public abstract class CharacterBase : MonoBehaviour
     public virtual void ExitCombat()
     {
         if (IsDead) return;
-        currentTarget = null;
-        attackCount = 0;
+        currentTarget    = null;
+        attackCount      = 0;
+        _leashStuckTimer = 0f;
+        _leashBestDist   = float.MaxValue;
         EnterState(CharacterState.Leashing);
     }
 
     void OnGameStateChanged(GameState state)
     {
-        if (state == GameState.Shop)
-        {
-            // Vào shop: dừng leashing (char đứng ở chỗ hiện tại, separation lo phần còn lại)
-            if (State == CharacterState.Leashing)
-                EnterState(CharacterState.Idle);
-        }
+        // Không cancel Leashing khi vào Shop.
+        // Char tiếp tục đi về home, tự sang Idle khi đến nơi.
+        // Nếu wave mới bắt đầu giữa chừng, EnterCombat() override sang Seeking.
     }
 
     // ── Knockback ─────────────────────────────────────────────────────────────

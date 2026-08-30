@@ -18,10 +18,10 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    On activation: All allies heal <color=#4CAF50>60% Max HP.</color>
+    On activation: All allies heal <color=#4CAF50>60% Max HP<sprite
+    name="stat_hp">.</color>
 
-    Rarity:
-    Common'
+    Rarity: Common'
   buyCost: 2
   sellValue: 1
   characterPrefab: {fileID: 0}
