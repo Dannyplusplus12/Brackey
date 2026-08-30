@@ -15,6 +15,7 @@ MonoBehaviour:
   bloodHit: {fileID: 3183507124708621576, guid: a9a97de10d4ee5b4083ef46aac15bde9, type: 3}
   deathBurst: {fileID: 2869918662379787816, guid: 174f096e181623041844ac5747740650, type: 3}
   buffArrow: {fileID: 5867971413540951012, guid: 747f470400379544f90d5bf5b30340a2, type: 3}
+  healParticle: {fileID: 5867971413540951012, guid: f290a9b86e5a47e1a647ae9d501c0e9f, type: 3}
   feedHappy: {fileID: 4965449136792041510, guid: cb0694f9402ca0e49a85482029688024, type: 3}
   feedAngry: {fileID: 4965449136792041510, guid: cb0694f9402ca0e49a85482029688024, type: 3}
   stunStars: {fileID: 5188067929165294761, guid: 361456cbefdc93f4db8e66c95169993d, type: 3}
