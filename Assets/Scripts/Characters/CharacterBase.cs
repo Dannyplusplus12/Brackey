@@ -606,7 +606,8 @@ public abstract class CharacterBase : MonoBehaviour
     public virtual void EnterCombat()
     {
         if (IsDead) return;
-        leashCenter = transform.position;
+        // leashCenter KHÔNG reset ở đây — home đã được set lúc spawn hoặc kéo thả.
+        // Ghi đè ở đây gây drift mỗi wave khi char bị cancel giữa chừng khi leash về.
         AddAngry(stats.angryOnRoundStart, AngryReason.RoundStart);
         currentTarget = null;
         retargetTimer = 0f; // tìm enemy ngay từ đầu wave

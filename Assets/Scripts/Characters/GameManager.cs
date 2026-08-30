@@ -85,6 +85,7 @@ public class GameManager : MonoBehaviour
         if (CharacterGrid.CountAlive(Faction.Enemy) == 0)
         {
             _pendingShop = true;
+            WaveManager.Instance?.EndWave(); // end ngay để char bắt đầu leash về trong shopDelay
             StartCoroutine(DelayedEnterShop());
         }
         // Defeat được xử lý event-driven qua OnAllyDied() — không poll ở đây nữa.
