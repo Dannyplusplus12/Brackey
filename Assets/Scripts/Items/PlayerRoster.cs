@@ -12,7 +12,7 @@ public static class PlayerRoster
     static readonly HashSet<CharacterStats> ownedTypes = new();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void Reset() => ownedTypes.Clear();
+    public static void Reset() => ownedTypes.Clear();
 
     // Gọi từ CharacterBase.Start() khi nhân vật Ally spawn.
     public static void Register(CharacterStats type)

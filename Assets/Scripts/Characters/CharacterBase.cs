@@ -63,12 +63,15 @@ public abstract class CharacterBase : MonoBehaviour
     // ── Effective stats = (base + flat) * (1 + percent) ────────────────────
     // flat   = GlobalStatBonus + perType flat + instanceBonus flat
     // percent= GlobalStatBonus + perType percent + instanceBonus percent
+    // GlobalStatBonus (từ item player) chỉ áp cho Ally — không buff enemy.
+    bool IsAlly => faction == Faction.Ally;
+
     protected float EffectiveDamage
     {
         get {
-            var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.damage + GlobalStatBonus.damage + t.damage + _instanceBonus.damage;
-            float pct  = GlobalStatBonus.damagePercent + t.damagePercent + _instanceBonus.damagePercent;
+            var t = IsAlly ? GlobalStatBonus.GetTypeBonus(stats) : default;
+            float flat = stats.damage + (IsAlly ? GlobalStatBonus.damage + t.damage : 0f) + _instanceBonus.damage;
+            float pct  = (IsAlly ? GlobalStatBonus.damagePercent + t.damagePercent : 0f) + _instanceBonus.damagePercent;
             float result = flat * (1f + pct);
             // Hard buff: chỉ áp cho Enemy gốc (spawn bởi LevelManager), không áp cho ally đổi phe
             if (faction == Faction.Enemy && !_wasAlly)
@@ -79,18 +82,18 @@ public abstract class CharacterBase : MonoBehaviour
     protected float EffectiveMoveSpeed
     {
         get {
-            var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.moveSpeed + GlobalStatBonus.moveSpeed + t.moveSpeed + _instanceBonus.moveSpeed;
-            float pct  = GlobalStatBonus.moveSpeedPercent + t.moveSpeedPercent + _instanceBonus.moveSpeedPercent;
+            var t = IsAlly ? GlobalStatBonus.GetTypeBonus(stats) : default;
+            float flat = stats.moveSpeed + (IsAlly ? GlobalStatBonus.moveSpeed + t.moveSpeed : 0f) + _instanceBonus.moveSpeed;
+            float pct  = (IsAlly ? GlobalStatBonus.moveSpeedPercent + t.moveSpeedPercent : 0f) + _instanceBonus.moveSpeedPercent;
             return flat * (1f + pct);
         }
     }
     protected float EffectiveMaxHP
     {
         get {
-            var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.maxHP + GlobalStatBonus.maxHP + t.maxHP + _instanceBonus.maxHP;
-            float pct  = GlobalStatBonus.maxHPPercent + t.maxHPPercent + _instanceBonus.maxHPPercent;
+            var t = IsAlly ? GlobalStatBonus.GetTypeBonus(stats) : default;
+            float flat = stats.maxHP + (IsAlly ? GlobalStatBonus.maxHP + t.maxHP : 0f) + _instanceBonus.maxHP;
+            float pct  = (IsAlly ? GlobalStatBonus.maxHPPercent + t.maxHPPercent : 0f) + _instanceBonus.maxHPPercent;
             float result = flat * (1f + pct);
             // Hard buff: chỉ áp cho Enemy gốc
             if (faction == Faction.Enemy && !_wasAlly)
@@ -102,22 +105,21 @@ public abstract class CharacterBase : MonoBehaviour
     public float EffectiveAPS
     {
         get {
-            var t = GlobalStatBonus.GetTypeBonus(stats);
-            float flat = stats.attackSpeed + GlobalStatBonus.attackSpeed + t.attackSpeed + _instanceBonus.attackSpeed;
+            var t = IsAlly ? GlobalStatBonus.GetTypeBonus(stats) : default;
+            float flat = stats.attackSpeed + (IsAlly ? GlobalStatBonus.attackSpeed + t.attackSpeed : 0f) + _instanceBonus.attackSpeed;
             // Hard buff APS: +0.05 flat mỗi wave, chỉ enemy gốc
             if (faction == Faction.Enemy && !_wasAlly)
                 flat += EnemyHardSystem.HardFlatAPS;
-            float pct  = GlobalStatBonus.attackSpeedPercent + t.attackSpeedPercent + _instanceBonus.attackSpeedPercent;
+            float pct  = (IsAlly ? GlobalStatBonus.attackSpeedPercent + t.attackSpeedPercent : 0f) + _instanceBonus.attackSpeedPercent;
             return flat * (1f + pct);
         }
     }
     // Interval (giây) dùng nội bộ — clamp min 0.05s (tối đa 20 APS)
     protected float EffectiveAttackInterval => 1f / Mathf.Max(0.05f, EffectiveAPS);
-    protected float EffectiveAttackRange    => stats.attackRange + GlobalStatBonus.attackRange + GlobalStatBonus.GetTypeBonus(stats).attackRange;
+    protected float EffectiveAttackRange    => stats.attackRange + (IsAlly ? GlobalStatBonus.attackRange + GlobalStatBonus.GetTypeBonus(stats).attackRange : 0f);
     // Public: UI và FeedingManager đọc chi phí ăn thực tế (có thể bị item thay đổi)
     public  int    EffectiveFoodCost       => Mathf.Max(0, stats.foodRequiredPerRound
-                                                + (int)GlobalStatBonus.foodCost
-                                                + (int)GlobalStatBonus.GetTypeBonus(stats).foodCost);
+                                                + (IsAlly ? (int)GlobalStatBonus.foodCost + (int)GlobalStatBonus.GetTypeBonus(stats).foodCost : 0));
 
     // Tâm thân nhân vật (giữa chân và đầu) — dùng cho mọi tính toán distance/separation
     // thay vì transform.position (chân) để khớp với vòng tròn Gizmos và cảm giác gameplay.
@@ -188,6 +190,10 @@ public abstract class CharacterBase : MonoBehaviour
     public static event System.Action<CharacterBase> OnAllyBecameEnemy;
     // Fire khi bất kỳ nhân vật nào nhận sát thương (victim, amount, attacker — attacker có thể null).
     public static event System.Action<CharacterBase, float, CharacterBase> OnDamageTaken;
+    // Fire khi nhân vật thực hiện đòn tấn công — SoundManager dùng để phát attack sound.
+    public static event System.Action<CharacterBase> OnCharacterAttacked;
+    // Fire khi nhân vật được heal (Feed hoặc Heal) — SoundManager dùng để phát heal sound.
+    public static event System.Action<CharacterBase> OnCharacterHealed;
     // Fire khi bất kỳ nhân vật nào tăng angry (amount = lượng thực tế tăng sau clamp).
     public static event System.Action<CharacterBase, float> OnAngryAdded;
     // Fire khi nhân vật bị bỏ đói (SkipFeed) — Serum item dùng event này.
@@ -202,6 +208,8 @@ public abstract class CharacterBase : MonoBehaviour
         OnEnemyDied          = null;
         OnAllyBecameEnemy    = null;
         OnDamageTaken        = null;
+        OnCharacterAttacked  = null;
+        OnCharacterHealed    = null;
         OnAngryAdded         = null;
         OnSkipFeed           = null;
         OnInstanceMaxHPAdded = null;
@@ -711,6 +719,7 @@ public abstract class CharacterBase : MonoBehaviour
         if (IsDead) return;
         CurrentHP = Mathf.Min(EffectiveMaxHP, CurrentHP + amount);
         VFXManager.PlayHeal(BodyCenter);
+        OnCharacterHealed?.Invoke(this);
     }
 
     public virtual void AddAngry(float amount, AngryReason reason)
@@ -757,6 +766,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         CurrentHP = EffectiveMaxHP;
         VFXManager.PlayFeedHappy(BodyCenter);
+        OnCharacterHealed?.Invoke(this);
     }
 
     // Gọi bởi FeedingManager khi thiếu corn.
@@ -794,6 +804,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (!gameObject.activeInHierarchy) return;
         attackCount++;
+        OnCharacterAttacked?.Invoke(this);
         target.TakeDamage(EffectiveDamage, this);
         FlashSprite(stats.attackSprite);
     }

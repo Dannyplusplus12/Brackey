@@ -97,6 +97,9 @@ public class DefeatScreenUI : MonoBehaviour
     void OnClickRestart()
     {
         Time.timeScale = 1f; // reset timescale phòng debug đang chỉnh
+        // Reset static state trước khi load scene, vì SubsystemRegistration không chạy khi reload scene.
+        PlayerRoster.Reset();
+        GlobalStatBonus.Reset();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

@@ -16,6 +16,8 @@ public class ShopOfferManager : MonoBehaviour
     public static event System.Action<int> OnRerollCostChanged;
     // Raised khi mua thành công — RunTracker dùng để đếm item/char đã mua.
     public static event System.Action<ItemData> OnItemBought;
+    // Raised khi người chơi bấm Reroll (có tốn corn, không fire khi auto-roll mỗi wave).
+    public static event System.Action OnRerollUsed;
 
     public const int OfferCount = 4;
 
@@ -89,6 +91,7 @@ public class ShopOfferManager : MonoBehaviour
         if (PlayerWallet.Instance != null && !PlayerWallet.Instance.TrySpend(_rerollCost))
             return false;
         _rerollCost++; // mỗi lần bấm tăng 1
+        OnRerollUsed?.Invoke();
         RerollFree();
         return true;
     }

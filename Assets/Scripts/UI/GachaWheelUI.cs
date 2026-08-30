@@ -165,6 +165,8 @@ public class GachaWheelUI : MonoBehaviour
         _isSpinning = true;
         SetCenterInteractable(false);
 
+        SoundManager.PlayLooping(SoundId.WheelSpin);
+
         float currentMod = _totalCW % 360f;
         float targetMod  = (360f - winnerIndex * (360f / SlotCount)) % 360f;
         float delta      = targetMod - currentMod;
@@ -183,6 +185,9 @@ public class GachaWheelUI : MonoBehaviour
                 wheelContainer.localEulerAngles = new Vector3(0f, 0f, -_totalCW);
             yield return null;
         }
+
+        // Fade out tiếng quay cùng lúc bánh xe dừng
+        SoundManager.StopLooping(fadeDuration: 0.4f);
 
         _totalCW = end;
         if (wheelContainer != null)

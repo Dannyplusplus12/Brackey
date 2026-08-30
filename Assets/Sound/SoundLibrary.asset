@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d910c49af235d5489b9087f99ac6822, type: 3}
+  m_Name: SoundLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::SoundLibrary
+  entries:
+  - id: 0
+    clips:
+    - {fileID: 8300000, guid: e48fe71a2c2b70c4f853c10a9604a657, type: 3}
+    volume: 0.195
+    pitchMin: 0.95
+    pitchMax: 1.05
+  - id: 1
+    clips:
+    - {fileID: 8300000, guid: ba5dccb308151ad4a95c440b5e7a638a, type: 3}
+    volume: 0.534
+    pitchMin: 0.92
+    pitchMax: 1.08
+  - id: 2
+    clips: []
+    volume: 0.7
+    pitchMin: 0.9
+    pitchMax: 1.1
+  - id: 3
+    clips: []
+    volume: 0.8
+    pitchMin: 0.93
+    pitchMax: 1.07
+  - id: 4
+    clips: []
+    volume: 1
+    pitchMin: 0.97
+    pitchMax: 1.03
+  - id: 5
+    clips:
+    - {fileID: 8300000, guid: 3e786f47875976b4baa1e305a55326c6, type: 3}
+    volume: 0.695
+    pitchMin: 0.88
+    pitchMax: 1.12
+  - id: 6
+    clips: []
+    volume: 0.7
+    pitchMin: 0.85
+    pitchMax: 1.15
+  - id: 7
+    clips: []
+    volume: 0.9
+    pitchMin: 0.9
+    pitchMax: 1.1
+  - id: 8
+    clips:
+    - {fileID: 8300000, guid: 3fb3b2db8364de0499061b810775d42b, type: 3}
+    volume: 0.7
+    pitchMin: 0.93
+    pitchMax: 1.07
+  - id: 9
+    clips: []
+    volume: 0.7
+    pitchMin: 0.93
+    pitchMax: 1.07
