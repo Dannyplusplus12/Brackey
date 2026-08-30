@@ -10,6 +10,9 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
+    /// <summary>Fire ngay sau khi SpawnHarder() spawn xong — LevelAwardPanelUI dùng để update hiển thị.</summary>
+    public static event System.Action OnHarderSpawned;
+
     [Header("Levels — kéo LevelData theo thứ tự từ trên xuống")]
     [SerializeField] LevelData[] levels;
 
@@ -89,6 +92,7 @@ public class LevelManager : MonoBehaviour
         _harderUsedThisRound = true;
         Debug.Log($"[LevelManager] HARDER — spawn thêm từ level {nextIndex} (hard không tăng).");
         StartCoroutine(SpawnRoutine(levels[nextIndex]));
+        OnHarderSpawned?.Invoke();
     }
 
     IEnumerator SpawnRoutine(LevelData data)

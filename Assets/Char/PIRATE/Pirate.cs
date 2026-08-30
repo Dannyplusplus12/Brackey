@@ -1,8 +1,9 @@
 // Pirate — Gold-hungry scoundrel. Luck grows with every battle survived.
 //
 // SKILL 1 — Plunder
-//   Every even attack (2nd, 4th, 6th...): _earnChance% to earn 5 corn.
-//   Chance starts at 5% and grows with Skill 2.
+//   Every even attack (2nd, 4th, 6th...): earnChance% to earn 5 corn.
+//   Base chance = 5%, grows +1% per wave survived (Skill 2).
+//   Key item: each Key in StaticItems adds +1% on top.
 //
 // SKILL 2 — Sea Dog's Fortune (permanent for the run)
 //   Each wave survived as Ally: +1% plunder chance (no cap).
@@ -11,18 +12,19 @@ using UnityEngine;
 
 public class Pirate : CharacterBase
 {
-    const int   PlunderReward       = 5;
-    const float BaseEarnChance      = 0.05f;  // 5% starting
-    const float ChanceGainPerWave   = 0.01f;  // +1% per wave survived
+    const int   PlunderReward     = 5;
+    const float BaseEarnChance    = 0.05f;  // 5% base
+    const float ChanceGainPerWave = 0.01f;  // +1% per wave survived
+    const float KeyBonusPerKey    = 0.01f;  // +1% per Key item
+
+    [Header("Key Item")]
+    [Tooltip("Kéo Key ItemData vào đây — Pirate tự đếm số Key trong inventory")]
+    [SerializeField] ItemData keyItemData;
 
     float _earnChance = BaseEarnChance;
 
-    // Key item bonus — SpecialItemTracker sync mỗi frame theo số Key trong inventory.
-    float _keyBonus;
-    public void SetKeyBonus(float bonus) => _keyBonus = bonus;
-
-    // Debug / UI readable
-    public float EarnChance => _earnChance + _keyBonus;
+    // Debug / UI readable — tính luôn bonus từ Key hiện tại
+    public float EarnChance => _earnChance + CountKeyBonus();
 
     // ── Skill 1 — Plunder ─────────────────────────────────────────────────────
 
@@ -30,10 +32,11 @@ public class Pirate : CharacterBase
     {
         base.ExecuteAttack(target); // deals damage, increments attackCount
 
-        // attackCount is post-incremented: fires on 2nd, 4th, 6th...
+        // attackCount post-incremented: fires on 2nd, 4th, 6th...
         if (attackCount % 2 == 0)
         {
-            if (Random.value < _earnChance + _keyBonus)
+            float chance = _earnChance + CountKeyBonus();
+            if (Random.value < chance)
             {
                 PlayerWallet.Instance?.Earn(PlunderReward);
                 PlaySkillVFX(VFXManager.ColorHP);
@@ -47,8 +50,20 @@ public class Pirate : CharacterBase
     {
         base.ExitCombat();
 
-        // Chỉ tính khi còn sống và vẫn là Ally cuối wave
         if (!IsDead && Faction == Faction.Ally)
             _earnChance += ChanceGainPerWave;
+    }
+
+    // ── Key bonus helper ───────────────────────────────────────────────────────
+
+    float CountKeyBonus()
+    {
+        if (keyItemData == null || PlayerInventory.Instance == null) return 0f;
+
+        int count = 0;
+        foreach (var item in PlayerInventory.Instance.StaticItems)
+            if (item == keyItemData) count++;
+
+        return count * KeyBonusPerKey;
     }
 }

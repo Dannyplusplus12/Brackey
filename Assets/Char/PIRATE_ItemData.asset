@@ -16,9 +16,14 @@ MonoBehaviour:
   icon: {fileID: -901256396567455822, guid: cfad608f48c9e83409be5c4c8737503a, type: 3}
   itemType: 2
   rarity: 2
-  description: "C\u01B0\u1EDBp bi\u1EC3n l\u1EAFm m\u01B0u. M\u1ED7i \u0111\xF2n
-    ch\u1EB5n: 5% ki\u1EBFm 5 corn. M\u1ED7i wave s\u1ED1ng s\xF3t t\u1EC9 l\u1EC7
-    t\u0103ng th\xEAm 1%."
+  description: 'Every 2nd attack: 5% chance to gain <color=#FFD700>+5 coin.
+
+    Each
+    wave survived: +1% coin drop chance.
+
+
+    <color=#E82020>+25 angry</color><sprite
+    name="stat_angry"> when hungry '
   buyCost: 8
   sellValue: 1
   characterPrefab: {fileID: 9094000336568356389, guid: 4e64cc9557c20684dbd508586f91de94, type: 3}

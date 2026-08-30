@@ -18,13 +18,14 @@ public class LevelAwardPanelUI : MonoBehaviour
     void OnEnable()
     {
         GameManager.OnGameStateChanged += OnStateChanged;
-        // Delay để đảm bảo LevelManager.AdvanceAndSpawn() đã chạy xong
+        LevelManager.OnHarderSpawned   += Refresh;
         StartCoroutine(RefreshDelayed());
     }
 
     void OnDisable()
     {
         GameManager.OnGameStateChanged -= OnStateChanged;
+        LevelManager.OnHarderSpawned   -= Refresh;
     }
 
     void OnStateChanged(GameState state)
@@ -40,16 +41,14 @@ public class LevelAwardPanelUI : MonoBehaviour
 
     void Refresh()
     {
-        // Khi vào Shop, LevelManager đã AdvanceAndSpawn() → currentLevelIndex là level sắp đánh
-        var data   = LevelManager.Instance?.GetCurrentLevelData();
-        int reward = data?.waveWinReward
-                     ?? GameManager.Instance?.waveWinReward
-                     ?? 5;
+        var data    = LevelManager.Instance?.GetCurrentLevelData();
+        int base_   = data?.waveWinReward ?? GameManager.Instance?.waveWinReward ?? 5;
+        bool harder = LevelManager.Instance != null && LevelManager.Instance.HarderWasUsed;
+        int reward  = harder ? base_ * 3 : base_;
 
         if (awardText != null)
             awardText.text = $"Award: +{reward}";
 
-        // Ẩn panel nếu không còn level
         bool hasLevel = LevelManager.Instance == null || LevelManager.Instance.GetCurrentLevelData() != null;
         gameObject.SetActive(hasLevel);
     }

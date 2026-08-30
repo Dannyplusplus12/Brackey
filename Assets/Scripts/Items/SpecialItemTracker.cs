@@ -60,7 +60,7 @@ public class SpecialItemTracker : MonoBehaviour
     void Update()
     {
         TickClaw();
-        TickKey();
+        // TickKey removed — Pirate tự đếm Key từ PlayerInventory.StaticItems trực tiếp
         TickHourglass();
     }
 
@@ -240,23 +240,6 @@ public class SpecialItemTracker : MonoBehaviour
             int count = CountStaticItems("Boots");
             bagger.AddInstanceBonus(new StatDelta { attackSpeed = 0.04f * count, damage = 5f * count });
             Debug.Log($"[Tracker] Boots: {bagger.name} +{0.04f * count:F2} APS +{5 * count} dmg");
-        }
-    }
-
-    // ── Key ───────────────────────────────────────────────────────────────────
-    // Sync _keyBonus cho mỗi Pirate mỗi frame — đơn giản như Claw pattern.
-
-    void TickKey()
-    {
-        if (!TryGetCharItem("Key", out var keyItem)) return;
-        int count = CountStaticItems("Key");
-        float bonus = count * 0.01f;
-
-        var allies = CharacterGrid.FindAllAlive(Faction.Ally);
-        foreach (var ch in allies)
-        {
-            if (ch.Stats != keyItem.targetCharacterType) continue;
-            if (ch is Pirate p) p.SetKeyBonus(bonus);
         }
     }
 
