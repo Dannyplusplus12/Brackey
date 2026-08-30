@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    [Sumo] Each time getting hit: Deals damage equal to <color=#4CAF50>5%
+    [Sumo] Each time getting hit: Deals damage equal to <color=#4CAF50>10%
     Max HP<sprite name="stat_hp">.</color>
 
     Rarity: Common'

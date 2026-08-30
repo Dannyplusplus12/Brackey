@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
   m_Name: FRANK Z
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
-  maxHP: 100
+  maxHP: 300
   damage: 20
   attackSpeed: 0.8
-  attackRange: 1.2
+  attackRange: 100
   attackVisualDuration: 0.15
   moveSpeed: 100
-  separationRadius: 0.6
+  separationRadius: 30
   separationStrength: 2
   flipCooldown: 0.4
   actionDelayMin: 0

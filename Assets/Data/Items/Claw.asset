@@ -19,7 +19,7 @@ MonoBehaviour:
   description: '
 
     [Werewolf] Every <color=#E82020>10 angry<sprite name="stat_angry"></color>:
-    <color=#B48EE0>+5% damage<sprite name="stat_damage">.</color>
+    <color=#B48EE0>+10% damage<sprite name="stat_damage">.</color>
 
     Rarity: Uncommon'
   buyCost: 6

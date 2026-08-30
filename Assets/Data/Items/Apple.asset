@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    <color=#4CAF50>+5 Max HP<sprite name="stat_hp"> permanently.</color>
+    <color=#4CAF50>+15 Max HP<sprite name="stat_hp"> permanently.</color>
 
     Rarity:
     Common'
@@ -30,7 +30,7 @@ MonoBehaviour:
   statDelta:
     damage: 0
     moveSpeed: 0
-    maxHP: 5
+    maxHP: 15
     attackSpeed: 0
     attackRange: 0
     foodCost: 0

@@ -106,7 +106,7 @@ public class SpecialItemTracker : MonoBehaviour
         if (victim.Stats != shieldItem.targetCharacterType) return;
 
         int count = CountStaticItems("Shield");
-        float thorns = victim.MaxHP * 0.05f * count;
+        float thorns = victim.MaxHP * 0.10f * count;
         // Không truyền attacker để tránh recursion (thorns không trigger Shield/Lightning)
         attacker.TakeDamage(thorns);
         Debug.Log($"[Tracker] Shield: {victim.name} phản {thorns:F1} lên {attacker.name}");
@@ -120,12 +120,12 @@ public class SpecialItemTracker : MonoBehaviour
         if (victim.Stats != lightItem.targetCharacterType) return;
 
         int count = CountStaticItems("Lightning");
-        float maxBonus = 0.5f * count;
+        float maxBonus = 1.0f * count;
 
         lightningApsBonus.TryGetValue(victim, out float current);
         if (current >= maxBonus) return; // đã đạt cap
 
-        float add = Mathf.Min(0.1f, maxBonus - current);
+        float add = Mathf.Min(0.2f, maxBonus - current);
         victim.AddInstanceBonus(new StatDelta { attackSpeed = add });
         lightningApsBonus[victim] = current + add;
         Debug.Log($"[Tracker] Lightning: {victim.name} +{add:F2} APS (total {current + add:F2}/{maxBonus})");
@@ -174,7 +174,7 @@ public class SpecialItemTracker : MonoBehaviour
         {
             if (ch.Stats != clawItem.targetCharacterType) continue;
 
-            float newBonus = Mathf.Floor(ch.CurrentAngry / 10f) * 0.05f * count;
+            float newBonus = Mathf.Floor(ch.CurrentAngry / 10f) * 0.10f * count;
             clawDmgBonus.TryGetValue(ch, out float prev);
 
             if (Mathf.Approximately(newBonus, prev)) continue;

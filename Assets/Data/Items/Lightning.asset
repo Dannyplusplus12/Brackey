@@ -18,8 +18,8 @@ MonoBehaviour:
   rarity: 1
   description: '
 
-    [Sumo] On hit: <color=#00BFFF>+0.1 attack speed<sprite name="stat_atkspeed"></color>
-    until end of round (Max: 0.5 per item).
+    [Sumo] On hit: <color=#00BFFF>+0.2 attack speed<sprite name="stat_atkspeed"></color>
+    until end of round (Max: 1.0 per item).
 
     Rarity: Uncommon'
   buyCost: 6

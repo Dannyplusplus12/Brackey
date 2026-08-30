@@ -5,6 +5,8 @@ using UnityEngine;
 // Quản lý hệ thống level: spawn enemy theo LevelData khi bắt đầu Shop.
 // Level 0 được spawn ngay khi game bắt đầu (wave 1).
 // Mỗi lần vào Shop → dọn enemy thừa → spawn level tiếp theo.
+// Khi hết tất cả level → chuyển sang Combo Mode vô hạn:
+//   Combo 1: gộp ngẫu nhiên 2 level | Combo 2: 3 level | ... (tăng dần mãi)
 // Gắn lên bất kỳ GO nào trong scene (khuyên gắn vào Managers).
 public class LevelManager : MonoBehaviour
 {
@@ -12,6 +14,8 @@ public class LevelManager : MonoBehaviour
 
     /// <summary>Fire ngay sau khi SpawnHarder() spawn xong — LevelAwardPanelUI dùng để update hiển thị.</summary>
     public static event System.Action OnHarderSpawned;
+    /// <summary>Fire khi bắt đầu Combo Mode (lần đầu hết level thường).</summary>
+    public static event System.Action OnComboModeStarted;
 
     [Header("Levels — kéo LevelData theo thứ tự từ trên xuống")]
     [SerializeField] LevelData[] levels;
@@ -28,6 +32,10 @@ public class LevelManager : MonoBehaviour
     int currentLevelIndex = -1; // -1 = chưa spawn lần nào
     bool _harderUsedThisRound;  // true nếu đã bấm Harder trong lượt Shop này
     readonly List<CharacterBase> spawnedEnemies = new();
+
+    // ─── combo mode state ────────────────────────────────────────────────────
+    bool _comboMode;     // true khi đã hết level thường
+    int  _comboWave;     // số combo wave đã qua (0-based); combo wave N dùng (N+2) level
 
     // ─── lifecycle ───────────────────────────────────────────────────────────
     void Awake()
@@ -63,13 +71,66 @@ public class LevelManager : MonoBehaviour
             EnemyHardSystem.IncrementWave();
 
         currentLevelIndex++;
-        if (levels == null || currentLevelIndex >= levels.Length)
+
+        if (levels == null || levels.Length == 0)
         {
-            Debug.Log($"[LevelManager] Không còn level nào (index {currentLevelIndex}). Dừng spawn.");
+            Debug.LogWarning("[LevelManager] Không có LevelData nào được gán.");
             return;
         }
+
+        // ── Combo Mode ───────────────────────────────────────────────────────
+        if (currentLevelIndex >= levels.Length)
+        {
+            if (!_comboMode)
+            {
+                _comboMode = true;
+                _comboWave = 0;
+                Debug.Log("[LevelManager] ★ COMBO MODE bắt đầu! Hết level thường.");
+                OnComboModeStarted?.Invoke();
+            }
+
+            int pickCount = _comboWave + 2; // combo 0 = 2 level, combo 1 = 3 level, ...
+            Debug.Log($"[LevelManager] Combo #{_comboWave + 1} — gộp {pickCount} level ngẫu nhiên — Hard {EnemyHardSystem.HardPercent * 100f:F0}%");
+            StartCoroutine(SpawnComboRoutine(pickCount));
+            _comboWave++;
+            return;
+        }
+
+        // ── Level thường ─────────────────────────────────────────────────────
         Debug.Log($"[LevelManager] Wave {currentLevelIndex} — Hard {EnemyHardSystem.HardPercent * 100f:F0}%");
         StartCoroutine(SpawnRoutine(levels[currentLevelIndex]));
+    }
+
+    /// <summary>
+    /// Chọn ngẫu nhiên <paramref name="pickCount"/> level từ pool (có thể trùng nếu pool nhỏ),
+    /// spawn enemy của tất cả chúng tuần tự.
+    /// </summary>
+    IEnumerator SpawnComboRoutine(int pickCount)
+    {
+        // Shuffle-pick không trùng nếu pool đủ lớn; nếu pickCount > pool thì cho phép lặp lại
+        var picked = new List<LevelData>();
+        if (pickCount <= levels.Length)
+        {
+            // Fisher-Yates trên copy index để tránh trùng
+            var indices = new List<int>(levels.Length);
+            for (int i = 0; i < levels.Length; i++) indices.Add(i);
+            for (int i = 0; i < pickCount; i++)
+            {
+                int r = Random.Range(i, indices.Count);
+                (indices[i], indices[r]) = (indices[r], indices[i]);
+                picked.Add(levels[indices[i]]);
+            }
+        }
+        else
+        {
+            // pickCount > số level: lặp lại ngẫu nhiên
+            for (int i = 0; i < pickCount; i++)
+                picked.Add(levels[Random.Range(0, levels.Length)]);
+        }
+
+        // Spawn lần lượt từng level đã chọn
+        foreach (var data in picked)
+            yield return StartCoroutine(SpawnRoutine(data));
     }
 
     /// <summary>
@@ -181,19 +242,32 @@ public class LevelManager : MonoBehaviour
 
     // ─── public helpers ──────────────────────────────────────────────────────
     public int CurrentLevelIndex => currentLevelIndex;
-    public bool HasMoreLevels => levels != null && currentLevelIndex + 1 < levels.Length;
-    /// <summary>True nếu nút Harder có thể bấm được: còn level kế và chưa dùng lượt này.</summary>
+
+    /// <summary>True khi đang ở Combo Mode vô hạn (đã hết toàn bộ level thường).</summary>
+    public bool IsComboMode => _comboMode;
+
+    /// <summary>Số combo wave đã qua (1-based khi hiển thị: ComboWaveNumber = _comboWave).</summary>
+    public int ComboWaveNumber => _comboWave; // _comboWave tăng SAU khi spawn → đây là số wave hiện tại
+
+    /// <summary>Số level được gộp trong combo wave vừa spawn (= ComboWaveNumber + 1 vì tăng trước khi đọc).</summary>
+    public int CurrentComboPickCount => _comboMode ? _comboWave + 1 : 0;
+
+    /// <summary>Còn level thường tiếp theo hay không (false khi ở Combo Mode).</summary>
+    public bool HasMoreLevels => !_comboMode && levels != null && currentLevelIndex + 1 < levels.Length;
+
+    /// <summary>True nếu nút Harder có thể bấm được: còn level kế và chưa dùng lượt này. Tắt trong Combo Mode.</summary>
     public bool CanSpawnHarder => HasMoreLevels && !_harderUsedThisRound;
+
     /// <summary>True nếu Harder đã được dùng trong wave vừa kết thúc — GameManager dùng để tính reward.</summary>
     public bool HarderWasUsed => _harderUsedThisRound;
 
-    /// <summary>LevelData của wave đang diễn ra (enemies đã spawn).</summary>
+    /// <summary>LevelData của wave đang diễn ra. Null khi ở Combo Mode.</summary>
     public LevelData GetCurrentLevelData() =>
-        (levels != null && currentLevelIndex >= 0 && currentLevelIndex < levels.Length)
+        (!_comboMode && levels != null && currentLevelIndex >= 0 && currentLevelIndex < levels.Length)
         ? levels[currentLevelIndex] : null;
 
-    /// <summary>LevelData của wave tiếp theo (chưa spawn — dùng để preview award).</summary>
+    /// <summary>LevelData của wave tiếp theo (preview award). Null khi ở Combo Mode.</summary>
     public LevelData GetNextLevelData() =>
-        (levels != null && currentLevelIndex + 1 < levels.Length)
+        (!_comboMode && levels != null && currentLevelIndex + 1 < levels.Length)
         ? levels[currentLevelIndex + 1] : null;
 }

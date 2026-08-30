@@ -18,7 +18,7 @@ MonoBehaviour:
   rarity: 0
   description: '
 
-    <color=#00BFFF>+0.03 attack speed<sprite name="stat_atkspeed">
+    <color=#00BFFF>+0.05 attack speed<sprite name="stat_atkspeed">
     permanently.</color>
 
     Rarity: Common'
@@ -31,7 +31,7 @@ MonoBehaviour:
     damage: 0
     moveSpeed: 0
     maxHP: 0
-    attackSpeed: 0.03
+    attackSpeed: 0.05
     attackRange: 0
     foodCost: 0
     damagePercent: 0

@@ -72,7 +72,13 @@ public class GachaWheelUI : MonoBehaviour
         // OnEnable chạy sau khi ShopRoot active (event Shop đã fire rồi)
         // → cần reset ngay tại đây thay vì chờ event
         if (GameManager.Instance?.CurrentState == GameState.Shop)
-            _rollCount = 0;
+        {
+            _rollCount  = 0;
+            // Reset stuck state: nếu coroutine bị interrupt (object disable giữa chừng),
+            // _isSpinning và button interactable có thể kẹt → clear cả hai khi mở lại Shop.
+            _isSpinning = false;
+            SetCenterInteractable(true);
+        }
 
         RefreshCharacterSprites();
         UpdateCostText();
@@ -195,7 +201,10 @@ public class GachaWheelUI : MonoBehaviour
         else
             OnReceive(won);
 
-        _isSpinning = false;
+        // _isSpinning được reset bên trong OnReceive() — KHÔNG set false ở đây.
+        // Nếu set ở đây thì khi có resultPopup, _isSpinning = false trước khi
+        // user bấm "Nhận", nhưng button vẫn non-interactable → kẹt mỗi khi
+        // object bị disable/enable giữa 2 state đó.
     }
 
     void OnReceive(ItemData item)
@@ -203,6 +212,7 @@ public class GachaWheelUI : MonoBehaviour
         if (item?.characterPrefab != null) CharacterSpawner.Spawn(item.characterPrefab);
         _rollCount++;
         UpdateCostText();
+        _isSpinning = false;        // reset ở đây — sau khi popup đã đóng (hoặc không có popup)
         SetCenterInteractable(true);
     }
 
