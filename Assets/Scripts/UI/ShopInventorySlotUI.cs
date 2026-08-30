@@ -91,7 +91,7 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
             return;
         }
 
-        // Shop: right click = bán, left click = swap
+        // Shop: right click = bán
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             PlayerInventory.Instance.SellSlot(slotIndex);
@@ -99,6 +99,16 @@ public class ShopInventorySlotUI : MonoBehaviour, IPointerClickHandler, IItemSlo
             return;
         }
 
+        // Shop: left click vào Active item → kích hoạt ngay (không swap)
+        ItemData item = PlayerInventory.Instance.GetSlot(slotIndex);
+        if (item != null && item.itemType == ItemType.Active)
+        {
+            selected = null; // huỷ selection đang chọn nếu có
+            PlayerInventory.Instance.ActivateSlot(slotIndex);
+            return;
+        }
+
+        // Shop: left click vào non-Active → swap
         if (selected == null)
         {
             selected = this;

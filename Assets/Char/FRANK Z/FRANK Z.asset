@@ -42,7 +42,7 @@ MonoBehaviour:
   angryOnRoundStart: 0
   maxAngry: 100
   foodRequiredPerRound: 1
-  killReward: 1
+  killReward: 0
   description: 'Every 2nd attack: Spawns 1 Dog Z.'
   idleSprite: {fileID: -4070323891087710856, guid: eda5981c300292845827c1b477885aec, type: 3}
   attackSprite: {fileID: 577762774703516282, guid: 5d4c6e6bfa22d384b8f7ed5cdd97df9d, type: 3}

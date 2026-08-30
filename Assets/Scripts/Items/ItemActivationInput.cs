@@ -20,10 +20,7 @@ public class ItemActivationInput : MonoBehaviour
 
     void Update()
     {
-        // Chỉ nhận input khi đang trong Arena
-        if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Arena)
-            return;
-
+        // Hoạt động ở cả Shop lẫn Arena
         for (int i = 0; i < Keys.Length; i++)
         {
             if (Input.GetKeyDown(Keys[i]))

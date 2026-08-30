@@ -42,7 +42,7 @@ MonoBehaviour:
   angryOnRoundStart: 0
   maxAngry: 10
   foodRequiredPerRound: 2
-  killReward: 2
+  killReward: 0
   description: 
   idleSprite: {fileID: 21300000, guid: ecf035688ee6dae4eab40ea5c708a505, type: 3}
   attackSprite: {fileID: 21300000, guid: f520f472f3258e54abf6c150d0b43028, type: 3}

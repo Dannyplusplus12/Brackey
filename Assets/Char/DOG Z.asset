@@ -42,7 +42,7 @@ MonoBehaviour:
   angryOnRoundStart: 5
   maxAngry: 100
   foodRequiredPerRound: 2
-  killReward: 1
+  killReward: 0
   description: '30% chance to chase a new target after each strike
 
     <color=#E82020>+20</color>

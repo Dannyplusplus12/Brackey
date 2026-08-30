@@ -46,6 +46,18 @@ public class ItemEffectHandler : MonoBehaviour
                 ApplyFriedEggBuff();
                 break;
 
+            case "Gold Coin":
+                ApplyGoldCoin();
+                break;
+
+            case "Damage Coin":
+                ApplyDamageCoin();
+                break;
+
+            case "Health Coin":
+                ApplyHealthCoin();
+                break;
+
             // Thêm item mới ở đây:
             // case "Item Name":
             //     DoEffect(item);
@@ -75,6 +87,59 @@ public class ItemEffectHandler : MonoBehaviour
         GlobalStatBonus.damagePercent      -= 0.3f;
         friedEggBuffActive = false;
         Debug.Log("[ItemEffectHandler] Fried Egg: buff hết hạn.");
+    }
+
+    // ── Gold Coin — 50/50 double hoặc mất nửa corn ───────────────────────────
+
+    static void ApplyGoldCoin()
+    {
+        var wallet = PlayerWallet.Instance;
+        if (wallet == null) return;
+
+        if (UnityEngine.Random.value < 0.5f)
+        {
+            wallet.Earn(wallet.Corn); // double: earn thêm bằng số hiện có
+            Debug.Log($"[ItemEffectHandler] Gold Coin: WIN — corn x2 = {wallet.Corn}");
+        }
+        else
+        {
+            int lose = wallet.Corn / 2;
+            wallet.TrySpend(lose);   // luôn thành công vì lose <= Corn
+            Debug.Log($"[ItemEffectHandler] Gold Coin: LOSE — mất {lose} corn, còn {wallet.Corn}");
+        }
+    }
+
+    // ── Damage Coin — 50/50 +5 damage hoặc tất cả ally +10 angry ─────────────
+
+    static void ApplyDamageCoin()
+    {
+        if (UnityEngine.Random.value < 0.5f)
+        {
+            GlobalStatBonus.damage += 5f;
+            Debug.Log("[ItemEffectHandler] Damage Coin: WIN — +5 damage vĩnh viễn.");
+        }
+        else
+        {
+            var allies = CharacterGrid.FindAllAlive(Faction.Ally);
+            foreach (var ally in allies)
+                ally.AddAngry(10f, AngryReason.Debug);
+            Debug.Log($"[ItemEffectHandler] Damage Coin: LOSE — +10 angry cho {allies.Count} ally.");
+        }
+    }
+
+    // ── Health Coin — 50% +10 MaxHP, 50% không có gì ─────────────────────────
+
+    static void ApplyHealthCoin()
+    {
+        if (UnityEngine.Random.value < 0.5f)
+        {
+            GlobalStatBonus.maxHP += 10f;
+            Debug.Log("[ItemEffectHandler] Health Coin: WIN — +10 MaxHP vĩnh viễn.");
+        }
+        else
+        {
+            Debug.Log("[ItemEffectHandler] Health Coin: LOSE — không có gì.");
+        }
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
