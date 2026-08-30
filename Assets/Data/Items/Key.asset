@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b703f5b72c64ea4495a48c868794b3b, type: 3}
-  m_Name: Bread
+  m_Name: Key
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  displayName: Bread
-  icon: {fileID: -1472951928115924048, guid: d7d207a5744931d4698a5b3b0a0d7967, type: 3}
-  itemType: 0
+  displayName: Key
+  icon: {fileID: 21300000, guid: 0af7129050701de45bcd4f357b3d1f30, type: 3}
+  itemType: 1
   rarity: 0
   description: '
 
-    On activation: All allies heal <color=#4CAF50>60% Max HP.</color>
+    [Pirate] <color=#00BFFF>+0.3 attack speed</color> and <color=#00BFFF>+1%
+    coin drop chance.</color>
 
-    Rarity:
-    Common'
-  buyCost: 2
+    Rarity: Common'
+  buyCost: 4
   sellValue: 1
-  characterPrefab: {fileID: 0}
-  targetType: 0
-  targetCharacterType: {fileID: 0}
+  characterPrefab: {fileID: 9094000336568356389, guid: 4e64cc9557c20684dbd508586f91de94, type: 3}
+  targetType: 1
+  targetCharacterType: {fileID: 11400000, guid: aecf6b6a5947d7a4abc017997771f9d6, type: 2}
   statDelta:
     damage: 0
     moveSpeed: 0
     maxHP: 0
-    attackSpeed: 0
+    attackSpeed: 0.3
     attackRange: 0
     foodCost: 0
     damagePercent: 0

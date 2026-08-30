@@ -24,7 +24,7 @@ MonoBehaviour:
     Rarity: Common'
   buyCost: 4
   sellValue: 1
-  characterPrefab: {fileID: 0}
+  characterPrefab: {fileID: 4535559801046744120, guid: 67da874244924ea43b701364e2b06ad3, type: 3}
   targetType: 1
   targetCharacterType: {fileID: 11400000, guid: 6e63f198b84ca8d46a29da741be54984, type: 2}
   statDelta:

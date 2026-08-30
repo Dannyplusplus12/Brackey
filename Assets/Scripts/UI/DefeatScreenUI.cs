@@ -46,12 +46,13 @@ public class DefeatScreenUI : MonoBehaviour
             restartButton.onClick.AddListener(OnClickRestart);
     }
 
-    void OnEnable()  => GameManager.OnDefeat += Show;
-    void OnDisable() => GameManager.OnDefeat -= Show;
+    void OnEnable()  => GameManager.OnDefeat += ShowDefeatScreen;
+    void OnDisable() => GameManager.OnDefeat -= ShowDefeatScreen;
 
     // ── Show ──────────────────────────────────────────────────────────────────
+    // Public để GameManager có thể gọi trực tiếp kể cả khi object vừa được SetActive(true).
 
-    void Show()
+    public void ShowDefeatScreen()
     {
         PopulateStats();
         StopAllCoroutines();

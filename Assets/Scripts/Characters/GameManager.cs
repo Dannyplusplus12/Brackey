@@ -95,7 +95,22 @@ public class GameManager : MonoBehaviour
         // Đợi một chút để VFX chết cuối cùng play xong
         yield return new WaitForSeconds(1.2f);
         WaveManager.Instance?.EndWave();
-        OnDefeat?.Invoke();
+
+        // Tìm DefeatScreenUI kể cả khi inactive (FindObjectsInactive.Include)
+        // để không phụ thuộc vào việc object có active hay không trong scene.
+        var ui = Object.FindFirstObjectByType<DefeatScreenUI>(FindObjectsInactive.Include);
+        if (ui != null)
+        {
+            ui.gameObject.SetActive(true); // Đảm bảo active trước khi Show
+            ui.ShowDefeatScreen();
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] Không tìm thấy DefeatScreenUI trong scene. " +
+                             "Chạy Tools > UI > Build Defeat Screen để tạo.");
+        }
+
+        OnDefeat?.Invoke(); // Cho các script khác hook vào nếu cần
     }
 
     IEnumerator DelayedEnterShop()
@@ -108,12 +123,14 @@ public class GameManager : MonoBehaviour
 
     /// <summary>
     /// Reward của wave vừa thắng — đọc từ LevelData hiện tại nếu có,
-    /// fallback về GameManager.waveWinReward (dùng làm default/override).
+    /// fallback về GameManager.waveWinReward. Nếu wave có Harder: x3 (+200%).
     /// </summary>
     public int CurrentWaveReward()
     {
         var data = LevelManager.Instance?.GetCurrentLevelData();
-        return data != null ? data.waveWinReward : waveWinReward;
+        int baseReward = data != null ? data.waveWinReward : waveWinReward;
+        bool harder = LevelManager.Instance != null && LevelManager.Instance.HarderWasUsed;
+        return harder ? baseReward * 3 : baseReward;
     }
 
     // Gọi từ nút "Bắt đầu Wave"

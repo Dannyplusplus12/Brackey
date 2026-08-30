@@ -34,6 +34,9 @@ public class SpecialItemTracker : MonoBehaviour
     // ── Flag Axe: MaxHP instance bonus tích lũy per-Viking ────────────────────
     readonly Dictionary<CharacterBase, float> flagAxeHpAccum      = new();
 
+    // ── Hourglass: số bước hiện tại (floor(corn/5)) đã áp per-Pirate ──────────
+    readonly Dictionary<CharacterBase, float> hourglassSteps      = new();
+
     void OnEnable()
     {
         CharacterBase.OnDamageTaken      += HandleDamageTaken;
@@ -57,6 +60,8 @@ public class SpecialItemTracker : MonoBehaviour
     void Update()
     {
         TickClaw();
+        TickKey();
+        TickHourglass();
     }
 
     // ── Mushroom ──────────────────────────────────────────────────────────────
@@ -238,6 +243,51 @@ public class SpecialItemTracker : MonoBehaviour
         }
     }
 
+    // ── Key ───────────────────────────────────────────────────────────────────
+    // Sync _keyBonus cho mỗi Pirate mỗi frame — đơn giản như Claw pattern.
+
+    void TickKey()
+    {
+        if (!TryGetCharItem("Key", out var keyItem)) return;
+        int count = CountStaticItems("Key");
+        float bonus = count * 0.01f;
+
+        var allies = CharacterGrid.FindAllAlive(Faction.Ally);
+        foreach (var ch in allies)
+        {
+            if (ch.Stats != keyItem.targetCharacterType) continue;
+            if (ch is Pirate p) p.SetKeyBonus(bonus);
+        }
+    }
+
+    // ── Hourglass ─────────────────────────────────────────────────────────────
+    // Mỗi 5 corn hiện có: +1 damage + 10 MaxHP per item (dynamic, có thể giảm khi tiêu corn).
+
+    void TickHourglass()
+    {
+        if (!TryGetCharItem("Hourglass", out var hgItem)) return;
+        if (PlayerWallet.Instance == null) return;
+
+        // Chỉ tăng: lấy max giữa steps hiện tại và steps đã từng đạt được.
+        float curSteps = Mathf.Floor(PlayerWallet.Instance.Corn / 5f);
+        int count = CountStaticItems("Hourglass");
+
+        var allies = CharacterGrid.FindAllAlive(Faction.Ally);
+        foreach (var ch in allies)
+        {
+            if (ch.Stats != hgItem.targetCharacterType) continue;
+
+            hourglassSteps.TryGetValue(ch, out float prev);
+            float newSteps = Mathf.Max(prev, curSteps); // không bao giờ giảm
+            if (Mathf.Approximately(newSteps, prev)) continue;
+
+            float diff = newSteps - prev;
+            ch.AddInstanceBonus(new StatDelta { damage = diff * count, maxHP = diff * 10f * count });
+            hourglassSteps[ch] = newSteps;
+            Debug.Log($"[Tracker] Hourglass: {ch.name} +{diff * count:F0} dmg +{diff * 10f * count:F0} MaxHP (steps={newSteps})");
+        }
+    }
+
     // ── Wave end: xoá buff tạm thời ──────────────────────────────────────────
 
     void ResetRoundBuffs()
@@ -250,6 +300,9 @@ public class SpecialItemTracker : MonoBehaviour
 
         // Hammer: thưởng wave sống sót
         TickHammer();
+
+        // Xoá entries cũ — Pirate có thể chết trong wave, instance mới sẽ tự tính lại
+        hourglassSteps.Clear();
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PIRATE
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
   maxHP: 100
-  damage: 10
+  damage: 15
   attackSpeed: 1
   attackRange: 70
   attackVisualDuration: 0.15
@@ -36,8 +36,8 @@ MonoBehaviour:
   hitFlashDuration: 0.1
   hitShakeStrength: 0.5
   hitShakeDuration: 0.18
-  initialAngry: 25
-  angryPerHunger: 25
+  initialAngry: 30
+  angryPerHunger: 30
   angryOnAllyDeath: 0
   angryOnRoundStart: 0
   maxAngry: 100

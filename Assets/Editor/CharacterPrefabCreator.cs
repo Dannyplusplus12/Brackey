@@ -17,13 +17,61 @@ public static class CharacterPrefabCreator
     {
         { "BAGGER",    "Bagger"   },
         { "DOG Z",     "DogZ"     },
-        { "FRANK Z",   "FrankZ"   },
+        { "FRANK Z",   "ZombieBrute" },
         { "NGUOI SOI", "NguoiSoi" },
         { "PIRATE",    "Pirate"   },
         { "SUMO",      "Sumo"     },
         { "VIKING",    "Viking"   },
         { "ZOMIBIE",   "Zombie"   },
     };
+
+    // Menu item chạy đơn lẻ cho ZOMBIE BRUTE (folder FRANK Z) — faction Enemy, không đụng char khác.
+    [MenuItem("Tools/Characters/Create ZOMBIE BRUTE Prefab")]
+    public static void CreateZombieBrute()
+    {
+        string folder = CharRootFolder + "/FRANK Z";
+        if (!AssetDatabase.IsValidFolder(folder))
+        {
+            EditorUtility.DisplayDialog("Error", $"Folder không tồn tại: {folder}", "OK");
+            return;
+        }
+
+        bool wasNew = ProcessCharacter(folder, "FRANK Z", "ZombieBrute");
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        // Đổi faction mặc định sang Enemy (ProcessCharacter luôn set Ally)
+        string prefabPath = folder + "/FRANK Z.prefab";
+        SetPrefabFaction(prefabPath, Faction.Enemy);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        string msg = wasNew ? "Tạo mới prefab ZOMBIE BRUTE thành công!" : "Cập nhật prefab ZOMBIE BRUTE thành công!";
+        Debug.Log($"[CharPrefab] {msg}");
+        EditorUtility.DisplayDialog("ZOMBIE BRUTE Prefab", msg, "OK");
+    }
+
+    // Mở prefab, đổi faction trên CharacterBase, lưu lại. Gọi sau ProcessCharacter.
+    static void SetPrefabFaction(string prefabPath, Faction faction)
+    {
+        GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        if (prefabAsset == null) { Debug.LogWarning($"[CharPrefab] SetPrefabFaction: không tìm thấy {prefabPath}"); return; }
+
+        GameObject instance = PrefabUtility.InstantiatePrefab(prefabAsset) as GameObject;
+        if (instance == null) return;
+
+        var charBase = instance.GetComponent<CharacterBase>();
+        if (charBase != null)
+        {
+            var so = new SerializedObject(charBase);
+            so.FindProperty("faction").enumValueIndex = (int)faction;
+            so.ApplyModifiedProperties();
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
+        Object.DestroyImmediate(instance);
+        Debug.Log($"[CharPrefab] Faction → {faction} cho {prefabPath}");
+    }
 
     // Menu item chạy đơn lẻ cho PIRATE — không đụng đến prefab/asset các char khác.
     [MenuItem("Tools/Characters/Create PIRATE Prefab")]

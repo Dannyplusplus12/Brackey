@@ -10,42 +10,42 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a7acf6280c4d6042bf06a02422bb3bb, type: 3}
-  m_Name: FRANK Z
+  m_Name: PIRATE
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStats
   maxHP: 100
-  damage: 20
-  attackSpeed: 0.8
+  damage: 10
+  attackSpeed: 1
   attackRange: 1.2
   attackVisualDuration: 0.15
-  moveSpeed: 100
+  moveSpeed: 2.5
   separationRadius: 0.6
   separationStrength: 2
   flipCooldown: 0.4
-  actionDelayMin: 0
-  actionDelayMax: 0
-  swayTiltAngle: 18
-  swayBounceHeight: 1.5
-  swayFrequency: 16
-  centerOffset: 4
-  dragHeadOffset: 8
-  dragTiltPerSpeed: 6
-  dragMaxTilt: 25
-  dragSpringStiffness: 100
-  dragSpringDamping: 12
+  actionDelayMin: 0.2
+  actionDelayMax: 0.8
+  swayTiltAngle: 15
+  swayBounceHeight: 0.06
+  swayFrequency: 8
+  centerOffset: 0.3
+  dragHeadOffset: 0.3
+  dragTiltPerSpeed: 4
+  dragMaxTilt: 35
+  dragSpringStiffness: 120
+  dragSpringDamping: 8
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   hitFlashDuration: 0.08
   hitShakeStrength: 0.06
   hitShakeDuration: 0.15
   initialAngry: 0
-  angryPerHunger: 0
+  angryPerHunger: 25
   angryOnAllyDeath: 0
   angryOnRoundStart: 0
   maxAngry: 100
   foodRequiredPerRound: 1
   killReward: 1
-  description: 'Every 2nd attack: Spawns 1 Dog Z.'
-  idleSprite: {fileID: -4070323891087710856, guid: eda5981c300292845827c1b477885aec, type: 3}
-  attackSprite: {fileID: 577762774703516282, guid: 5d4c6e6bfa22d384b8f7ed5cdd97df9d, type: 3}
+  description: 
+  idleSprite: {fileID: 0}
+  attackSprite: {fileID: 0}
   skillSprite: {fileID: 0}
   portraitOffset: {x: 0, y: 0}
   portraitScale: 1

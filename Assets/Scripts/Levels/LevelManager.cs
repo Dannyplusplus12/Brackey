@@ -23,6 +23,7 @@ public class LevelManager : MonoBehaviour
 
     // ─── state ───────────────────────────────────────────────────────────────
     int currentLevelIndex = -1; // -1 = chưa spawn lần nào
+    bool _harderUsedThisRound;  // true nếu đã bấm Harder trong lượt Shop này
     readonly List<CharacterBase> spawnedEnemies = new();
 
     // ─── lifecycle ───────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ public class LevelManager : MonoBehaviour
     void OnGameStateChanged(GameState state)
     {
         if (state != GameState.Shop) return;
+        _harderUsedThisRound = false;
         DestroyLeftoverEnemies();
         AdvanceAndSpawn();
     }
@@ -52,13 +54,41 @@ public class LevelManager : MonoBehaviour
     // ─── spawn logic ─────────────────────────────────────────────────────────
     void AdvanceAndSpawn()
     {
+        // Wave đầu tiên (currentLevelIndex == -1): không tăng hard (hard bắt đầu ở 0%).
+        // Từ wave thứ 2 trở đi: mỗi lần advance = 1 wave thường hoàn thành → +5% hard.
+        if (currentLevelIndex >= 0)
+            EnemyHardSystem.IncrementWave();
+
         currentLevelIndex++;
         if (levels == null || currentLevelIndex >= levels.Length)
         {
             Debug.Log($"[LevelManager] Không còn level nào (index {currentLevelIndex}). Dừng spawn.");
             return;
         }
+        Debug.Log($"[LevelManager] Wave {currentLevelIndex} — Hard {EnemyHardSystem.HardPercent * 100f:F0}%");
         StartCoroutine(SpawnRoutine(levels[currentLevelIndex]));
+    }
+
+    /// <summary>
+    /// Spawn thêm quái từ level tiếp theo mà không advance currentLevelIndex và không tăng hard%.
+    /// Gọi bởi nút "Harder" trong Shop. Chỉ khả dụng khi còn level tiếp theo và chưa dùng trong lượt này.
+    /// </summary>
+    public void SpawnHarder()
+    {
+        int nextIndex = currentLevelIndex + 1;
+        if (levels == null || nextIndex >= levels.Length)
+        {
+            Debug.Log("[LevelManager] SpawnHarder: không còn level tiếp theo.");
+            return;
+        }
+        if (_harderUsedThisRound)
+        {
+            Debug.Log("[LevelManager] SpawnHarder: đã dùng Harder lần này rồi.");
+            return;
+        }
+        _harderUsedThisRound = true;
+        Debug.Log($"[LevelManager] HARDER — spawn thêm từ level {nextIndex} (hard không tăng).");
+        StartCoroutine(SpawnRoutine(levels[nextIndex]));
     }
 
     IEnumerator SpawnRoutine(LevelData data)
@@ -148,6 +178,10 @@ public class LevelManager : MonoBehaviour
     // ─── public helpers ──────────────────────────────────────────────────────
     public int CurrentLevelIndex => currentLevelIndex;
     public bool HasMoreLevels => levels != null && currentLevelIndex + 1 < levels.Length;
+    /// <summary>True nếu nút Harder có thể bấm được: còn level kế và chưa dùng lượt này.</summary>
+    public bool CanSpawnHarder => HasMoreLevels && !_harderUsedThisRound;
+    /// <summary>True nếu Harder đã được dùng trong wave vừa kết thúc — GameManager dùng để tính reward.</summary>
+    public bool HarderWasUsed => _harderUsedThisRound;
 
     /// <summary>LevelData của wave đang diễn ra (enemies đã spawn).</summary>
     public LevelData GetCurrentLevelData() =>

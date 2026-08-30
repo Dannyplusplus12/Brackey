@@ -17,8 +17,12 @@ public class Pirate : CharacterBase
 
     float _earnChance = BaseEarnChance;
 
+    // Key item bonus — SpecialItemTracker sync mỗi frame theo số Key trong inventory.
+    float _keyBonus;
+    public void SetKeyBonus(float bonus) => _keyBonus = bonus;
+
     // Debug / UI readable
-    public float EarnChance => _earnChance;
+    public float EarnChance => _earnChance + _keyBonus;
 
     // ── Skill 1 — Plunder ─────────────────────────────────────────────────────
 
@@ -29,7 +33,7 @@ public class Pirate : CharacterBase
         // attackCount is post-incremented: fires on 2nd, 4th, 6th...
         if (attackCount % 2 == 0)
         {
-            if (Random.value < _earnChance)
+            if (Random.value < _earnChance + _keyBonus)
             {
                 PlayerWallet.Instance?.Earn(PlunderReward);
                 PlaySkillVFX(VFXManager.ColorHP);

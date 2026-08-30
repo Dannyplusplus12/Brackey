@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrankZ
   stats: {fileID: 11400000, guid: c25769583f9a42840b77b3771f776e26, type: 2}
-  faction: 0
+  faction: 1
   spriteRenderer: {fileID: 657032026163723817}
   visualRoot: {fileID: 2435684778490415608}
   vfxSpawnPoint: {fileID: 0}

@@ -43,6 +43,9 @@ public abstract class CharacterBase : MonoBehaviour
     // Dùng trong subclass để trigger skill mỗi X đòn.
     protected int attackCount { get; private set; }
 
+    // True nếu nhân vật này ban đầu là Ally (kể cả đã SwitchToEnemy) — loại khỏi hard buff
+    bool _wasAlly;
+
     // ── Per-instance bonus — áp lên đúng 1 nhân vật cụ thể, không ảnh hưởng type khác ──
     // Dùng khi skill 1 char cần buff trực tiếp 1 char khác (VD: Bagger beg cho Viking gần nhất).
     private StatDelta _instanceBonus;
@@ -63,7 +66,11 @@ public abstract class CharacterBase : MonoBehaviour
             var t = GlobalStatBonus.GetTypeBonus(stats);
             float flat = stats.damage + GlobalStatBonus.damage + t.damage + _instanceBonus.damage;
             float pct  = GlobalStatBonus.damagePercent + t.damagePercent + _instanceBonus.damagePercent;
-            return flat * (1f + pct);
+            float result = flat * (1f + pct);
+            // Hard buff: chỉ áp cho Enemy gốc (spawn bởi LevelManager), không áp cho ally đổi phe
+            if (faction == Faction.Enemy && !_wasAlly)
+                result *= (1f + EnemyHardSystem.HardPercent);
+            return result;
         }
     }
     protected float EffectiveMoveSpeed
@@ -81,15 +88,22 @@ public abstract class CharacterBase : MonoBehaviour
             var t = GlobalStatBonus.GetTypeBonus(stats);
             float flat = stats.maxHP + GlobalStatBonus.maxHP + t.maxHP + _instanceBonus.maxHP;
             float pct  = GlobalStatBonus.maxHPPercent + t.maxHPPercent + _instanceBonus.maxHPPercent;
-            return flat * (1f + pct);
+            float result = flat * (1f + pct);
+            // Hard buff: chỉ áp cho Enemy gốc
+            if (faction == Faction.Enemy && !_wasAlly)
+                result *= (1f + EnemyHardSystem.HardPercent);
+            return result;
         }
     }
-    // Tổng APS = (base + flat) * (1 + percent)
+    // Tổng APS = (base + flat) * (1 + percent) [+ hard flat nếu là enemy gốc]
     public float EffectiveAPS
     {
         get {
             var t = GlobalStatBonus.GetTypeBonus(stats);
             float flat = stats.attackSpeed + GlobalStatBonus.attackSpeed + t.attackSpeed + _instanceBonus.attackSpeed;
+            // Hard buff APS: +0.05 flat mỗi wave, chỉ enemy gốc
+            if (faction == Faction.Enemy && !_wasAlly)
+                flat += EnemyHardSystem.HardFlatAPS;
             float pct  = GlobalStatBonus.attackSpeedPercent + t.attackSpeedPercent + _instanceBonus.attackSpeedPercent;
             return flat * (1f + pct);
         }
@@ -148,6 +162,8 @@ public abstract class CharacterBase : MonoBehaviour
         visualBaseLocalPos = visualRoot.localPosition;
         visualBaseLocalRot = visualRoot.localRotation;
         lastPositionForSway = transform.position;
+        // Ghi nhận phe ban đầu — ally đổi phe sau không nhận hard buff
+        _wasAlly = faction == Faction.Ally;
     }
 
 #if UNITY_EDITOR
